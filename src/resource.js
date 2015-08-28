@@ -1,4 +1,5 @@
 var res = {
+    big_mine_png: "res/big_mine.png",
 };
 
 var g_resources = [];
