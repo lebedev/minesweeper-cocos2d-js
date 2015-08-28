@@ -20,11 +20,48 @@ var HelloWorldLayer = cc.Layer.extend({
         var infinite_rotate = cc.RepeatForever.create(cc.RotateBy.create(2, 360));
         big_mine.runAction(infinite_rotate);
 
-        cc.audioEngine.playEffect(res.app_start_sound);
+        if (cc.sys.capabilities.hasOwnProperty('mouse')) {
+            cc.eventManager.addListener(
+                {
+                    event: cc.EventListener.MOUSE,
+                    onMouseDown: function(event) {
+                        if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
+                            ResumeMusic();
+                        } else if (event.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+                            PauseMusic();
+                        }
+                    },
+                },
+                this
+            );
+        }
+
+        cc.audioEngine.playEffect(res.app_start_sound); //returns soundEffect id
+        cc.audioEngine.playMusic(res.music, true);
+        cc.audioEngine.setMusicVolume(0.25);
+        PauseMusic();
+        //cc.audioEngine.setEffectsVolume(0-1)
+        //cc.audioEngine.stopAllEffects()
+        //cc.audioEngine.stopEffect(sound_id)
+        //cc.audioEngine.playMusic(musicRes, repeat)
+        //cc.audioEngine.stopMusic()
+        //this.scheduleOnce(func, seconds)
 
         return true;
     }
 });
+
+var PauseMusic = function() {
+    cc.audioEngine.pauseMusic();
+};
+
+var ResumeMusic = function() {
+    cc.audioEngine.resumeMusic();
+};
+
+var StopMusic = function() {
+    cc.audioEngine.stopMusic();
+};
 
 var HelloWorldScene = cc.Scene.extend({
     onEnter:function () {
