@@ -14,8 +14,13 @@ var HelloWorldLayer = cc.Layer.extend({
         big_mine.setPosition(cc.p(size.width/2, size.height/2));
         this.addChild(big_mine, 0);
 
-        var action = cc.MoveBy.create(3, cc.p(100, 100));
-        big_mine.runAction(action);
+        var move = cc.MoveBy.create(3, cc.p(100, 100));
+        big_mine.runAction(move);
+
+        var infinite_rotate = cc.RepeatForever.create(cc.RotateBy.create(2, 360));
+        big_mine.runAction(infinite_rotate);
+
+        cc.audioEngine.playEffect(res.app_start_sound);
 
         return true;
     }
