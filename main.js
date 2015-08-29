@@ -47,7 +47,7 @@
  *
  */
 window.onload = function() {
-    cc.game.onStart = function(){
+    cc.game.onStart = function() {
         if(!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
             document.body.removeChild(document.getElementById("cocosLoading"));
 
@@ -60,8 +60,8 @@ window.onload = function() {
         // The game will be resized when browser size change
         cc.view.resizeWithBrowserSize(true);
         //load resources
-        cc.LoaderScene.preload(g_resources, function () {
-            cc.director.runScene(new HelloWorldScene());
+        cc.LoaderScene.preload(g_resources, function() {
+            cc.director.runScene(new BlankScene());
         }, this);
     };
     cc.game.run();
