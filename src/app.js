@@ -22,8 +22,9 @@ var HelloWorldLayer = cc.Layer.extend({
 });
 
 var PushScene = function() {
+    INITIALIZED = false;
     var scene = new HelloWorldScene2();
-    cc.director.pushScene(scene);
+    cc.director.runScene(new cc.TransitionFade(0.5, scene));
 };
 
 var HelloWorldScene = cc.Scene.extend({

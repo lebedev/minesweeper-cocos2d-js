@@ -101,8 +101,8 @@ var StopMusic = function() {
 var PopScene = function() {
     INITIALIZED_2 = false;
     StopMusic();
-    cc.director.popScene();
-};
+    var scene = new HelloWorldScene();
+    cc.director.runScene(new cc.TransitionFade(0.5, scene));};
 
 var HelloWorldScene2 = cc.Scene.extend({
     onEnter:function () {
