@@ -1,5 +1,5 @@
 var res = {
-    big_mine_png: "res/big_mine.png",
+    background_menu_mine_png: "res/background_menu_mine.png",
     app_start_sound: "res/app_start.mp3",
     music: "res/MainMusic.ogg",
     one: "res/1.png",
