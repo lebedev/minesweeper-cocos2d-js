@@ -12,6 +12,7 @@
 
     "jsList" : [
         "src/resource.js",
+        "src/helper.js",
         "src/blank.js",
         "src/menu.js",
         "src/game.js"
