@@ -1,21 +1,32 @@
-var debug;
+var layer, textf;
 
-var addUITextToLayer = function(aLayer, aString, aFontSize, aY) {
-    var uiText = new ccui.Text(),
-        size = cc.winSize;
+var createUIText = function(aString, aFontSize) {
+    var uiText = new ccui.Text();
     uiText.attr({
         textAlign: cc.TEXT_ALIGNMENT_CENTER,
         string: aString,
         fontName: 'Impact',
-        fontSize: aFontSize,
-        x: size.width*0.5,
-        y: aY
+        fontSize: aFontSize
     });
     uiText.enableOutline(cc.color(0, 0, 0), aFontSize*0.15);
+
+    return uiText;
+};
+
+var addUITextToLayer = function(aLayer, aString, aFontSize, aY) {
+    var uiText = createUIText(aString, aFontSize);
+    uiText.attr({
+        x: cc.winSize.width*0.5,
+        y: aY
+    });
 
     aLayer.addChild(uiText);
 
     return uiText;
+};
+
+var createS9TileFromRes = function(aRes) {
+    return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
 };
 
 var BackgroundLayer = cc.LayerColor.extend({
@@ -32,21 +43,21 @@ var BackgroundLayer = cc.LayerColor.extend({
         var background_menu_mine = new cc.Sprite(res.background_menu_mine_png);
         background_menu_mine.setAnchorPoint(cc.p(0.5, 0.5));
         background_menu_mine.setPosition(cc.p(size.width/2, size.height/2));
-        this.addChild(background_menu_mine, 0);
+        //this.addChild(background_menu_mine, 0);
 
         var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
         background_menu_mine.runAction(infinite_rotate);
 
         addUITextToLayer(this, 'САПЁР',        size.height*0.25, size.height*0.8);
 
-        addUITextToLayer(this, '2015 © ZEIRD', size.height*0.03, size.height*0.02);
+        addUITextToLayer(this, '2015 © zeird', size.height*0.03, size.height*0.02);
 
         return true;
     }
 });
 
 var LoginLayer = cc.Layer.extend({
-    ctor:function () {
+    ctor: function() {
         //////////////////////////////
         // 1. super init first
         this._super();
@@ -54,78 +65,56 @@ var LoginLayer = cc.Layer.extend({
         // ask the window size
         var size = cc.winSize;
 
-        var menuItemFontScene2 = new cc.MenuItemFont("Start", PushScene);
+        addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
 
-        var menu = new cc.Menu(menuItemFontScene2);
-        menu.alignItemsVertically();
-        //this.addChild(menu);
+        var loginEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), createS9TileFromRes(res.down_png));
+        loginEditBox.setAdjustBackgroundImage(false);
+        loginEditBox.fontName = loginEditBox.placeHolderFontName = 'Impact';
+        loginEditBox.fontSize = loginEditBox.placeHolderFontSize = size.height*0.04;
+        loginEditBox.placeHolder = 'логин';
+        loginEditBox.setAnchorPoint(cc.p(0.5, 0.5));
+        loginEditBox.setPosition(cc.p(size.width*0.5, size.height*0.57));
+        loginEditBox.setDelegate(this);
+        this.addChild(loginEditBox);
 
-        var button = new ccui.Button();
-        button.loadTextures(res.one, res.onex);
-        button.x = size.width/2;
-        button.y = size.height/2;
-        button.addTouchEventListener(this.touchEvent, this);
-        this.addChild(button);
+        addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
 
-        cc.audioEngine.playEffect(res.app_start_sound); //returns soundEffect id
+        var passwordEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), createS9TileFromRes(res.down_png));
+        passwordEditBox.setAdjustBackgroundImage(false);
+        passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
+        passwordEditBox.fontName = passwordEditBox.placeHolderFontName = 'Impact';
+        passwordEditBox.fontSize = passwordEditBox.placeHolderFontSize = size.height*0.04;
+        passwordEditBox.placeHolder = 'пароль';
+        passwordEditBox.setAnchorPoint(cc.p(0.5, 0.5));
+        passwordEditBox.setPosition(cc.p(size.width*0.5, size.height*0.37));
+        passwordEditBox.setDelegate(this);
+        passwordEditBox;
+        this.addChild(passwordEditBox);
 
-        if (cc.sys.capabilities.hasOwnProperty('mouse')) {
-            cc.eventManager.addListener(
-                {
-                    event: cc.EventListener.MOUSE,
-                    onMouseDown: function(event) {
-                        cc.log('down at X=' + event.getLocationX() + ' Y=' + event.getLocationY() + ' button ' + event.getButton());
-                        if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                            cc.log('left down at X=' + event.getLocationX());
-                            ResumeMusic();
-                        } else if (event.getButton() === cc.EventMouse.BUTTON_RIGHT) {
-                            cc.log('right down at Y=' + event.getLocationY());
-                            PauseMusic();
-                        }
-                    },
-                    onMouseUp: function(event) {
-                        if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                            cc.log('left up at X=' + event.getLocationX());
-                        } else if (event.getButton() === cc.EventMouse.BUTTON_RIGHT) {
-                            cc.log('right up at Y=' + event.getLocationY());
-                        }
-                    },
-                    onMouseMove: function(event) {
-                        cc.log('move at X=' + event.getLocationX() + ' Y=' + event.getLocationY() + ' button ' + event.getButton());
-                        var target = event.getCurrentTarget();
-                        var locationInNode = target.convertToNodeSpace(event.getLocation());
-                        var s = target.getContentSize();
-                        var rect = cc.rect(0, 0, s.width, s.height);
 
-                        if (cc.rectContainsPoint(rect, locationInNode)) {
-                            cc.log("It's hovering! x = " + locationInNode.x + ", y = " + locationInNode.y);
-                            target.opacity = 180;
-                            return true;
-                        } else {
-                          target.opacity = 255;
-                          return false;
-                        }
-                    },
-                },
-                button
-            );
-        }
 
-        //this.schedule(this.functionCallback);
+        var enterButton = new cc.ControlButton();
+        enterButton.setBackgroundSpriteForState(createS9TileFromRes(res.up_png), cc.CONTROL_STATE_INITIAL);
+        enterButton.setBackgroundSpriteForState(createS9TileFromRes(res.one), cc.CONTROL_STATE_NORMAL);
+        enterButton.setBackgroundSpriteForState(createS9TileFromRes(res.down_l_png), cc.CONTROL_STATE_HIGHLIGHTED);
+        enterButton.setBackgroundSpriteForState(createS9TileFromRes(res.two), cc.CONTROL_STATE_SELECTED);
+        enterButton.setBackgroundSpriteForState(createS9TileFromRes(res.up_png), cc.CONTROL_STATE_DISABLED);
+        enterButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
+        enterButton.setAnchorPoint(cc.p(0.5, 0.5));
+        enterButton.setPosition(cc.p(size.width*0.5, size.height*0.2));
+        txt = createUIText('Войти', size.height*0.04);
+        //enterButton.setTitleForState('Войти', cc.CONTROL_STATE_NORMAL);
+        //enterButton.setTitleColorForState(cc.color(170,170,170), cc.CONTROL_STATE_DISABLED);
+        //enterButton.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
+        //enterButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
+        //enterButton.setTitleLabelForState(txt, cc.CONTROL_STATE_NORMAL);
+        textf = enterButton;
+        this.addChild(enterButton);
+
+        cc.audioEngine.playEffect(res.login_page_sound);
 
         return true;
-    },
-    touchEvent: function(sender, type) {
-        switch(type) {
-        case ccui.Widget.TOUCH_BEGAN: cc.log(sender); break;
-        case ccui.Widget.TOUCH_MOVED: cc.log('MOVED'); break;
-        case ccui.Widget.TOUCH_ENDED: cc.log('ENDED'); sender.loadTextures(res.two, res.twox); this.scheduleOnce(PushScene, 1); break;
-        case ccui.Widget.TOUCH_CANCELLED: cc.log('CANCELLED'); break;
-        }
     }
-    //this.functionCallback:function() {
-    //
-    //}
 });
 
 var PushScene = function() {
@@ -137,7 +126,26 @@ var PushScene = function() {
 var MenuScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
-        var background_layer = new BackgroundLayer(cc.color(32, 32, 32));
-        this.addChild(background_layer);
+
+        var isLoggedIn = false;
+        this.addChild(new BackgroundLayer(cc.color(32, 32, 32)));
+        if (!isLoggedIn) {
+            layer = new LoginLayer();
+            this.addChild(layer);
+        }
     }
 });
+
+var test = function(a,b,c) {
+    try{
+    textf.removeFromParent();
+    var size = cc.winSize;
+    var enterButton = new cc.ControlButton(a, b, c);
+    enterButton.setAnchorPoint(cc.p(0.5, 0.5));
+    enterButton.setPosition(cc.p(size.width*0.5, size.height*0.27));
+    textf = enterButton;
+    layer.addChild(enterButton);
+    }catch(e) {
+        cc.log(e);
+    }
+}

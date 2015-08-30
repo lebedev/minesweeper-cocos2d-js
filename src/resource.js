@@ -1,11 +1,15 @@
 var res = {
     background_menu_mine_png: "res/background_menu_mine.png",
-    app_start_sound: "res/app_start.mp3",
+    login_page_sound: "res/login_page.mp3",
     music: "res/MainMusic.ogg",
     one: "res/1.png",
     onex: "res/1x.png",
     two: "res/2.png",
     twox: "res/2x.png",
+    down_png: "res/down.png",
+    down_l_png: "res/down_l.png",
+    up_png: "res/up.png",
+    up_l_png: "res/up_l.png",
 };
 
 var g_resources = [];
