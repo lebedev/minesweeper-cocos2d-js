@@ -11,11 +11,11 @@
     "modules" : ["cocos2d", "extensions"],
 
     "jsList" : [
-        "src/CCEditBoxFixed.js",
+        "src/fixes/CCEditBoxFixed.js",
         "src/resource.js",
         "src/helper.js",
-        "src/blank.js",
-        "src/menu.js",
-        "src/game.js"
+        "src/scenes/blank.js",
+        "src/scenes/menu.js",
+        "src/scenes/game.js"
     ]
 }
