@@ -11,6 +11,7 @@
     "modules" : ["cocos2d", "extensions"],
 
     "jsList" : [
+        "src/CCEditBoxFixed.js",
         "src/resource.js",
         "src/helper.js",
         "src/blank.js",

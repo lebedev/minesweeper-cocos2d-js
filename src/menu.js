@@ -55,7 +55,7 @@ var LoginLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
 
-        var loginEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.down_png));
+        var loginEditBox = new cc.EditBoxFixed(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.down_png));
         loginEditBox.setAdjustBackgroundImage(false);
         loginEditBox.fontName = loginEditBox.placeHolderFontName = 'Impact';
         loginEditBox.fontSize = loginEditBox.placeHolderFontSize = size.height*0.04;
@@ -68,7 +68,7 @@ var LoginLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
 
-        var passwordEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.down_png));
+        var passwordEditBox = new cc.EditBoxFixed(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.down_png));
         passwordEditBox.setAdjustBackgroundImage(false);
         passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
         passwordEditBox.fontName = passwordEditBox.placeHolderFontName = 'Impact';
