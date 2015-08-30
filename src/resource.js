@@ -1,7 +1,11 @@
 var res = {
-    background_menu_mine_png: "res/background_menu_mine.png",
+    // sound effects
     login_page_sound: "res/login_page.mp3",
+    // music tracks
     menu_music: "res/menu_music.ogg",
+    game_music: "res/game_music.mp3",
+    // sprites
+    background_menu_mine_png: "res/background_menu_mine.png",
     one: "res/1.png",
     onex: "res/1x.png",
     two: "res/2.png",
