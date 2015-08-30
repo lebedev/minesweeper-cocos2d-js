@@ -223,7 +223,7 @@ var MenuLayer = cc.Layer.extend({
         var size = cc.winSize;
 
         var newGameButton = addControlButtonToLayer(this, 'Новая игра', size.height*0.65);
-        addActionToControlButton(newGameButton, function(target) { ChangeSceneTo(BlankScene); });
+        addActionToControlButton(newGameButton, function(target) { ChangeSceneTo(GameScene); });
         addControlButtonToLayer(this, 'Продолжить', size.height*0.45);
         var exitButton = addControlButtonToLayer(this, 'Выйти', size.height*0.25);
         addActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });

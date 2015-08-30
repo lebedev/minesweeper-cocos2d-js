@@ -13,6 +13,7 @@
     "jsList" : [
         "src/resource.js",
         "src/blank.js",
-        "src/menu.js"
+        "src/menu.js",
+        "src/game.js"
     ]
 }
