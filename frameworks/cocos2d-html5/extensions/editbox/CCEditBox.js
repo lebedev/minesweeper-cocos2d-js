@@ -173,7 +173,7 @@ cc.EditBoxDelegate = cc.Class.extend({
     },
 
     /**
-     * This method is called when the return button was pressed.
+     * This method is called when the return button was pressed or the outside area of keyboard was touched.
      * @param {cc.EditBox} sender
      */
     editBoxReturn: function (sender) {
@@ -269,8 +269,6 @@ cc.EditBox = cc.ControlButton.extend({
             if (e.keyCode === cc.KEY.enter) {
                 e.stopPropagation();
                 e.preventDefault();
-                if (selfPointer._delegate && selfPointer._delegate.editBoxReturn)
-                    selfPointer._delegate.editBoxReturn(selfPointer);
                 cc._canvas.focus();
             }
         });
@@ -297,6 +295,8 @@ cc.EditBox = cc.ControlButton.extend({
             }
             if (selfPointer._delegate && selfPointer._delegate.editBoxEditingDidEnd)
                 selfPointer._delegate.editBoxEditingDidEnd(selfPointer);
+            if (selfPointer._delegate && selfPointer._delegate.editBoxReturn)
+                selfPointer._delegate.editBoxReturn(selfPointer);
             cc._canvas.removeEventListener('click', onCanvasClick);
         });
 
