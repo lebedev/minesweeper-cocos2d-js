@@ -17,9 +17,9 @@ var BackgroundLayer = cc.LayerColor.extend({
         var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
         background_menu_mine.runAction(infinite_rotate);
 
-        addUITextToLayer(this, 'САПЁР',        size.height*0.25, size.height*0.8);
+        helper.addUITextToLayer(this, 'САПЁР',        size.height*0.25, size.height*0.8);
 
-        addUITextToLayer(this, '2015 © zeird', size.height*0.03, size.height*0.02);
+        helper.addUITextToLayer(this, '2015 © zeird', size.height*0.03, size.height*0.02);
 
         return true;
     }
@@ -49,14 +49,13 @@ var LoginLayer = cc.Layer.extend({
         };
         loginLayerEditBoxDelegate.editBoxReturn = function(sender) {
             if (loginEditBox.string && passwordEditBox.string) {
-                cc.log('here?');
                 sender.parent.changeLayer(MenuLayer);
             }
         };
 
-        addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
+        helper.addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
 
-        var loginEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), createS9TileFromRes(res.down_png));
+        var loginEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.down_png));
         loginEditBox.setAdjustBackgroundImage(false);
         loginEditBox.fontName = loginEditBox.placeHolderFontName = 'Impact';
         loginEditBox.fontSize = loginEditBox.placeHolderFontSize = size.height*0.04;
@@ -67,9 +66,9 @@ var LoginLayer = cc.Layer.extend({
 
         this.addChild(loginEditBox);
 
-        addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
+        helper.addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
 
-        var passwordEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), createS9TileFromRes(res.down_png));
+        var passwordEditBox = new cc.EditBox(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.down_png));
         passwordEditBox.setAdjustBackgroundImage(false);
         passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
         passwordEditBox.fontName = passwordEditBox.placeHolderFontName = 'Impact';
@@ -81,8 +80,8 @@ var LoginLayer = cc.Layer.extend({
 
         this.addChild(passwordEditBox);
 
-        var enterButton = addControlButtonToLayer(this, 'Войти', size.height*0.25, true);
-        addActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
+        var enterButton = helper.addControlButtonToLayer(this, 'Войти', size.height*0.25, true);
+        helper.addActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
 
         cc.audioEngine.playEffect(res.login_page_sound);
 
@@ -107,11 +106,11 @@ var MenuLayer = cc.Layer.extend({
         // ask the window size
         var size = cc.winSize;
 
-        var newGameButton = addControlButtonToLayer(this, 'Новая игра', size.height*0.65);
-        addActionToControlButton(newGameButton, function(target) { ChangeSceneTo(GameScene); });
-        addControlButtonToLayer(this, 'Продолжить', size.height*0.45);
-        var exitButton = addControlButtonToLayer(this, 'Выйти', size.height*0.25);
-        addActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
+        var newGameButton = helper.addControlButtonToLayer(this, 'Новая игра', size.height*0.65);
+        helper.addActionToControlButton(newGameButton, function(target) { helper.changeSceneTo(GameScene); });
+        helper.addControlButtonToLayer(this, 'Продолжить', size.height*0.45);
+        var exitButton = helper.addControlButtonToLayer(this, 'Выйти', size.height*0.25);
+        helper.addActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
 
         cc.audioEngine.playMusic(res.menu_music, true);
         cc.audioEngine.setMusicVolume(0.25);
