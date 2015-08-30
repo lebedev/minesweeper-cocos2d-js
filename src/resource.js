@@ -6,14 +6,19 @@ var res = {
     game_music: "res/game_music.mp3",
     // sprites
     background_menu_mine_png: "res/background_menu_mine.png",
-    one: "res/1.png",
-    onex: "res/1x.png",
-    two: "res/2.png",
-    twox: "res/2x.png",
-    down_png: "res/down.png",
-    down_l_png: "res/down_l.png",
-    up_png: "res/up.png",
-    up_l_png: "res/up_l.png",
+    number_1_png: "res/1.png",
+    number_2_png: "res/2.png",
+    number_3_png: "res/3.png",
+    number_4_png: "res/4.png",
+    number_5_png: "res/5.png",
+    number_6_png: "res/6.png",
+    number_7_png: "res/7.png",
+    number_8_png: "res/8.png",
+    empty_png: "res/empty.png",
+    empty_highlighted_png: "res/empty_highlighted.png",
+    closed_png: "res/closed.png",
+    closed_highlighted_png: "res/closed_highlighted.png",
+    closed_flag_png: "res/closed_flag.png",
 };
 
 var g_resources = [];
