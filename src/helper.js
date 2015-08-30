@@ -71,9 +71,9 @@ var helper = {
         var size = cc.winSize;
 
         var b = new cc.ControlButton();
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.up_l_png), cc.CONTROL_STATE_NORMAL);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.down_l_png), cc.CONTROL_STATE_HIGHLIGHTED);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.up_png), cc.CONTROL_STATE_DISABLED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_NORMAL);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.empty_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_png), cc.CONTROL_STATE_DISABLED);
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
