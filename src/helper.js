@@ -111,4 +111,26 @@ var helper = {
 
         return cc.rectContainsPoint(rect, locationInNode);
     },
+
+    ReplaceWithTryCatch: function(method) {
+        return function() {
+            try {
+                return method.apply(null, arguments);
+            } catch (e) {
+                cc.error(e);
+            }
+        };
+    },
+
+    ProcessTryCatcher: function(object) {
+        var method_name, method;
+        for (method_name in object) {
+            method = object[method_name];
+            if (typeof method === "function") {
+                object[method_name] = helper.ReplaceWithTryCatch(method);
+            }
+        }
+    },
 };
+
+helper.ProcessTryCatcher(helper);
