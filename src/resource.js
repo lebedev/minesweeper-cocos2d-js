@@ -1,7 +1,7 @@
 var res = {
     background_menu_mine_png: "res/background_menu_mine.png",
     login_page_sound: "res/login_page.mp3",
-    music: "res/MainMusic.ogg",
+    menu_music: "res/menu_music.ogg",
     one: "res/1.png",
     onex: "res/1x.png",
     two: "res/2.png",
