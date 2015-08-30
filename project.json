@@ -14,6 +14,7 @@
         "src/fixes/CCEditBoxFixed.js",
         "src/resource.js",
         "src/helper.js",
+        "src/mines.js",
         "src/scenes/blank.js",
         "src/scenes/menu.js",
         "src/scenes/game.js"
