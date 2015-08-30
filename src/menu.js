@@ -37,7 +37,7 @@ var isTouchOnTarget = function(touch, target) {
     return cc.rectContainsPoint(rect, locationInNode);
 };
 
-var createControlButton = function(aString) {
+var createControlButton = function(aString, aDisabled) {
     var size = cc.winSize;
 
     var b = new cc.ControlButton();
@@ -46,21 +46,71 @@ var createControlButton = function(aString) {
     b.setBackgroundSpriteForState(createS9TileFromRes(res.up_png), cc.CONTROL_STATE_DISABLED);
     b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
     b.setAnchorPoint(cc.p(0.5, 0.5));
-    b.setPosition(cc.p(size.width*0.5, size.height*0.25));
     b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
     b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
     b.setTitleTTFSizeForState(size.height*0.07, cc.CONTROL_STATE_NORMAL);
     b.setTitleColorForState(cc.color(170,170,170), cc.CONTROL_STATE_DISABLED);
-    b.setEnabled(false);
+    if (aDisabled) {
+        b.setEnabled(false);
+    }
 
     return b;
 };
 
-var addControlButtonToLayer = function(aLayer, aString) {
-    var b = createControlButton(aString);
+var addControlButtonToLayer = function(aLayer, aString, aY, aDisabled) {
+    var size = cc.winSize;
+
+    var b = createControlButton(aString, aDisabled);
+    b.setPosition(cc.p(size.width*0.5, aY));
     aLayer.addChild(b);
 
     return b;
+};
+
+var addActionToControlButton = function(aButton, aCallback) {
+    var l = cc.EventListener.create({
+        event: cc.EventListener.TOUCH_ONE_BY_ONE,
+        swallowTouches: true,
+        onTouchBegan: function(touch, event) {
+            var target = event.getCurrentTarget();
+
+            if (isTouchOnTarget(touch, target) && target.isEnabled()) {
+                target.setHighlighted(true);
+                return true;
+            }
+            return false;
+        },
+        onTouchMoved: function(touch, event) {
+            var target = event.getCurrentTarget();
+
+            if (isTouchOnTarget(touch, target)) {
+                if (target.isHighlighted() === false) {
+                    target.setHighlighted(true);
+                }
+            } else {
+                if (target.isHighlighted() === true) {
+                    target.setHighlighted(false);
+                }
+            }
+        },
+        onTouchEnded: function(touch, event) {
+            var target = event.getCurrentTarget();
+            cc.log("sprite onTouchesEnded.. ");
+            if (isTouchOnTarget(touch, target)) {
+                target.setHighlighted(false);
+                if (aCallback) {
+                    aCallback(target);
+                }
+            }
+        }
+    });
+
+    cc.eventManager.addListener(l, aButton);
+};
+
+var ChangeSceneTo = function(aScene) {
+    var scene = new aScene();
+    cc.director.runScene(new cc.TransitionFade(0.5, scene));
 };
 
 var BackgroundLayer = cc.LayerColor.extend({
@@ -96,6 +146,9 @@ var LoginLayer = cc.Layer.extend({
         // 1. super init first
         this._super();
 
+        cc.audioEngine.stopAllEffects();
+        cc.audioEngine.stopMusic();
+
         // ask the window size
         var size = cc.winSize;
 
@@ -112,7 +165,7 @@ var LoginLayer = cc.Layer.extend({
         loginLayerEditBoxDelegate.editBoxReturn = function(sender) {
             if (loginEditBox.string && passwordEditBox.string) {
                 cc.log('here?');
-                sender.parent.changeLayer(BlankLayer);
+                sender.parent.changeLayer(MenuLayer);
             }
         };
 
@@ -143,46 +196,8 @@ var LoginLayer = cc.Layer.extend({
 
         this.addChild(passwordEditBox);
 
-        var enterButton = addControlButtonToLayer(this, 'Войти');
-
-        var listener1 = cc.EventListener.create({
-            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            swallowTouches: true,
-            onTouchBegan: function(touch, event) {
-                var target = event.getCurrentTarget();
-
-                if (isTouchOnTarget(touch, target) && target.isEnabled()) {
-                    cc.log("sprite began...");//" x = " + locationInNode.x + ", y = " + locationInNode.y);
-                    target.setHighlighted(true);
-                    return true;
-                }
-                return false;
-            },
-            onTouchMoved: function(touch, event) {
-                var target = event.getCurrentTarget();
-
-                if (isTouchOnTarget(touch, target)) {
-                    if (target.isHighlighted() === false) {
-                        target.setHighlighted(true);
-                    }
-                } else {
-                    if (target.isHighlighted() === true) {
-                        target.setHighlighted(false);
-                    }
-                }
-            },
-            onTouchEnded: function(touch, event) {
-                var target = event.getCurrentTarget();
-                cc.log("sprite onTouchesEnded.. ");
-                if (isTouchOnTarget(touch, target)) {
-                    target.setHighlighted(false);
-                    target.parent.changeLayer(BlankLayer);
-
-                }
-            }
-        });
-
-        cc.eventManager.addListener(listener1, enterButton);
+        var enterButton = addControlButtonToLayer(this, 'Войти', size.height*0.25, true);
+        addActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
 
         cc.audioEngine.playEffect(res.login_page_sound);
 
@@ -195,11 +210,36 @@ var LoginLayer = cc.Layer.extend({
     }
 });
 
-var PushScene = function() {
-    INITIALIZED = false;
-    var scene = new HelloWorldScene2();
-    cc.director.runScene(new cc.TransitionFade(0.5, scene));
-};
+var MenuLayer = cc.Layer.extend({
+    ctor: function() {
+        //////////////////////////////
+        // 1. super init first
+        this._super();
+
+        cc.audioEngine.stopAllEffects();
+        cc.audioEngine.stopMusic();
+
+        // ask the window size
+        var size = cc.winSize;
+
+        var newGameButton = addControlButtonToLayer(this, 'Новая игра', size.height*0.65);
+        addActionToControlButton(newGameButton, function(target) { ChangeSceneTo(BlankScene); });
+        addControlButtonToLayer(this, 'Продолжить', size.height*0.45);
+        var exitButton = addControlButtonToLayer(this, 'Выйти', size.height*0.25);
+        addActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
+
+        cc.audioEngine.playMusic(res.menu_music, true);
+        cc.audioEngine.setMusicVolume(0.25);
+
+        return true;
+    },
+    changeLayer: function(aLayer) {
+        cc.log('changing LoginLayer to another');
+        // TODO: add transition maybe?
+        this.parent.addChild(new aLayer());
+        this.removeFromParent();
+    }
+});
 
 var MenuScene = cc.Scene.extend({
     onEnter:function () {
