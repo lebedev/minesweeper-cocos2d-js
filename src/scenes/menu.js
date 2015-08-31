@@ -83,7 +83,7 @@ var LoginLayer = cc.Layer.extend({
         this.addChild(passwordEditBox);
 
         var enterButton = helper.addButtonToLayer(this, 'Войти', size.height*0.25, true);
-        helper.addMouseUpActionToControlButton(enterButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(MenuLayer); } });
+        helper.addMouseUpActionTo(enterButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
 
         cc.audioEngine.playEffect(res.login_page_sound);
 
@@ -106,19 +106,20 @@ var OptionsLayer = cc.Layer.extend({
 
         var optionsLayerEditBoxDelegate = new cc.EditBoxDelegate();
         optionsLayerEditBoxDelegate.editBoxTextChanged = function(sender, text) {
-            if (!isNaN(columnsEditBox.string) && +columnsEditBox.string >= 9 && +columnsEditBox.string <= 30 &&
-                !isNaN(rowsEditBox.string) && +rowsEditBox.string >= 9 && +rowsEditBox.string <= 16 &&
+            cc.log(columnsEditBox.string, rowsEditBox.string, minesEditBox.string);
+            if (!isNaN(columnsEditBox.string) && +columnsEditBox.string >= 9 && +columnsEditBox.string <= 50 &&
+                !isNaN(rowsEditBox.string) && +rowsEditBox.string >= 9 && +rowsEditBox.string <= 50 &&
                 !isNaN(minesEditBox.string) && +minesEditBox.string > 0 && +minesEditBox.string < 1000) {
                 if (!saveButton.enabled) {
-                    saveButton.setEnabled(true);
+                    saveButton.enabled = true;
                 }
             } else if (saveButton.enabled) {
-                saveButton.setEnabled(false);
+                saveButton.enabled = false;
             }
         };
         optionsLayerEditBoxDelegate.editBoxReturn = function(sender) {
-            if (!isNaN(columnsEditBox.string) && +columnsEditBox.string >= 9 && +columnsEditBox.string <= 30 &&
-                !isNaN(rowsEditBox.string) && +rowsEditBox.string >= 9 && +rowsEditBox.string <= 16 &&
+            if (!isNaN(columnsEditBox.string) && +columnsEditBox.string >= 9 && +columnsEditBox.string <= 50 &&
+                !isNaN(rowsEditBox.string) && +rowsEditBox.string >= 9 && +rowsEditBox.string <= 50 &&
                 !isNaN(minesEditBox.string) && +minesEditBox.string > 0 && +minesEditBox.string < 1000) {
                 icolumns = +columnsEditBox.string;
                 irows = +rowsEditBox.string;
@@ -134,7 +135,6 @@ var OptionsLayer = cc.Layer.extend({
         columnsEditBox.setAdjustBackgroundImage(false);
         columnsEditBox.fontName = columnsEditBox.placeHolderFontName = 'Impact';
         columnsEditBox.fontSize = columnsEditBox.placeHolderFontSize = size.height*0.04;
-        columnsEditBox.setInputMode(cc.EDITBOX_INPUT_MODE_NUMERIC);
         columnsEditBox.placeHolder = columnsEditBox.string = icolumns;
         columnsEditBox.setMaxLength(2);
         columnsEditBox.setAnchorPoint(cc.p(0.5, 0.5));
@@ -150,7 +150,6 @@ var OptionsLayer = cc.Layer.extend({
         rowsEditBox.setAdjustBackgroundImage(false);
         rowsEditBox.fontName = rowsEditBox.placeHolderFontName = 'Impact';
         rowsEditBox.fontSize = rowsEditBox.placeHolderFontSize = size.height*0.04;
-        rowsEditBox.setInputMode(cc.EDITBOX_INPUT_MODE_NUMERIC);
         rowsEditBox.placeHolder = rowsEditBox.string = irows;
         rowsEditBox.setMaxLength(2);
         rowsEditBox.setAnchorPoint(cc.p(0.5, 0.5));
@@ -166,7 +165,6 @@ var OptionsLayer = cc.Layer.extend({
         minesEditBox.setAdjustBackgroundImage(false);
         minesEditBox.fontName = minesEditBox.placeHolderFontName = 'Impact';
         minesEditBox.fontSize = minesEditBox.placeHolderFontSize = size.height*0.04;
-        minesEditBox.setInputMode(cc.EDITBOX_INPUT_MODE_NUMERIC);
         minesEditBox.placeHolder = minesEditBox.string = imines;
         minesEditBox.setMaxLength(3);
         minesEditBox.setAnchorPoint(cc.p(0.5, 0.5));
@@ -176,15 +174,15 @@ var OptionsLayer = cc.Layer.extend({
         this.addChild(minesEditBox);
 
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
-        helper.addMouseUpActionToControlButton(saveButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) {
+        helper.addMouseUpActionTo(saveButton, function(event) {
             icolumns = +columnsEditBox.string;
             irows = +rowsEditBox.string;
             imines = +minesEditBox.string;
-            target.parent.changeLayer(MenuLayer);
-        } });
+            event.getCurrentTarget().parent.changeLayer(MenuLayer);
+        });
 
         var cancelButton = helper.addButtonToLayer(this, 'Отмена', size.height*0.25);
-        helper.addMouseUpActionToControlButton(cancelButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(MenuLayer); } });
+        helper.addMouseUpActionTo(cancelButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
 
         return true;
     },
@@ -206,11 +204,11 @@ var MenuLayer = cc.Layer.extend({
         isLoggedIn = true;
 
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
-        helper.addMouseUpActionToControlButton(newGameButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { helper.changeSceneTo(GameScene); } });
+        helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene); });
         var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4);
-        helper.addMouseUpActionToControlButton(optionsButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(OptionsLayer); } });
+        helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent.changeLayer(OptionsLayer); });
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addMouseUpActionToControlButton(exitButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(LoginLayer); } });
+        helper.addMouseUpActionTo(exitButton, function(event) { event.getCurrentTarget().parent.changeLayer(LoginLayer); });
 
         cc.audioEngine.setMusicVolume(0.25);
         if (!cc.audioEngine.isMusicPlaying()) {

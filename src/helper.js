@@ -1,76 +1,10 @@
 var helper = {
-    addActionsToControlButton: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
+    addMouseActionsTo: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
             event: cc.EventListener.MOUSE,
-            previousNode: null,
-            rows: aNode._minefield_tiles.length,
-            columns: aNode._minefield_tiles[0].length,
-            minx: aNode._minefield_tiles[0][0].getPositionX() - aNode.tile_size/2,
-            maxx: aNode._minefield_tiles[0][aNode._minefield_tiles[0].length-1].getPositionX() + aNode.tile_size/2,
-            miny: aNode._minefield_tiles[aNode._minefield_tiles.length-1][0].getPositionY() - aNode.tile_size/2,
-            maxy: aNode._minefield_tiles[0][0].getPositionY() + aNode.tile_size/2,
-            lastMove: Date.now(),
-
-            testNode: function(aNode, aLocation) {
-                var locationInNode = aNode.convertToNodeSpace(aLocation),
-                    s = aNode.getContentSize(),
-                    rect = cc.rect(0, 0, s.width, s.height);
-                return cc.rectContainsPoint(rect, locationInNode);
-            },
-            onMouseDown: function(event) {
-                var target = event.getCurrentTarget();
-                if (target.enabled) {
-                    if (helper.isMouseEventOnItsTarget(event)) {
-                        this.mouseIsDown = true;
-                    }
-                    if (aMouseDownCallback) {
-                        aMouseDownCallback(target, event);
-                    }
-                }
-            },
-            onMouseMove: function(event) {
-                event.stopPropagation();
-                /*var now = Date.now();
-                if (now - this.lastMove < 100) {
-                    this.lastMove = now;
-                    return;
-                }*/
-                //event.preventDefault();
-                if (aMouseMoveCallback) {
-                    aMouseMoveCallback.call(this, event);
-                }
-                //console.time('move');
-                //cc.log(this.allNodesLength);
-
-                /*this.allNodes.every(function(aNode){
-
-                    if (cc.rectContainsPoint(rect, locationInNode)) {
-                        if (!aNode.isHighlighted()) {
-                            aNode.setHighlighted(true);
-                        }
-                    } else {
-                        if (aNode.isHighlighted()) {
-                            aNode.setHighlighted(false);
-                        }
-                    }*/
-                    //return true;
-                //});
-                //console.timeEnd('move');
-                //count++;
-                //cc.log('mean: ' + summ/count + 'ms.');
-            },
-            onMouseUp: function(event) {
-                var target = event.getCurrentTarget();
-                if (target.enabled && aMouseUpCallback) {
-                    if (helper.isMouseEventOnItsTarget(event)) {
-                        target.setHighlighted(true);
-                    }
-                    if (this.mouseIsDown) {
-                        aMouseUpCallback(target, event);
-                        this.mouseIsDown = false;
-                    }
-                }
-            }
+            onMouseDown: aMouseDownCallback,
+            onMouseMove: aMouseMoveCallback,
+            onMouseUp: aMouseUpCallback
         });
 
         cc.eventManager.addListener(l, aNode);
@@ -83,22 +17,23 @@ var helper = {
         return b;
     },
 
-    addMouseDownActionToControlButton: function(aButton, aCallback) {
-        helper.addActionsToControlButton(aButton, aCallback, null, null);
-    },
-
-    addMouseMoveActionToControlButton: function(aButton, aCallback) {
-        helper.addActionsToControlButton(aButton, null, aCallback, null);
-    },
-
-    addMouseUpActionToControlButton: function(aButton, aCallback) {
-        helper.addActionsToControlButton(aButton, null, null, aCallback);
+    addMouseUpActionTo: function(aNode, aCallback) {
+        var l = cc.EventListener.create({
+            event: cc.EventListener.MOUSE,
+            onMouseUp: function(event) {
+                var target = event.getCurrentTarget();
+                if (target.enabled && helper.isMouseEventOnItsTarget(event)) {
+                    aCallback(event, target);
+                }
+            }
+        });
+        cc.eventManager.addListener(l, aNode);
     },
 
     addTileToLayer: function(aLayer) {
         var size = cc.winSize;
         var b = new cc.Sprite();
-        b.initWithFile(res.closed_png, helper.rect1);
+        b.initWithFile(res.closed_png, helper['rect_' + sprite_size]);
         b.setAnchorPoint(cc.p(0.5, 0.5));
         aLayer.addChild(b);
 
@@ -199,8 +134,9 @@ var helper = {
             }
         }
     },
-    rect1: cc.rect(0, 0, 45, 45),
-    rect2: cc.rect(1, 1, 43, 43),
+    rect_small: cc.rect(0, 0, 45, 45),
+    rect_medium: cc.rect(0, 0, 80, 80),
+    rect_big: cc.rect(0, 0, 110, 110),
 };
 
 helper.ProcessTryCatcher(helper);
