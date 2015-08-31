@@ -1,4 +1,4 @@
-var isLoggedIn = true;
+var isLoggedIn = false;
 
 var BackgroundLayer = cc.LayerColor.extend({
     ctor: function(aColor) {
