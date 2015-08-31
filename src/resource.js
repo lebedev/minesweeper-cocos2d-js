@@ -30,6 +30,7 @@ var res = {
     button_normal_png: "res/button_normal.png",
     button_highlighted_png: "res/button_highlighted.png",
     button_disabled_png: "res/button_disabled.png",
+    editbox_png: "res/editbox.png",
 };
 
 var g_resources = [];

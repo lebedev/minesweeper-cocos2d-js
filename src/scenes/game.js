@@ -25,9 +25,6 @@ var GameLayer = cc.Layer.extend({
         // 1. super init first
         this._super();
 
-        cc.audioEngine.stopAllEffects();
-        cc.audioEngine.stopMusic();
-
         cc.audioEngine.setEffectsVolume(0.5);
 
         // ask the window size

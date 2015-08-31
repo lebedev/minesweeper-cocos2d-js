@@ -76,6 +76,8 @@ var helper = {
     },
 
     changeSceneTo: function(aScene) {
+        cc.audioEngine.stopAllEffects();
+        cc.audioEngine.stopMusic();
         var scene = new aScene();
         cc.director.runScene(new cc.TransitionFade(0.5, scene));
     },
