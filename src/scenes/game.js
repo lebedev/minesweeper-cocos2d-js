@@ -9,9 +9,6 @@ var GameLayer = cc.Layer.extend({
     TILE_STATE_MINE:                        5,
     TILE_STATE_MINE_DEFUSED:                6,
     TILE_STATE_FLAG_WRONG:                  7,
-    BUTTON_LEFT: 1,
-    BUTTON_RIGHT: 2,
-    BUTTONS_BOTH: 3,
     _deltas8: [
         [-1, -1],  [0, -1], [+1, -1],
         [-1,  0],/*[x,  y]*/[+1,  0],
@@ -31,7 +28,8 @@ var GameLayer = cc.Layer.extend({
     _columns: null,
     _rows: null,
     _last_tile_coords: null,
-    _buttons: 0,
+    _left_button_pressed: false,
+    _right_button_pressed: false,
     _easy_state: false,
     ctor: function() {
         //////////////////////////////
@@ -195,13 +193,13 @@ var GameLayer = cc.Layer.extend({
             function(aEvent) {
                 if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
                     cc.log('left pressed');
-                    this._buttons += this.BUTTON_LEFT;
+                    this._left_button_pressed = true;
                 } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
                     cc.log('right pressed');
-                    this._buttons += this.BUTTON_RIGHT;
+                    this._right_button_pressed = true;
                 }
                 cc.log(this._buttons);
-                if (this._buttons === this.BUTTONS_BOTH) {
+                if (this._left_button_pressed && this._right_button_pressed) {
                     this._easy_state = true;
                     cc.log('easy state on!');
                 }
@@ -266,7 +264,7 @@ var GameLayer = cc.Layer.extend({
                 }
                 if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
                     cc.log('left released');
-                    this._buttons -= this.BUTTON_LEFT;
+                    this._left_button_pressed = false;
                     if (this._easy_state) {
                         this._easy_state = false;
                         cc.log('easy state off on ' + coords.x + ':' + coords.y + ' on number: ' + (tile.state === this.TILE_STATE_NUMBER && tile.value));
@@ -324,7 +322,7 @@ var GameLayer = cc.Layer.extend({
                     }
                 } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
                     cc.log('right released');
-                    this._buttons -= this.BUTTON_RIGHT;
+                    this._right_button_pressed = false;
                 }
                 cc.log(this._buttons);
             }.bind(this)
