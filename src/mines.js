@@ -1,11 +1,13 @@
 var mines = {
-    _mineField: null,
-
+    _columns: null,
+    _game_over: true,
     _deltas: [
         [-1, -1],  [0, -1], [+1, -1],
         [-1,  0],/*[x,  y]*/[+1,  0],
         [-1, +1],  [0, +1], [+1, +1],
     ],
+    _mineField: null,
+    _rows: null,
 
     _incrementNumberSurroundingsOf: function(aX, aY) {
         var x, y;
@@ -19,6 +21,10 @@ var mines = {
     },
 
     askValueOf: function(aX, aY) {
+        var value = mines._mineField[aY][aX];
+        if (value === '*') {
+            mines._game_over = true;
+        }
         return mines._mineField[aY][aX];
     },
 
@@ -61,6 +67,24 @@ var mines = {
                 minesCount++;
             }
         }
+
+        mines._rows = aRows;
+        mines._columns = aColumns;
+        mines._game_over = false;
+    },
+
+    getAllMines: function() {
+        var mines_coords = [];
+        if (mines._game_over) {
+            for (var i = 0; i < mines._rows; i++) {
+                for (var j = 0; j < mines._columns; j++) {
+                    if (mines._mineField[i][j] === '*') {
+                        mines_coords.push({ x: j, y: i });
+                    }
+                }
+            }
+        }
+        return mines_coords;
     },
 
     showMineField: function() {

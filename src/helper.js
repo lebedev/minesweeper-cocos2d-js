@@ -2,32 +2,33 @@ var helper = {
     addActionsToControlButton: function(aButton, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
             event: cc.EventListener.MOUSE,
-            onMouseDown: null || aMouseDownCallback && function(event) {
+            mouseIsDown: false,
+            onMouseDown: function(event) {
                 var target = event.getCurrentTarget();
-                if (helper.isMouseEventOnItsTarget(event)) {
-                    aMouseDownCallback(target, event);
+                if (target.enabled) {
+                    if (helper.isMouseEventOnItsTarget(event)) {
+                        this.mouseIsDown = true;
+                    }
+                    if (aMouseDownCallback) {
+                        aMouseDownCallback(target, event);
+                    }
                 }
             },
-            onMouseMove: null || aMouseMoveCallback && function(event) {
+            onMouseMove: function(event) {
                 var target = event.getCurrentTarget();
-                aMouseMoveCallback(target, helper.isMouseEventOnItsTarget(event));
-
-                /*if (helper.isTouchOnTarget(touch, target)) {
-                    if (target.isHighlighted() === false) {
-                        target.setHighlighted(true);
-                    }
-                } else {
-                    if (target.isHighlighted() === true) {
-                        target.setHighlighted(false);
-                    }
-                }*/
+                if (target.enabled && aMouseMoveCallback) {
+                    aMouseMoveCallback(target, event);
+                }
             },
             onMouseUp: function(event) {
                 var target = event.getCurrentTarget();
-                if (helper.isMouseEventOnItsTarget(event)) {
-                    target.setHighlighted(true);
-                    if (aMouseUpCallback) {
+                if (target.enabled && aMouseUpCallback) {
+                    if (helper.isMouseEventOnItsTarget(event)) {
+                        target.setHighlighted(true);
+                    }
+                    if (this.mouseIsDown) {
                         aMouseUpCallback(target, event);
+                        this.mouseIsDown = false;
                     }
                 }
             }
@@ -83,8 +84,8 @@ var helper = {
         var size = cc.winSize;
 
         var textures = {
-            normal:      aIsButton ? res.button_normal_png      : res.closed_highlighted_png,
-            highlighted: aIsButton ? res.button_highlighted_png : res.empty_highlighted_png,
+            normal:      aIsButton ? res.button_normal_png      : res.closed_png,
+            highlighted: aIsButton ? res.button_highlighted_png : res.closed_highlighted_png,
             disabled:    aIsButton ? res.button_disabled_png    : res.closed_png
         };
 

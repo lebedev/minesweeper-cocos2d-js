@@ -1,4 +1,4 @@
-var isLoggedIn = false;
+var isLoggedIn = true;
 
 var BackgroundLayer = cc.LayerColor.extend({
     ctor: function(aColor) {
@@ -14,7 +14,7 @@ var BackgroundLayer = cc.LayerColor.extend({
         var background_menu_mine = new cc.Sprite(res.background_menu_mine_png);
         background_menu_mine.setAnchorPoint(cc.p(0.5, 0.5));
         background_menu_mine.setPosition(cc.p(size.width/2, size.height/2));
-        //this.addChild(background_menu_mine, 0);
+        this.addChild(background_menu_mine, 0);
 
         var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
         background_menu_mine.runAction(infinite_rotate);
@@ -83,14 +83,13 @@ var LoginLayer = cc.Layer.extend({
         this.addChild(passwordEditBox);
 
         var enterButton = helper.addButtonToLayer(this, 'Войти', size.height*0.25, true);
-        helper.addMouseUpActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
+        helper.addMouseUpActionToControlButton(enterButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(MenuLayer); } });
 
         cc.audioEngine.playEffect(res.login_page_sound);
 
         return true;
     },
     changeLayer: function(aLayer) {
-        cc.log('changing LoginLayer to another');
         this.parent.addChild(new aLayer());
         this.removeFromParent();
     }
@@ -110,11 +109,10 @@ var MenuLayer = cc.Layer.extend({
 
         isLoggedIn = true;
 
-        var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.65);
-        helper.addMouseUpActionToControlButton(newGameButton, function(target) { helper.changeSceneTo(GameScene); });
-        helper.addButtonToLayer(this, 'Продолжить', size.height*0.45);
-        var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addMouseUpActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
+        var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.6);
+        helper.addMouseUpActionToControlButton(newGameButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { helper.changeSceneTo(GameScene); } });
+        var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.45);
+        helper.addMouseUpActionToControlButton(exitButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(LoginLayer); } });
 
         cc.audioEngine.playMusic(res.menu_music, true);
         cc.audioEngine.setMusicVolume(0.25);
@@ -122,8 +120,6 @@ var MenuLayer = cc.Layer.extend({
         return true;
     },
     changeLayer: function(aLayer) {
-        cc.log('changing LoginLayer to another');
-        // TODO: add transition maybe?
         this.parent.addChild(new aLayer());
         this.removeFromParent();
     }

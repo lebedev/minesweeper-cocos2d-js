@@ -1,6 +1,9 @@
 var res = {
     // sound effects
     login_page_sound: "res/login_page.mp3",
+    game_over_sound: "res/game_over.mp3",
+    victory_sound: "res/victory.ogg",
+    open_many_tiles: "res/open_many_tiles.mp3",
     // music tracks
     menu_music: "res/menu_music.ogg",
     game_music: "res/game_music.mp3",
@@ -20,7 +23,10 @@ var res = {
     closed_highlighted_png: "res/closed_highlighted.png",
     closed_flag_png: "res/closed_flag.png",
     closed_flag_highlighted_png: "res/closed_flag_highlighted.png",
-    mine_wrong_png: "res/mine_wrong.png",
+    mine_exploded_png: "res/mine_exploded.png",
+    mine_png: "res/mine.png",
+    mine_defused_png: "res/mine_defused.png",
+    closed_flag_wrong_png: "res/closed_flag_wrong.png",
     button_normal_png: "res/button_normal.png",
     button_highlighted_png: "res/button_highlighted.png",
     button_disabled_png: "res/button_disabled.png",
