@@ -30,6 +30,25 @@ var helper = {
         cc.eventManager.addListener(l, aNode);
     },
 
+    addSoundAndMusicButtons: function(aLayer) {
+        var size = cc.winSize;
+        var soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
+        soundButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.sound_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
+        soundButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.sound_disabled_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
+        soundButton.setContentSize(cc.size(120, 120));
+        soundButton.setPreferredSize(cc.size(120, 120));
+        soundButton.setPosition(cc.p(size.width*0.94, size.height*0.8));
+        helper.addMouseUpActionTo(soundButton, function() { cc.audioEngine.stopAllEffects(); });
+
+        var musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
+        musicButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.music_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
+        musicButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.music_disabled_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
+        musicButton.setContentSize(cc.size(120, 120));
+        musicButton.setPreferredSize(cc.size(120, 120));
+        musicButton.setPosition(cc.p(size.width*0.94, size.height*0.6));
+        helper.addMouseUpActionTo(musicButton, function() { cc.audioEngine.stopMusic(); });
+    },
+
     addTileToLayer: function(aLayer) {
         var size = cc.winSize;
         var b = new cc.Sprite();

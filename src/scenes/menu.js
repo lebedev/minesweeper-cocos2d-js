@@ -23,6 +23,8 @@ var BackgroundLayer = cc.LayerColor.extend({
 
         helper.addUITextToLayer(this, '2015 © zeird', size.height*0.03, size.height*0.02);
 
+        helper.addSoundAndMusicButtons(this);
+
         return true;
     }
 });

@@ -83,6 +83,8 @@ var GameLayer = cc.Layer.extend({
         cc.audioEngine.setMusicVolume(0.25);
         cc.audioEngine.playMusic(res.ingame_music, true);
 
+        helper.addSoundAndMusicButtons(this);
+
         return true;
     },
     getTile: function(aPoint) {
