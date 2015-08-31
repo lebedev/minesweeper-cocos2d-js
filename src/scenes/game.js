@@ -1,4 +1,4 @@
-var irows = 9, icolumns = 9, imines = 10;
+var irows = 40, icolumns = 50, imines = 10, gamelayer;
 
 var GameLayer = cc.Layer.extend({
     TILE_STATE_CLOSED:                      0,
@@ -20,6 +20,7 @@ var GameLayer = cc.Layer.extend({
     _tiles_total: null,
     _mines_count: null,
     _opened_tiles: null,
+    returnButton: null,
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -32,15 +33,15 @@ var GameLayer = cc.Layer.extend({
 
         isLoggedIn = true;
 
-        var returnButton = helper.addButtonToLayer(this, "В меню", size.height*0.05);
-        returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
-        returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
-        helper.addMouseUpActionToControlButton(returnButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { helper.changeSceneTo(MenuScene); } });
+        this.returnButton = helper.addButtonToLayer(this, "В меню", size.height*0.05);
+        this.returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
+        this.returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
+        //helper.addMouseUpActionToControlButton(returnButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { helper.changeSceneTo(MenuScene); } });
 
         this.createBlankMineField();
 
         cc.audioEngine.setMusicVolume(0.25);
-        cc.audioEngine.playMusic(res.game_music, true);
+        //cc.audioEngine.playMusic(res.game_music, true);
 
         return true;
     },
@@ -155,32 +156,23 @@ var GameLayer = cc.Layer.extend({
             selfPointer = this;
         this._minefield_tiles = [];
         this._tiles_total = rows*columns;
+        this.tile_size = tile_size;
+
         for (var i = 0; i < rows; i++) {
             row = [];
             for (var j = 0; j < columns; j++) {
-                tile = helper.addTileToLayer(this, size.height/2);
+                tile = helper.addTileToLayer(this);
+
                 tile.setUserData({ x: j, y: i, state: this.TILE_STATE_CLOSED });
-                tile.setPreferredSize(cc.size(tile_size, tile_size));
+                tile.setScale(tile_size/45, tile_size/45);
+                //tile.setContentSize(cc.size(tile_size, tile_size));
                 tile.setPosition(cc.p(x_offset + (j + 0.5)*tile_size, y_offset - (i + 0.5)*tile_size));
-                tile.setZoomOnTouchDown(false);
+                //tile.setZoomOnTouchDown(false);
 
-                tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_png), cc.CONTROL_STATE_NORMAL);
-                tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
+                //tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_png), cc.CONTROL_STATE_NORMAL);
+                //tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
 
-                helper.addMouseMoveActionToControlButton(tile, function(target, event) {
-                    //cc.log('move');
-                    var data = target.getUserData();
-                    if (helper.isMouseEventOnItsTarget(event)) {
-                        if (!target.isHighlighted()) {
-                            target.setHighlighted(true);
-                        }
-                    } else {
-                        if (target.isHighlighted()) {
-                            target.setHighlighted(false);
-                        }
-                    }
-                });
-                helper.addMouseDownActionToControlButton(tile, function(target, event) {
+                /*helper.addMouseDownActionToControlButton(tile, function(target, event) {
                     //cc.log('down');
                     if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
                         var tile, data, rows = selfPointer._minefield_tiles.length,
@@ -278,12 +270,51 @@ var GameLayer = cc.Layer.extend({
                             }
                         }
                     }
-                });
+                });*/
 
                 row.push(tile);
             }
             this._minefield_tiles.push(row);
         }
+
+        helper.addMouseMoveActionToControlButton(this, function(aEvent) {
+            //cc.log('azaza');
+            //cc.log(this);
+            var loc = aEvent.getLocation(),
+                target = aEvent.getCurrentTarget();
+            if (this.minx < loc.x && loc.x < this.maxx && this.miny < loc.y && loc.y < this.maxy) {
+                var nextNode = target._minefield_tiles[this.rows - 1 - Math.floor((loc.y - this.miny)/(this.maxy - this.miny)*this.rows)]
+                                                      [Math.floor((loc.x - this.minx)/(this.maxx - this.minx)*this.columns)];
+                if (nextNode !== this.previousNode) {
+                    if (this.previousNode) {
+                        this.previousNode.initWithFile(res.closed_png, helper.rect1);
+                        //this.previousNode.setContentSize(cc.size(selfPointer.tile_size, selfPointer.tile_size));
+                    }
+                    this.previousNode = nextNode;
+                    nextNode.initWithFile(res.closed_highlighted_png, helper.rect1);
+                    //nextNode.setContentSize(cc.size(selfPointer.tile_size, selfPointer.tile_size));
+                }
+                //this.previousNode =
+                //cc.log('tile');
+                //cc.log(this.previousNode);
+                //this.previousNode.setHighlighted(true);
+                return;
+            }
+            if (this.testNode(target.returnButton, loc)) {
+                cc.log('button');
+                return;
+            }
+        });
+        /*var data = target.getUserData();
+        if (helper.isMouseEventOnItsTarget(event)) {
+            if (!target.isHighlighted()) {
+                target.setHighlighted(true);
+            }
+        } else {
+            if (target.isHighlighted()) {
+                target.setHighlighted(false);
+            }
+        }*/
     },
     removeFlagFrom: function(aTile) {
         var data = aTile.getUserData();
@@ -320,7 +351,7 @@ var GameLayer = cc.Layer.extend({
 var GameScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
-        var layer = new GameLayer();
+        var layer = gamelayer = new GameLayer();
         this.addChild(layer);
     }
 });

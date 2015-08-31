@@ -1,14 +1,14 @@
 var res = {
     // sound effects
-    login_page_sound: "res/login_page.mp3",
+    /*login_page_sound: "res/login_page.mp3",
     game_over_sound: "res/game_over.mp3",
     victory_sound: "res/victory.ogg",
     open_many_tiles: "res/open_many_tiles.mp3",
     // music tracks
     menu_music: "res/menu_music.ogg",
-    game_music: "res/game_music.mp3",
+    game_music: "res/game_music.mp3",*/
     // sprites
-    background_menu_mine_png: "res/background_menu_mine.png",
+    //background_menu_mine_png: "res/background_menu_mine.png",
     number_1_png: "res/1.png",
     number_2_png: "res/2.png",
     number_3_png: "res/3.png",

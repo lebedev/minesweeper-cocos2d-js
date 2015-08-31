@@ -1,8 +1,22 @@
 var helper = {
-    addActionsToControlButton: function(aButton, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
+    addActionsToControlButton: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
             event: cc.EventListener.MOUSE,
-            mouseIsDown: false,
+            previousNode: null,
+            rows: aNode._minefield_tiles.length,
+            columns: aNode._minefield_tiles[0].length,
+            minx: aNode._minefield_tiles[0][0].getPositionX() - aNode.tile_size/2,
+            maxx: aNode._minefield_tiles[0][aNode._minefield_tiles[0].length-1].getPositionX() + aNode.tile_size/2,
+            miny: aNode._minefield_tiles[aNode._minefield_tiles.length-1][0].getPositionY() - aNode.tile_size/2,
+            maxy: aNode._minefield_tiles[0][0].getPositionY() + aNode.tile_size/2,
+            lastMove: Date.now(),
+
+            testNode: function(aNode, aLocation) {
+                var locationInNode = aNode.convertToNodeSpace(aLocation),
+                    s = aNode.getContentSize(),
+                    rect = cc.rect(0, 0, s.width, s.height);
+                return cc.rectContainsPoint(rect, locationInNode);
+            },
             onMouseDown: function(event) {
                 var target = event.getCurrentTarget();
                 if (target.enabled) {
@@ -15,10 +29,35 @@ var helper = {
                 }
             },
             onMouseMove: function(event) {
-                var target = event.getCurrentTarget();
-                if (target.enabled && aMouseMoveCallback) {
-                    aMouseMoveCallback(target, event);
+                event.stopPropagation();
+                /*var now = Date.now();
+                if (now - this.lastMove < 100) {
+                    this.lastMove = now;
+                    return;
+                }*/
+                //event.preventDefault();
+                if (aMouseMoveCallback) {
+                    aMouseMoveCallback.call(this, event);
                 }
+                //console.time('move');
+                //cc.log(this.allNodesLength);
+
+                /*this.allNodes.every(function(aNode){
+
+                    if (cc.rectContainsPoint(rect, locationInNode)) {
+                        if (!aNode.isHighlighted()) {
+                            aNode.setHighlighted(true);
+                        }
+                    } else {
+                        if (aNode.isHighlighted()) {
+                            aNode.setHighlighted(false);
+                        }
+                    }*/
+                    //return true;
+                //});
+                //console.timeEnd('move');
+                //count++;
+                //cc.log('mean: ' + summ/count + 'ms.');
             },
             onMouseUp: function(event) {
                 var target = event.getCurrentTarget();
@@ -34,7 +73,7 @@ var helper = {
             }
         });
 
-        cc.eventManager.addListener(l, aButton);
+        cc.eventManager.addListener(l, aNode);
     },
 
     addButtonToLayer: function(aLayer, aString, aY, aDisabled) {
@@ -56,8 +95,11 @@ var helper = {
         helper.addActionsToControlButton(aButton, null, null, aCallback);
     },
 
-    addTileToLayer: function(aLayer, aY) {
-        var b = helper.createControlButton('', true, aY);
+    addTileToLayer: function(aLayer) {
+        var size = cc.winSize;
+        var b = new cc.Sprite();
+        b.initWithFile(res.closed_png, helper.rect1);
+        b.setAnchorPoint(cc.p(0.5, 0.5));
         aLayer.addChild(b);
 
         return b;
@@ -65,10 +107,7 @@ var helper = {
 
     addUITextToLayer: function(aLayer, aString, aFontSize, aY) {
         var t = helper.createUIText(aString, aFontSize);
-        t.attr({
-            x: cc.winSize.width*0.5,
-            y: aY
-        });
+        t.setPosition(cc.p(cc.winSize.width*0.5, aY));
 
         aLayer.addChild(t);
 
@@ -98,10 +137,12 @@ var helper = {
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setPosition(cc.p(size.width*0.5, aY));
-        b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
-        b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
-        b.setTitleTTFSizeForState(size.height*0.07, cc.CONTROL_STATE_NORMAL);
-        b.setTitleColorForState(cc.color(170,170,170), cc.CONTROL_STATE_DISABLED);
+        if (aString) {
+            b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
+            b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
+            b.setTitleTTFSizeForState(size.height*0.07, cc.CONTROL_STATE_NORMAL);
+            b.setTitleColorForState(cc.color(170,170,170), cc.CONTROL_STATE_DISABLED);
+        }
         if (aDisabled) {
             b.setEnabled(false);
         }
@@ -113,7 +154,7 @@ var helper = {
         if (aIsButton) {
             return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
         } else {
-            return cc.Scale9Sprite.create(aRes, cc.rect(5, 5, 100, 100), cc.rect(5, 5, 90, 90));
+            return cc.Scale9Sprite.create(aRes, helper.rect1, helper.rect2);
         }
     },
 
@@ -158,6 +199,8 @@ var helper = {
             }
         }
     },
+    rect1: cc.rect(0, 0, 45, 45),
+    rect2: cc.rect(1, 1, 43, 43),
 };
 
 helper.ProcessTryCatcher(helper);
