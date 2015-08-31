@@ -2,10 +2,12 @@ var sprite_size = "big";
 
 var res = {
     // sound effects
-    login_page_sound: "res/login_page.mp3",
+    login_page_sound: "res/login_page.wav",
     game_over_sound: "res/game_over.ogg",
     victory_sound: "res/victory.mp3",
-    open_many_tiles_sound: "res/open_many_tiles.mp3",
+    open_many_tiles_sound: "res/open_many_tiles.wav",
+    mine_explode_sound: "res/mine_explode.mp3",
+    easy_mode_fail_sound: "res/easy_mode_fail.mp3",
     // music tracks
     menu_music: "res/menu_music.ogg",
     ingame_music: "res/ingame_music.mp3",
@@ -19,6 +21,13 @@ var res = {
     number_6_png: "res/6.png",
     number_7_png: "res/7.png",
     number_8_png: "res/8.png",
+    number_1x_png: "res/1x.png",
+    number_2x_png: "res/2x.png",
+    number_3x_png: "res/3x.png",
+    number_4x_png: "res/4x.png",
+    number_5x_png: "res/5x.png",
+    number_6x_png: "res/6x.png",
+    number_7x_png: "res/7x.png",
     empty_png: "res/empty.png",
     closed_png: "res/closed_" + sprite_size + ".png",
     closed_highlighted_png: "res/closed_highlighted_" + sprite_size + ".png",

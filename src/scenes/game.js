@@ -1,4 +1,4 @@
-var irows = 30, icolumns = 50, imines = 400, gamelayer;
+var irows = 30, icolumns = 50, imines = 200, gamelayer;
 
 var GameLayer = cc.Layer.extend({
     TILE_STATE_CLOSED:                      0,
@@ -9,9 +9,17 @@ var GameLayer = cc.Layer.extend({
     TILE_STATE_MINE:                        5,
     TILE_STATE_MINE_DEFUSED:                6,
     TILE_STATE_FLAG_WRONG:                  7,
-    _deltas: [
+    BUTTON_LEFT: 1,
+    BUTTON_RIGHT: 2,
+    BUTTONS_BOTH: 3,
+    _deltas8: [
         [-1, -1],  [0, -1], [+1, -1],
         [-1,  0],/*[x,  y]*/[+1,  0],
+        [-1, +1],  [0, +1], [+1, +1],
+    ],
+    _deltas9: [
+        [-1, -1],  [0, -1], [+1, -1],
+        [-1,  0],  [0,  0], [+1,  0],
         [-1, +1],  [0, +1], [+1, +1],
     ],
     _game_started: false,
@@ -22,7 +30,9 @@ var GameLayer = cc.Layer.extend({
     _tile_size: null,
     _columns: null,
     _rows: null,
-    _last_tile: null,
+    _last_tile_coords: null,
+    _buttons: 0,
+    _easy_state: false,
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -89,9 +99,9 @@ var GameLayer = cc.Layer.extend({
         if (state === this.TILE_STATE_EMPTY) {
             this.scheduleOnce(function() {
                 cc.audioEngine.playEffect(res.open_many_tiles_sound);
-                cc.audioEngine.setEffectsVolume(0.75);
+                cc.audioEngine.setEffectsVolume(0.25);
                 this.runActionOnSurroundingsOf(aPoint);
-            }, 0.25);
+            }, 0.1);
         } else if (state === this.TILE_STATE_MINE_EXPLODED) {
             var tile, mines_coords = mines.getAllMines();
             for (var i = 0; i < mines_coords.length; i++) {
@@ -173,110 +183,6 @@ var GameLayer = cc.Layer.extend({
                 tile.state = this.TILE_STATE_CLOSED;
                 tile.setScale(tile_size/helper['rect_' + sprite_size].width, tile_size/helper['rect_' + sprite_size].width);
                 tile.setPosition(cc.p(x_offset + (j + 0.5)*tile_size, y_offset - (i + 0.5)*tile_size));
-
-                //tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_png), cc.CONTROL_STATE_NORMAL);
-                //tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
-
-                /*helper.addMouseDownActionToControlButton(tile, function(target, event) {
-                    //cc.log('down');
-                    if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                        var tile, data, rows = selfPointer._minefield_tiles.length,
-                            columns = selfPointer._minefield_tiles[0].length;
-                        for (var i = 0; i < rows; i++) {
-                            for (var j = 0; j < columns; j++) {
-                                tile = selfPointer._minefield_tiles[i][j];
-                                data = tile.getUserData();
-                                if (data.state === selfPointer.TILE_STATE_CLOSED) {
-                                    tile.setUserData({ x: data.x, y: data.y, state: selfPointer.TILE_STATE_CLOSED_WITH_EMPTY_HIGHLIGHT });
-                                    tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.empty_png), cc.CONTROL_STATE_HIGHLIGHTED);
-                                }
-                            }
-                        }
-                    }
-                    if (helper.isMouseEventOnItsTarget(event)) {
-                        var data = target.getUserData();
-                        if (event.getButton() === cc.EventMouse.BUTTON_RIGHT) {
-                            if (data.state === selfPointer.TILE_STATE_CLOSED) {
-                                selfPointer.addFlagTo(target);
-                            } else if (data.state === selfPointer.TILE_STATE_CLOSED_FLAG) {
-                                selfPointer.removeFlagFrom(target);
-                            }
-                        } else if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                            var data = target.getUserData();
-                            if (data.state === selfPointer.TILE_STATE_CLOSED) {
-                                target.setUserData({ x: data.x, y: data.y, state: selfPointer.TILE_STATE_CLOSED_WITH_EMPTY_HIGHLIGHT });
-                                target.setBackgroundSpriteForState(helper.createS9TileFromRes(res.empty_png), cc.CONTROL_STATE_HIGHLIGHTED);
-                            }
-                        }
-                    }
-                });
-
-                helper.addMouseUpActionToControlButton(tile, function(target, event) {
-                    //cc.log('up');
-                    if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                        var tile, data, rows = selfPointer._minefield_tiles.length,
-                            columns = selfPointer._minefield_tiles[0].length;
-                        for (var i = 0; i < rows; i++) {
-                            for (var j = 0; j < columns; j++) {
-                                tile = selfPointer._minefield_tiles[i][j];
-                                data = tile.getUserData();
-                                if (data.state === selfPointer.TILE_STATE_CLOSED_WITH_EMPTY_HIGHLIGHT) {
-                                    tile.setUserData({ x: data.x, y: data.y, state: selfPointer.TILE_STATE_CLOSED });
-                                    tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
-                                }
-                            }
-                        }
-                    }
-                    if (helper.isMouseEventOnItsTarget(event)) {
-                        var data = target.getUserData();
-                        if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                            if (!selfPointer._game_started) {
-                                selfPointer._game_started = true;
-                                selfPointer.setMineFieldState(cc.p(data.x, data.y));
-                            }
-                            if (data.state === selfPointer.TILE_STATE_CLOSED) {
-                                selfPointer.changeStateOf(target);
-                            }
-                        } else if (event.getButton() === cc.EventMouse.BUTTON_RIGHT && data.state === selfPointer.TILE_STATE_NUMBER) {
-                            var mines_expected = data.value,
-                                flags_count = 0,
-                                closed_count = 0;
-                            var x, y;
-                            for (var i = 0; i < 8; i++) {
-                                x = data.x + selfPointer._deltas[i][0];
-                                y = data.y + selfPointer._deltas[i][1];
-                                if (selfPointer._minefield_tiles[y] !== undefined && selfPointer._minefield_tiles[y][x] !== undefined) {
-                                    if (selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED_FLAG) {
-                                        flags_count++;
-                                    } else if (selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED) {
-                                        closed_count++;
-                                    }
-                                }
-                            }
-                            //cc.log('azaza ' + mines_expected + ' ' + flags_count);
-                            if (mines_expected === flags_count) {
-                                var x, y;
-                                for (var i = 0; i < 8; i++) {
-                                    x = data.x + selfPointer._deltas[i][0];
-                                    y = data.y + selfPointer._deltas[i][1];
-                                    if (selfPointer._minefield_tiles[y] !== undefined && selfPointer._minefield_tiles[y][x] !== undefined && selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED) {
-                                        selfPointer.changeStateOf(selfPointer._minefield_tiles[y][x]);
-                                    }
-                                }
-                            } else if (mines_expected === flags_count + closed_count) {
-                                var x, y;
-                                for (var i = 0; i < 8; i++) {
-                                    x = data.x + selfPointer._deltas[i][0];
-                                    y = data.y + selfPointer._deltas[i][1];
-                                    if (selfPointer._minefield_tiles[y] !== undefined && selfPointer._minefield_tiles[y][x] !== undefined && selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED) {
-                                        selfPointer.addFlagTo(selfPointer._minefield_tiles[y][x]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });*/
-
                 row.push(tile);
             }
             this._minefield_tiles.push(row);
@@ -287,9 +193,22 @@ var GameLayer = cc.Layer.extend({
         helper.addMouseActionsTo(
             this,
             function(aEvent) {
+                if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
+                    cc.log('left pressed');
+                    this._buttons += this.BUTTON_LEFT;
+                } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+                    cc.log('right pressed');
+                    this._buttons += this.BUTTON_RIGHT;
+                }
+                cc.log(this._buttons);
+                if (this._buttons === this.BUTTONS_BOTH) {
+                    this._easy_state = true;
+                    cc.log('easy state on!');
+                }
+
                 var coords = this.getTileXYUnderMouse(aEvent),
                     tile = coords ? this._minefield_tiles[coords.y][coords.x] : null;
-                if (tile && aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+                if (tile && !this._easy_state && aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
                     if (tile.state === this.TILE_STATE_CLOSED) {
                         this.addFlagTo(coords);
                     } else if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
@@ -298,32 +217,44 @@ var GameLayer = cc.Layer.extend({
                 }
             }.bind(this),
             function(aEvent) {
-                var coords = this.getTileXYUnderMouse(aEvent),
-                    tile = coords ? this._minefield_tiles[coords.y][coords.x] : null;
-                if (this._last_tile) {
-                    if (this._last_tile.state === this.TILE_STATE_CLOSED) {
-                        this._last_tile.initWithFile(res.closed_png, helper['rect_' + sprite_size]);
-                    } else if (this._last_tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                        this._last_tile.initWithFile(res.closed_flag_png, helper['rect_' + sprite_size]);
+                var tile, coords = this.getTileXYUnderMouse(aEvent);
+                if (this._last_tile_coords) {
+                    for (var i = 0; i < 9; i++) {
+                        tile = this.getTile(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
+                        if (tile && tile.state === this.TILE_STATE_CLOSED) {
+                            tile.initWithFile(res.closed_png, helper['rect_' + sprite_size]);
+                        } else if (tile && tile.state === this.TILE_STATE_CLOSED_FLAG) {
+                            tile.initWithFile(res.closed_flag_png, helper['rect_' + sprite_size]);
+                        }
                     }
                 }
-                this._last_tile = tile;
-                if (this._last_tile) {
-                    if (this._last_tile.state === this.TILE_STATE_CLOSED) {
-                        if (aEvent.getButton() !== cc.EventMouse.BUTTON_LEFT) {
-                            this._last_tile.initWithFile(res.closed_highlighted_png, helper['rect_' + sprite_size]);
-                        } else {
-                            this._last_tile.initWithFile(res.empty_png, helper['rect_' + sprite_size]);
+                this._last_tile_coords = coords;
+                if (this._last_tile_coords) {
+                    if (!this._easy_state) {
+                        if (this.getTile(this._last_tile_coords).state === this.TILE_STATE_CLOSED) {
+                            if (aEvent.getButton() !== cc.EventMouse.BUTTON_LEFT) {
+                                this.getTile(this._last_tile_coords).initWithFile(res.closed_highlighted_png, helper['rect_' + sprite_size]);
+                            } else {
+                                this.getTile(this._last_tile_coords).initWithFile(res.empty_png, helper['rect_' + sprite_size]);
+                            }
+                        } else if (this.getTile(this._last_tile_coords).state === this.TILE_STATE_CLOSED_FLAG) {
+                            this.getTile(this._last_tile_coords).initWithFile(res.closed_flag_highlighted_png, helper['rect_' + sprite_size]);
                         }
-                    } else if (this._last_tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                        this._last_tile.initWithFile(res.closed_flag_highlighted_png, helper['rect_' + sprite_size]);
+                    } else {
+                        cc.log('set new in easy mode');
+                        for (var i = 0; i < 9; i++) {
+                            tile = this.getTile(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
+                            if (tile && tile.state === this.TILE_STATE_CLOSED) {
+                                tile.initWithFile(res.empty_png, helper['rect_' + sprite_size]);
+                            }
+                        }
                     }
                 }
             }.bind(this),
             function(aEvent) {
-                if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
-                    var coords = this.getTileXYUnderMouse(aEvent);
-                    tile = coords ? this._minefield_tiles[coords.y][coords.x] : null;
+                var coords = this.getTileXYUnderMouse(aEvent),
+                    tile = this.getTile(coords);
+                if (!this._easy_state && aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
                     if (tile && tile.state === this.TILE_STATE_CLOSED) {
                         if (!this._game_started) {
                             this._game_started = true;
@@ -333,18 +264,71 @@ var GameLayer = cc.Layer.extend({
                         }
                     }
                 }
+                if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
+                    cc.log('left released');
+                    this._buttons -= this.BUTTON_LEFT;
+                    if (this._easy_state) {
+                        this._easy_state = false;
+                        cc.log('easy state off on ' + coords.x + ':' + coords.y + ' on number: ' + (tile.state === this.TILE_STATE_NUMBER && tile.value));
+                        if (tile.state === this.TILE_STATE_NUMBER) {
+                            var mines_expected = tile.value,
+                                flags_count = 0,
+                                closed_count = 0;
+                            for (var i = 0; i < 8; i++) {
+                                tile = this.getTile(cc.p(coords.x + this._deltas8[i][0], coords.y + this._deltas8[i][1]));
+                                if (tile && tile.state === this.TILE_STATE_CLOSED_FLAG) {
+                                    flags_count++;
+                                } else if (tile && tile.state === this.TILE_STATE_CLOSED) {
+                                    closed_count++;
+                                }
+                            }
+                            if (mines_expected === flags_count) {
+                                var p, tile;
+                                for (var i = 0; i < 8; i++) {
+                                    p = cc.p(coords.x + this._deltas8[i][0], coords.y + this._deltas8[i][1]);
+                                    tile = this.getTile(p);
+                                    if (tile && tile.state ===  this.TILE_STATE_CLOSED) {
+                                        this.changeStateOf(p);
+                                    }
+                                }
+                            } else if (mines_expected === flags_count + closed_count) {
+                                var p, tile;
+                                for (var i = 0; i < 8; i++) {
+                                    p = cc.p(coords.x + this._deltas8[i][0], coords.y + this._deltas8[i][1]);
+                                    tile = this.getTile(p);
+                                    if (tile && tile.state ===  this.TILE_STATE_CLOSED) {
+                                        this.addFlagTo(p);
+                                    }
+                                }
+                            } else {
+                                cc.audioEngine.playEffect(res.easy_mode_fail_sound);
+                                tile = this.getTile(coords);
+                                tile.initWithFile(res['number_' + tile.value + 'x_png'], helper['rect_' + sprite_size]);
+
+                                this.scheduleOnce(function(aCoords) {
+                                    var tile = this.getTile(aCoords);
+                                    tile.initWithFile(res['number_' + tile.value + '_png'], helper['rect_' + sprite_size]);
+                                }.bind(this, coords), 0.25);
+
+                                this.scheduleOnce(function(aCoords) {
+                                    var tile = this.getTile(aCoords);
+                                    tile.initWithFile(res['number_' + tile.value + 'x_png'], helper['rect_' + sprite_size]);
+                                }.bind(this, coords), 0.5);
+
+                                this.scheduleOnce(function(aCoords) {
+                                    var tile = this.getTile(aCoords);
+                                    tile.initWithFile(res['number_' + tile.value + '_png'], helper['rect_' + sprite_size]);
+                                }.bind(this, coords), 0.75);
+                            }
+                        }
+                    }
+                } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+                    cc.log('right released');
+                    this._buttons -= this.BUTTON_RIGHT;
+                }
+                cc.log(this._buttons);
             }.bind(this)
         );
-        /*var data = target.getUserData();
-        if (helper.isMouseEventOnItsTarget(event)) {
-            if (!target.isHighlighted()) {
-                target.setHighlighted(true);
-            }
-        } else {
-            if (target.isHighlighted()) {
-                target.setHighlighted(false);
-            }
-        }*/
     },
     getTileXYUnderMouse: function(aEvent) {
         var size = cc.winSize,
@@ -368,8 +352,8 @@ var GameLayer = cc.Layer.extend({
         var point, tile;
         for (var i = 0; i < 8; i++) {
             point = cc.p(
-                aPoint.x + this._deltas[i][0],
-                aPoint.y + this._deltas[i][1]
+                aPoint.x + this._deltas8[i][0],
+                aPoint.y + this._deltas8[i][1]
             );
             tile = this.getTile(point);
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
