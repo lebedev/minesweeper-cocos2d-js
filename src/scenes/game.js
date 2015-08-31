@@ -1,4 +1,4 @@
-var ev;
+var irows = 9, icolumns = 9, imines = 10;
 
 var GameLayer = cc.Layer.extend({
     TILE_STATE_CLOSED:                      0,
@@ -55,7 +55,7 @@ var GameLayer = cc.Layer.extend({
         aTile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_flag_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
     },
     changeStateOf: function(aTile) {
-        var texture, state,
+        var texture, state, number,
             data = aTile.getUserData(),
             value = mines.askValueOf(data.x, data.y);
         switch(value) {
@@ -76,7 +76,7 @@ var GameLayer = cc.Layer.extend({
             this._opened_tiles++;
             break;
         }}
-        aTile.setUserData({ x: data.x, y: data.y, state: state });
+        aTile.setUserData({ x: data.x, y: data.y, state: state, value: value });
         aTile.setBackgroundSpriteForState(helper.createS9TileFromRes(texture), cc.CONTROL_STATE_NORMAL);
         aTile.setBackgroundSpriteForState(helper.createS9TileFromRes(texture), cc.CONTROL_STATE_DISABLED);
         aTile.setBackgroundSpriteForState(helper.createS9TileFromRes(texture), cc.CONTROL_STATE_HIGHLIGHTED);
@@ -149,8 +149,8 @@ var GameLayer = cc.Layer.extend({
         }
 
         var tile, row,
-            rows = 9,
-            columns = 9,
+            rows = irows,
+            columns = icolumns,
             size = cc.winSize,
             tile_size = Math.min(size.width*0.8/columns, size.height*0.8/rows),
             x_offset = (size.width  - tile_size*columns)/2,
@@ -171,6 +171,7 @@ var GameLayer = cc.Layer.extend({
                 tile.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
 
                 helper.addMouseMoveActionToControlButton(tile, function(target, event) {
+                    //cc.log('move');
                     var data = target.getUserData();
                     if (helper.isMouseEventOnItsTarget(event)) {
                         if (!target.isHighlighted()) {
@@ -183,6 +184,7 @@ var GameLayer = cc.Layer.extend({
                     }
                 });
                 helper.addMouseDownActionToControlButton(tile, function(target, event) {
+                    //cc.log('down');
                     if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
                         var tile, data, rows = selfPointer._minefield_tiles.length,
                             columns = selfPointer._minefield_tiles[0].length;
@@ -216,6 +218,7 @@ var GameLayer = cc.Layer.extend({
                 });
 
                 helper.addMouseUpActionToControlButton(tile, function(target, event) {
+                    //cc.log('up');
                     if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
                         var tile, data, rows = selfPointer._minefield_tiles.length,
                             columns = selfPointer._minefield_tiles[0].length;
@@ -230,14 +233,52 @@ var GameLayer = cc.Layer.extend({
                             }
                         }
                     }
-                    if (helper.isMouseEventOnItsTarget(event) && event.getButton() === cc.EventMouse.BUTTON_LEFT) {
+                    if (helper.isMouseEventOnItsTarget(event)) {
                         var data = target.getUserData();
-                        if (!selfPointer._game_started) {
-                            selfPointer._game_started = true;
-                            selfPointer.setMineFieldState(cc.p(data.x, data.y));
-                        }
-                        if (data.state === selfPointer.TILE_STATE_CLOSED) {
-                            selfPointer.changeStateOf(target);
+                        if (event.getButton() === cc.EventMouse.BUTTON_LEFT) {
+                            if (!selfPointer._game_started) {
+                                selfPointer._game_started = true;
+                                selfPointer.setMineFieldState(cc.p(data.x, data.y));
+                            }
+                            if (data.state === selfPointer.TILE_STATE_CLOSED) {
+                                selfPointer.changeStateOf(target);
+                            }
+                        } else if (event.getButton() === cc.EventMouse.BUTTON_RIGHT && data.state === selfPointer.TILE_STATE_NUMBER) {
+                            var mines_expected = data.value,
+                                flags_count = 0,
+                                closed_count = 0;
+                            var x, y;
+                            for (var i = 0; i < 8; i++) {
+                                x = data.x + selfPointer._deltas[i][0];
+                                y = data.y + selfPointer._deltas[i][1];
+                                if (selfPointer._minefield_tiles[y] !== undefined && selfPointer._minefield_tiles[y][x] !== undefined) {
+                                    if (selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED_FLAG) {
+                                        flags_count++;
+                                    } else if (selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED) {
+                                        closed_count++;
+                                    }
+                                }
+                            }
+                            //cc.log('azaza ' + mines_expected + ' ' + flags_count);
+                            if (mines_expected === flags_count) {
+                                var x, y;
+                                for (var i = 0; i < 8; i++) {
+                                    x = data.x + selfPointer._deltas[i][0];
+                                    y = data.y + selfPointer._deltas[i][1];
+                                    if (selfPointer._minefield_tiles[y] !== undefined && selfPointer._minefield_tiles[y][x] !== undefined && selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED) {
+                                        selfPointer.changeStateOf(selfPointer._minefield_tiles[y][x]);
+                                    }
+                                }
+                            } else if (mines_expected === flags_count + closed_count) {
+                                var x, y;
+                                for (var i = 0; i < 8; i++) {
+                                    x = data.x + selfPointer._deltas[i][0];
+                                    y = data.y + selfPointer._deltas[i][1];
+                                    if (selfPointer._minefield_tiles[y] !== undefined && selfPointer._minefield_tiles[y][x] !== undefined && selfPointer._minefield_tiles[y][x].getUserData().state === selfPointer.TILE_STATE_CLOSED) {
+                                        selfPointer.addFlagTo(selfPointer._minefield_tiles[y][x]);
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -265,7 +306,7 @@ var GameLayer = cc.Layer.extend({
         }
     },
     setMineFieldState: function(aPoint) {
-        var mines_count = 10;
+        var mines_count = imines;
         var tile, texture, rows = this._minefield_tiles.length,
             columns = this._minefield_tiles[0].length,
             size = cc.winSize,
