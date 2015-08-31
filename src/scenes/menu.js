@@ -82,7 +82,7 @@ var LoginLayer = cc.Layer.extend({
 
         this.addChild(passwordEditBox);
 
-        var enterButton = helper.addControlButtonToLayer(this, 'Войти', size.height*0.25, true);
+        var enterButton = helper.addButtonToLayer(this, 'Войти', size.height*0.25, true);
         helper.addMouseUpActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
 
         cc.audioEngine.playEffect(res.login_page_sound);
@@ -110,10 +110,10 @@ var MenuLayer = cc.Layer.extend({
 
         isLoggedIn = true;
 
-        var newGameButton = helper.addControlButtonToLayer(this, 'Новая игра', size.height*0.65);
+        var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.65);
         helper.addMouseUpActionToControlButton(newGameButton, function(target) { helper.changeSceneTo(GameScene); });
-        helper.addControlButtonToLayer(this, 'Продолжить', size.height*0.45);
-        var exitButton = helper.addControlButtonToLayer(this, 'Выйти', size.height*0.25);
+        helper.addButtonToLayer(this, 'Продолжить', size.height*0.45);
+        var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
         helper.addMouseUpActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
 
         cc.audioEngine.playMusic(res.menu_music, true);

@@ -26,7 +26,8 @@ var GameLayer = cc.Layer.extend({
 
         isLoggedIn = true;
 
-        var returnButton = helper.addControlButtonToLayer(this, "В меню", size.height*0.05);
+        var returnButton = helper.addButtonToLayer(this, "В меню", size.height*0.05);
+        returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
         returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
         helper.addMouseUpActionToControlButton(returnButton, function() { helper.changeSceneTo(MenuScene); });
 
@@ -94,7 +95,7 @@ var GameLayer = cc.Layer.extend({
         for (var i = 0; i < rows; i++) {
             row = [];
             for (var j = 0; j < columns; j++) {
-                tile = helper.addControlButtonToLayer(this, '', size.height/2);
+                tile = helper.addTileToLayer(this, size.height/2);
                 tile.setUserData({ x: j, y: i, state: this.TILE_STATE_CLOSED });
                 tile.setPreferredSize(cc.size(tile_size, tile_size));
                 tile.setPosition(cc.p(x_offset + (j + 0.5)*tile_size, y_offset - (i + 0.5)*tile_size));

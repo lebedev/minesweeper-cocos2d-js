@@ -21,6 +21,9 @@ var res = {
     closed_flag_png: "res/closed_flag.png",
     closed_flag_highlighted_png: "res/closed_flag_highlighted.png",
     mine_wrong_png: "res/mine_wrong.png",
+    button_normal_png: "res/button_normal.png",
+    button_highlighted_png: "res/button_highlighted.png",
+    button_disabled_png: "res/button_disabled.png",
 };
 
 var g_resources = [];

@@ -36,11 +36,8 @@ var helper = {
         cc.eventManager.addListener(l, aButton);
     },
 
-    addControlButtonToLayer: function(aLayer, aString, aY, aDisabled) {
-        var size = cc.winSize;
-
-        var b = helper.createControlButton(aString, aDisabled);
-        b.setPosition(cc.p(size.width*0.5, aY));
+    addButtonToLayer: function(aLayer, aString, aY, aDisabled) {
+        var b = helper.createControlButton(aString, true, aY, aDisabled);
         aLayer.addChild(b);
 
         return b;
@@ -56,6 +53,13 @@ var helper = {
 
     addMouseUpActionToControlButton: function(aButton, aCallback) {
         helper.addActionsToControlButton(aButton, null, null, aCallback);
+    },
+
+    addTileToLayer: function(aLayer, aY) {
+        var b = helper.createControlButton('', true, aY);
+        aLayer.addChild(b);
+
+        return b;
     },
 
     addUITextToLayer: function(aLayer, aString, aFontSize, aY) {
@@ -75,15 +79,22 @@ var helper = {
         cc.director.runScene(new cc.TransitionFade(0.5, scene));
     },
 
-    createControlButton: function(aString, aDisabled) {
+    createControlButton: function(aString, aIsButton, aY, aDisabled) {
         var size = cc.winSize;
 
+        var textures = {
+            normal:      aIsButton ? res.button_normal_png      : res.closed_highlighted_png,
+            highlighted: aIsButton ? res.button_highlighted_png : res.empty_highlighted_png,
+            disabled:    aIsButton ? res.button_disabled_png    : res.closed_png
+        };
+
         var b = new cc.ControlButton();
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_highlighted_png), cc.CONTROL_STATE_NORMAL);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.empty_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.closed_png), cc.CONTROL_STATE_DISABLED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(textures.normal, aIsButton), cc.CONTROL_STATE_NORMAL);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(textures.highlighted, aIsButton), cc.CONTROL_STATE_HIGHLIGHTED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(textures.disabled, aIsButton), cc.CONTROL_STATE_DISABLED);
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
+        b.setPosition(cc.p(size.width*0.5, aY));
         b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
         b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
         b.setTitleTTFSizeForState(size.height*0.07, cc.CONTROL_STATE_NORMAL);
@@ -95,9 +106,12 @@ var helper = {
         return b;
     },
 
-    createS9TileFromRes: function(aRes) {
-        //return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
-        return cc.Scale9Sprite.create(aRes, cc.rect(5, 5, 100, 100), cc.rect(5, 5, 90, 90));
+    createS9TileFromRes: function(aRes, aIsButton) {
+        if (aIsButton) {
+            return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
+        } else {
+            return cc.Scale9Sprite.create(aRes, cc.rect(5, 5, 100, 100), cc.rect(5, 5, 90, 90));
+        }
     },
 
     createUIText: function(aString, aFontSize) {
