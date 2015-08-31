@@ -28,6 +28,8 @@ var GameLayer = cc.Layer.extend({
         cc.audioEngine.stopAllEffects();
         cc.audioEngine.stopMusic();
 
+        cc.audioEngine.setEffectsVolume(0.5);
+
         // ask the window size
         var size = cc.winSize;
 
@@ -40,6 +42,7 @@ var GameLayer = cc.Layer.extend({
 
         this.createBlankMineField();
 
+        cc.audioEngine.setMusicVolume(0.25);
         cc.audioEngine.playMusic(res.game_music, true);
 
         return true;

@@ -114,8 +114,8 @@ var MenuLayer = cc.Layer.extend({
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.45);
         helper.addMouseUpActionToControlButton(exitButton, function(target, event) { if (helper.isMouseEventOnItsTarget(event)) { target.parent.changeLayer(LoginLayer); } });
 
-        cc.audioEngine.playMusic(res.menu_music, true);
         cc.audioEngine.setMusicVolume(0.25);
+        cc.audioEngine.playMusic(res.menu_music, true);
 
         return true;
     },
