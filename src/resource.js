@@ -41,6 +41,8 @@ var res = {
     button_highlighted_png: "res/button_highlighted.png",
     button_disabled_png: "res/button_disabled.png",
     editbox_png: "res/editbox.png",
+    timer_png: "res/timer.png",
+    mines_left_png: "res/mines_left.png",
 };
 
 var g_resources = [];

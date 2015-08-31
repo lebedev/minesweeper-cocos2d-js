@@ -46,12 +46,42 @@ var GameLayer = cc.Layer.extend({
         returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
         helper.addMouseUpActionTo(returnButton, function() { helper.changeSceneTo(MenuScene); })
 
+        timerSprite = new cc.Sprite();
+        timerSprite.initWithFile(res.timer_png, cc.rect(0, 0, 137, 60));
+        timerSprite.setAnchorPoint(cc.p(0.5, 0.5));
+        timerSprite.setPosition(cc.p(size.width*0.25, size.height*0.05));
+        this.addChild(timerSprite);
+
+        timerLabel = new cc.LabelTTF();
+        timerLabel.setAnchorPoint(cc.p(0.5, 0.5));
+        timerLabel.setPosition(cc.p(size.width*0.27, size.height*0.042));
+        timerLabel.fontName = "Impact";
+        timerLabel.fontSize = size.height*0.045;
+        timerLabel.string = 0;
+        this.addChild(timerLabel);
+
+        timerLabel.schedule(function() {
+            timerLabel.string++;
+        }, 1);
+
+        minesLeftSprite = new cc.Sprite();
+        minesLeftSprite.initWithFile(res.mines_left_png, cc.rect(0, 0, 137, 60));
+        minesLeftSprite.setAnchorPoint(cc.p(0.5, 0.5));
+        minesLeftSprite.setPosition(cc.p(size.width*0.75, size.height*0.05));
+        this.addChild(minesLeftSprite);
+
+        minesLeftLabel = new cc.LabelTTF();
+        minesLeftLabel.setAnchorPoint(cc.p(0.5, 0.5));
+        minesLeftLabel.setPosition(cc.p(size.width*0.77, size.height*0.042));
+        minesLeftLabel.fontName = "Impact";
+        minesLeftLabel.fontSize = size.height*0.045;
+        minesLeftLabel.string = imines;
+        this.addChild(minesLeftLabel);
+
         this.createBlankMineField();
 
         cc.audioEngine.setMusicVolume(0.25);
         cc.audioEngine.playMusic(res.ingame_music, true);
-
-        this.scheduleOnce(function() {cc.log('azaza')}, 10);
 
         return true;
     },
@@ -63,6 +93,7 @@ var GameLayer = cc.Layer.extend({
             || null;
     },
     addFlagTo: function(aPoint) {
+        minesLeftLabel.string--;
         var tile = this.getTile(aPoint);
         tile.state = this.TILE_STATE_CLOSED_FLAG;
         tile.initWithFile(res.closed_flag_png, helper['rect_' + sprite_size]);
@@ -124,20 +155,20 @@ var GameLayer = cc.Layer.extend({
                 }
             }
             cc.eventManager.removeListeners(this, false);
+            timerLabel.unscheduleAllCallbacks()
             cc.audioEngine.stopMusic();
             cc.audioEngine.playEffect(res.game_over_sound);
         }
         if (this._opened_tiles === this._tiles_total - this._mines_count) {
             for (var i = 0; i < this._rows; i++) {
                 for (var j = 0; j < this._columns; j++) {
-                    tile = this.getTile(cc.p(j, i));
-                    if (tile.state === this.TILE_STATE_CLOSED) {
-                        tile.state = this.TILE_STATE_CLOSED_FLAG;
-                        tile.initWithFile(res.closed_flag_png, helper['rect_' + sprite_size]);
+                    if (this.getTile(cc.p(j, i)).state === this.TILE_STATE_CLOSED) {
+                        this.addFlagTo(cc.p(j, i));
                     }
                 }
             }
             cc.eventManager.removeListeners(this, false);
+            timerLabel.unscheduleAllCallbacks()
             cc.audioEngine.stopMusic();
             cc.audioEngine.stopAllEffects();
             cc.audioEngine.playEffect(res.victory_sound);
@@ -342,6 +373,7 @@ var GameLayer = cc.Layer.extend({
         return null;
     },
     removeFlagFrom: function(aPoint) {
+        minesLeftLabel.string++;
         var tile = this.getTile(aPoint);
         tile.state = this.TILE_STATE_CLOSED;
         tile.initWithFile(res.closed_png, helper['rect_' + sprite_size]);
