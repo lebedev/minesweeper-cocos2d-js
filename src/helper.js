@@ -1,3 +1,5 @@
+var s1 = true, s2 = true;
+
 var helper = {
     addMouseActionsTo: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
@@ -33,20 +35,35 @@ var helper = {
     addSoundAndMusicButtons: function(aLayer) {
         var size = cc.winSize;
         var soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
-        soundButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.sound_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
-        soundButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.sound_disabled_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
+        helper.setSoundVolume(soundButton, true);
         soundButton.setContentSize(cc.size(120, 120));
         soundButton.setPreferredSize(cc.size(120, 120));
         soundButton.setPosition(cc.p(size.width*0.94, size.height*0.8));
-        helper.addMouseUpActionTo(soundButton, function() { cc.audioEngine.stopAllEffects(); });
+        helper.addMouseUpActionTo(soundButton, function(event) { var target = event.getCurrentTarget(); helper.setSoundVolume(target); });
 
         var musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
-        musicButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.music_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
-        musicButton.setBackgroundSpriteForState(cc.Scale9Sprite.create(res.music_disabled_png, cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
+        helper.setMusicVolume(musicButton, true);
         musicButton.setContentSize(cc.size(120, 120));
         musicButton.setPreferredSize(cc.size(120, 120));
         musicButton.setPosition(cc.p(size.width*0.94, size.height*0.6));
-        helper.addMouseUpActionTo(musicButton, function() { cc.audioEngine.stopMusic(); });
+        helper.addMouseUpActionTo(musicButton, function(event) { var target = event.getCurrentTarget(); helper.setMusicVolume(target); });
+    },
+
+    setSoundVolume: function(aTarget, aDoNotSwitch) {
+        if (!aDoNotSwitch) {
+            s1 = !s1;
+        }
+        cc.audioEngine.setEffectsVolume(s1 ? 0.5 : 0);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res['sound_' + (s1 ? '' : 'disabled_') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res['sound_' + (s1 ? 'disabled_' : '') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
+    },
+    setMusicVolume: function(aTarget, aDoNotSwitch) {
+        if (!aDoNotSwitch) {
+            s2 = !s2;
+        }
+        cc.audioEngine.setMusicVolume(s2 ? 0.25 : 0);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res['music_' + (s2 ? '' : 'disabled_') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res['music_' + (s2 ? 'disabled_' : '') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
     },
 
     addTileToLayer: function(aLayer) {

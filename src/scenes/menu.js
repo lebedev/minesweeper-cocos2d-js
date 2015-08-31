@@ -212,7 +212,6 @@ var MenuLayer = cc.Layer.extend({
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
         helper.addMouseUpActionTo(exitButton, function(event) { event.getCurrentTarget().parent.changeLayer(LoginLayer); });
 
-        cc.audioEngine.setMusicVolume(0.25);
         if (!cc.audioEngine.isMusicPlaying()) {
             cc.audioEngine.playMusic(res.menu_music, true);
         }

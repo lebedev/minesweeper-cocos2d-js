@@ -80,7 +80,6 @@ var GameLayer = cc.Layer.extend({
 
         this.createBlankMineField();
 
-        cc.audioEngine.setMusicVolume(0.25);
         cc.audioEngine.playMusic(res.ingame_music, true);
 
         helper.addSoundAndMusicButtons(this);
@@ -130,7 +129,6 @@ var GameLayer = cc.Layer.extend({
         if (state === this.TILE_STATE_EMPTY) {
             this.scheduleOnce(function() {
                 cc.audioEngine.playEffect(res.open_many_tiles_sound);
-                cc.audioEngine.setEffectsVolume(0.25);
                 this.runActionOnSurroundingsOf(aPoint);
             }, 0.1);
         } else if (state === this.TILE_STATE_MINE_EXPLODED) {
