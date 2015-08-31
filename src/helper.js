@@ -38,14 +38,14 @@ var helper = {
         helper.setSoundVolume(soundButton, true);
         soundButton.setContentSize(cc.size(120, 120));
         soundButton.setPreferredSize(cc.size(120, 120));
-        soundButton.setPosition(cc.p(size.width*0.94, size.height*0.8));
+        soundButton.setPosition(cc.p(size.width*0.94, size.height*0.9));
         helper.addMouseUpActionTo(soundButton, function(event) { var target = event.getCurrentTarget(); helper.setSoundVolume(target); });
 
         var musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
         helper.setMusicVolume(musicButton, true);
         musicButton.setContentSize(cc.size(120, 120));
         musicButton.setPreferredSize(cc.size(120, 120));
-        musicButton.setPosition(cc.p(size.width*0.94, size.height*0.6));
+        musicButton.setPosition(cc.p(size.width*0.94, size.height*0.73));
         helper.addMouseUpActionTo(musicButton, function(event) { var target = event.getCurrentTarget(); helper.setMusicVolume(target); });
     },
 

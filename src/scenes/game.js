@@ -1,4 +1,4 @@
-var irows = 30, icolumns = 50, imines = 200, gamelayer;
+var irows = 16, icolumns = 16, imines = 40, gamelayer;
 
 var GameLayer = cc.Layer.extend({
     TILE_STATE_CLOSED:                      0,
