@@ -1,3 +1,5 @@
+var isLoggedIn = false;
+
 var BackgroundLayer = cc.LayerColor.extend({
     ctor: function(aColor) {
         //////////////////////////////
@@ -81,7 +83,7 @@ var LoginLayer = cc.Layer.extend({
         this.addChild(passwordEditBox);
 
         var enterButton = helper.addControlButtonToLayer(this, 'Войти', size.height*0.25, true);
-        helper.addActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
+        helper.addMouseUpActionToControlButton(enterButton, function(target) { target.parent.changeLayer(MenuLayer); });
 
         cc.audioEngine.playEffect(res.login_page_sound);
 
@@ -106,11 +108,13 @@ var MenuLayer = cc.Layer.extend({
         // ask the window size
         var size = cc.winSize;
 
+        isLoggedIn = true;
+
         var newGameButton = helper.addControlButtonToLayer(this, 'Новая игра', size.height*0.65);
-        helper.addActionToControlButton(newGameButton, function(target) { helper.changeSceneTo(GameScene); });
+        helper.addMouseUpActionToControlButton(newGameButton, function(target) { helper.changeSceneTo(GameScene); });
         helper.addControlButtonToLayer(this, 'Продолжить', size.height*0.45);
         var exitButton = helper.addControlButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
+        helper.addMouseUpActionToControlButton(exitButton, function(target) { target.parent.changeLayer(LoginLayer); });
 
         cc.audioEngine.playMusic(res.menu_music, true);
         cc.audioEngine.setMusicVolume(0.25);
@@ -129,7 +133,6 @@ var MenuScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
 
-        var isLoggedIn = false;
         this.addChild(new BackgroundLayer(cc.color(32, 32, 32)));
         if (!isLoggedIn) {
             this.addChild(new LoginLayer());

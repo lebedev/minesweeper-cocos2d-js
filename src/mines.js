@@ -1,4 +1,31 @@
 var mines = {
+    _mineField: null,
+
+    _deltas: [
+        [-1, -1],  [0, -1], [+1, -1],
+        [-1,  0],/*[x,  y]*/[+1,  0],
+        [-1, +1],  [0, +1], [+1, +1],
+    ],
+
+    _incrementNumberSurroundingsOf: function(aX, aY) {
+        var x, y;
+        for (var i = 0; i < 8; i++) {
+            x = aX + mines._deltas[i][0];
+            y = aY + mines._deltas[i][1];
+            if (mines._mineField[y] !== undefined && mines._mineField[y][x] !== undefined && mines._mineField[y][x] !== '*') {
+                mines._mineField[y][x]++;
+            }
+        }
+    },
+
+    askValueOf: function(aX, aY) {
+        return mines._mineField[aY][aX];
+    },
+
+    clearMineField: function() {
+        mines._mineField = null;
+    },
+
     createMineField: function(aColumns, aRows, aMaxMines, aX, aY) {
         if (aColumns === undefined || aColumns < 9 || aColumns > 50) {
             aColumns = 9;
@@ -16,47 +43,30 @@ var mines = {
             aY = Math.floor(aRows/2);
         }
 
-        var i, j, x, y, mineField = [];
+        var i, j, x, y;
+        mines._mineField = [];
         for (i = 0; i < aRows; i++) {
             var row = [];
             for (var j = 0; j < aColumns; j++) {
                 row.push(0);
             }
-            mineField.push(row);
+            mines._mineField.push(row);
         }
         for (var minesCount = 0; minesCount < aMaxMines;) {
             x = Math.floor(Math.random()*aColumns);
             y = Math.floor(Math.random()*aRows);
-            if ((Math.abs(x - aX) > 1 || Math.abs(y - aY) > 1) && mineField[y][x] !== '*') {
-                mineField[y][x] = '*';
-                mines.increaseSurroundingNumbers(mineField, x, y);
+            if ((Math.abs(x - aX) > 1 || Math.abs(y - aY) > 1) && mines._mineField[y][x] !== '*') {
+                mines._mineField[y][x] = '*';
+                mines._incrementNumberSurroundingsOf(x, y);
                 minesCount++;
             }
         }
-        return mineField;
     },
 
-    increaseSurroundingNumbers: function(aMineField, aX, aY) {
-        // 8 surrounding tiles
-        var x, y, deltas = [
-            [-1, -1],  [0, -1], [+1, -1],
-            [-1,  0],/*[aX,aY]*/[+1,  0],
-            [-1, +1],  [0, +1], [+1, +1],
-        ];
-        for (var i = 0; i < 8; i++) {
-            x = aX + deltas[i][0];
-            y = aY + deltas[i][1];
-            if (aMineField[y] !== undefined && aMineField[y][x] !== undefined && aMineField[y][x] !== '*') {
-                aMineField[y][x]++;
-            }
-        }
-        return aMineField;
-    },
-
-    showMineField: function(aMineField) {
+    showMineField: function() {
         log = "MineField:";
-        for (var i = 0; i < aMineField.length; i++) {
-            log += '\n[' + aMineField[i].join('] [') + ']';
+        for (var i = 0; i < mines._mineField.length; i++) {
+            log += '\n[' + mines._mineField[i].join('] [') + ']';
         }
         cc.log(log);
     },

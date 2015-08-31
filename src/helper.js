@@ -1,21 +1,18 @@
 var helper = {
-    addActionToControlButton: function(aButton, aCallback) {
+    addActionsToControlButton: function(aButton, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
-            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            swallowTouches: true,
-            onTouchBegan: function(touch, event) {
+            event: cc.EventListener.MOUSE,
+            onMouseDown: null || aMouseDownCallback && function(event) {
                 var target = event.getCurrentTarget();
-
-                if (helper.isTouchOnTarget(touch, target) && target.isEnabled()) {
-                    target.setHighlighted(true);
-                    return true;
+                if (helper.isMouseEventOnItsTarget(event)) {
+                    aMouseDownCallback(target, event);
                 }
-                return false;
             },
-            onTouchMoved: function(touch, event) {
+            onMouseMove: null || aMouseMoveCallback && function(event) {
                 var target = event.getCurrentTarget();
+                aMouseMoveCallback(target, helper.isMouseEventOnItsTarget(event));
 
-                if (helper.isTouchOnTarget(touch, target)) {
+                /*if (helper.isTouchOnTarget(touch, target)) {
                     if (target.isHighlighted() === false) {
                         target.setHighlighted(true);
                     }
@@ -23,15 +20,14 @@ var helper = {
                     if (target.isHighlighted() === true) {
                         target.setHighlighted(false);
                     }
-                }
+                }*/
             },
-            onTouchEnded: function(touch, event) {
+            onMouseUp: function(event) {
                 var target = event.getCurrentTarget();
-                cc.log("sprite onTouchesEnded.. ");
-                if (helper.isTouchOnTarget(touch, target)) {
-                    target.setHighlighted(false);
-                    if (aCallback) {
-                        aCallback(target);
+                if (helper.isMouseEventOnItsTarget(event)) {
+                    target.setHighlighted(true);
+                    if (aMouseUpCallback) {
+                        aMouseUpCallback(target, event);
                     }
                 }
             }
@@ -48,6 +44,18 @@ var helper = {
         aLayer.addChild(b);
 
         return b;
+    },
+
+    addMouseDownActionToControlButton: function(aButton, aCallback) {
+        helper.addActionsToControlButton(aButton, aCallback, null, null);
+    },
+
+    addMouseMoveActionToControlButton: function(aButton, aCallback) {
+        helper.addActionsToControlButton(aButton, null, aCallback, null);
+    },
+
+    addMouseUpActionToControlButton: function(aButton, aCallback) {
+        helper.addActionsToControlButton(aButton, null, null, aCallback);
     },
 
     addUITextToLayer: function(aLayer, aString, aFontSize, aY) {
@@ -88,7 +96,8 @@ var helper = {
     },
 
     createS9TileFromRes: function(aRes) {
-        return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
+        //return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
+        return cc.Scale9Sprite.create(aRes, cc.rect(5, 5, 100, 100), cc.rect(5, 5, 90, 90));
     },
 
     createUIText: function(aString, aFontSize) {
@@ -104,10 +113,11 @@ var helper = {
         return t;
     },
 
-    isTouchOnTarget: function(touch, target) {
-        var locationInNode = target.convertToNodeSpace(touch.getLocation());
-        var s = target.getContentSize();
-        var rect = cc.rect(0, 0, s.width, s.height);
+    isMouseEventOnItsTarget: function(event) {
+        var target = event.getCurrentTarget(),
+            locationInNode = target.convertToNodeSpace(event.getLocation()),
+            s = target.getContentSize(),
+            rect = cc.rect(0, 0, s.width, s.height);
 
         return cc.rectContainsPoint(rect, locationInNode);
     },
