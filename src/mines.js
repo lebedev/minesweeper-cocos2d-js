@@ -8,7 +8,6 @@ var mines = {
     ],
     _mineField: null,
     _rows: null,
-    _askedValueOf: [],
     _safe_tiles_left: null,
 
     _incrementNumberSurroundingsOf: function(aX, aY) {
@@ -25,15 +24,13 @@ var mines = {
     askValueOf: function(aX, aY) {
         if (!mines._game_over) {
             var value = mines._mineField[aY][aX];
-            mines._askedValueOf.push({x: aX, y: aY, value: value });
-            localStorage.setItem('_askedValueOf', JSON.stringify(mines._askedValueOf));
             if (value === '*' || --mines._safe_tiles_left === 0) {
                 mines._game_over = true;
             }
             cc.log(mines._safe_tiles_left);
+            localStorage.setItem('_safe_tiles_left', mines._safe_tiles_left);
             if (mines._game_over) {
-                mines._askedValueOf = [];
-                localStorage.removeItem('_askedValueOf');
+                localStorage.removeItem('_safe_tiles_left');
                 localStorage.removeItem('_mineField');
             }
             return mines._mineField[aY][aX];
@@ -47,14 +44,14 @@ var mines = {
     },
 
     createMineField: function(aColumns, aRows, aMaxMines, aX, aY) {
-        if (aColumns === undefined || aColumns < 9 || aColumns > 50) {
-            aColumns = 9;
+        if (aColumns === undefined || aColumns < helper.COLUMNS_MIN || aColumns > helper.COLUMNS_MAX) {
+            aColumns = helper.COLUMNS_MIN;
         }
-        if (aRows === undefined || aRows < 9 || aRows > 50) {
-            aRows = 9;
+        if (aRows === undefined || aRows < helper.ROWS_MIN || aRows > helper.ROWS_MAX) {
+            aRows = helper.ROWS_MIN;
         }
-        if (aMaxMines === undefined || aMaxMines < 1 || aMaxMines > aColumns*aRows - 9) {
-            aMaxMines = Math.floor(aColumns*aRows/8);
+        if (aMaxMines === undefined || aMaxMines < helper.MINES_MIN || aMaxMines > aColumns*aRows - 9) { // 9 start empty tiles.
+            aMaxMines = Math.floor(aColumns*aRows/8); // Just some random adequate number.
         }
         if (aX === undefined || aX < 0 || aX > aColumns) {
             aX = Math.floor(aColumns/2);
@@ -84,8 +81,8 @@ var mines = {
 
         mines._rows = aRows;
         mines._columns = aColumns;
-        mines._safe_tiles_left = aRows*aColumns - aMaxMines;
         mines._game_over = false;
+        mines._safe_tiles_left = aRows*aColumns - aMaxMines;
         localStorage.setItem('_mineField', JSON.stringify(mines._mineField));
     },
 
@@ -101,6 +98,17 @@ var mines = {
             }
         }
         return mines_coords;
+    },
+
+    continuePreviousGame: function() {
+        if (localStorage.getItem('_mineField') && localStorage.getItem('_safe_tiles_left')) {
+            mines._mineField = JSON.parse(localStorage.getItem('_mineField'));
+            mines._safe_tiles_left = localStorage.getItem('_safe_tiles_left');
+            mines._game_over = false;
+            return true;
+        } else {
+            return false;
+        }
     },
 
     showMineField: function() {

@@ -76,6 +76,12 @@ var server = {
         } else if (aParams.action === 'create_mine_field') {
             mines.createMineField(aParams.columns, aParams.rows, aParams.maxMines, aParams.x, aParams.y);
             return server._returnOK({});
+        } else if (aParams.action === 'continue_previous_game') {
+            if (mines.continuePreviousGame()) {
+                return server._returnOK({});
+            } else {
+                return server._returnError('Нет данных о предыдущей игре');
+            }
         }
 
         return server._returnError('Нет действия');

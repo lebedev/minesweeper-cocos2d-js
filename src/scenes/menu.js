@@ -44,7 +44,7 @@ var LoginLayer = cc.Layer.extend({
         var size = cc.winSize;
 
         var loginLayerEditBoxDelegate = new cc.EditBoxDelegate();
-        loginLayerEditBoxDelegate.editBoxTextChanged = function(sender, text) {
+        loginLayerEditBoxDelegate.editBoxTextChanged = function() {
             this._login = loginEditBox.string;
             this._password = passwordEditBox.string;
             if (this._login && this._password) {
@@ -55,7 +55,7 @@ var LoginLayer = cc.Layer.extend({
                 enterButton.setEnabled(false);
             }
         }.bind(this);
-        loginLayerEditBoxDelegate.editBoxReturn = function(sender) {
+        loginLayerEditBoxDelegate.editBoxReturn = function() {
             if (this._login && this._password) {
                 this._doLogin();
             }
@@ -125,6 +125,9 @@ var LoginLayer = cc.Layer.extend({
 });
 
 var OptionsLayer = cc.Layer.extend({
+    _columns_edit_box: null,
+    _rows_edit_box: null,
+    _mines_edit_box: null,
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -134,92 +137,91 @@ var OptionsLayer = cc.Layer.extend({
         var size = cc.winSize;
 
         var optionsLayerEditBoxDelegate = new cc.EditBoxDelegate();
-        optionsLayerEditBoxDelegate.editBoxTextChanged = function(sender, text) {
-            cc.log(columnsEditBox.string, rowsEditBox.string, minesEditBox.string);
-            if (!isNaN(columnsEditBox.string) && +columnsEditBox.string >= 9 && +columnsEditBox.string <= 50 &&
-                !isNaN(rowsEditBox.string) && +rowsEditBox.string >= 9 && +rowsEditBox.string <= 50 &&
-                !isNaN(minesEditBox.string) && +minesEditBox.string > 0 && +minesEditBox.string < 1000) {
+        optionsLayerEditBoxDelegate.editBoxTextChanged = function() {
+            if (this.checkIfSettingsAreValid()) {
                 if (!saveButton.enabled) {
                     saveButton.enabled = true;
                 }
             } else if (saveButton.enabled) {
                 saveButton.enabled = false;
             }
-        };
-        optionsLayerEditBoxDelegate.editBoxReturn = function(sender) {
-            if (!isNaN(columnsEditBox.string) && +columnsEditBox.string >= 9 && +columnsEditBox.string <= 50 &&
-                !isNaN(rowsEditBox.string) && +rowsEditBox.string >= 9 && +rowsEditBox.string <= 50 &&
-                !isNaN(minesEditBox.string) && +minesEditBox.string > 0 && +minesEditBox.string < 1000) {
-                icolumns = +columnsEditBox.string;
-                irows = +rowsEditBox.string;
-                imines = +minesEditBox.string;
-                sender.parent.changeLayer(MenuLayer);
-            }
-        };
+        }.bind(this);
+        optionsLayerEditBoxDelegate.editBoxReturn = this.saveSettingsAndGoBackToMenu.bind(this);
 
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
 
-        var columnsEditBox = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        columnsEditBox.setAdjustBackgroundImage(false);
-        columnsEditBox.fontName = columnsEditBox.placeHolderFontName = 'Impact';
-        columnsEditBox.fontSize = columnsEditBox.placeHolderFontSize = size.height*0.04;
-        columnsEditBox.placeHolder = columnsEditBox.string = +sessionStorage.last_columns_value;
-        columnsEditBox.setMaxLength(2);
-        columnsEditBox.setAnchorPoint(cc.p(0.5, 0.5));
-        columnsEditBox.setPosition(cc.p(size.width*0.24, size.height*0.575));
-        columnsEditBox.setDelegate(optionsLayerEditBoxDelegate);
+        var this._columns_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        this._columns_edit_box.setAdjustBackgroundImage(false);
+        this._columns_edit_box.fontName = this._columns_edit_box.placeHolderFontName = 'Impact';
+        this._columns_edit_box.fontSize = this._columns_edit_box.placeHolderFontSize = size.height*0.04;
+        this._columns_edit_box.placeHolder = this._columns_edit_box.string = +sessionStorage.last_columns_value;
+        this._columns_edit_box.setMaxLength(2);
+        this._columns_edit_box.setAnchorPoint(cc.p(0.5, 0.5));
+        this._columns_edit_box.setPosition(cc.p(size.width*0.24, size.height*0.575));
+        this._columns_edit_box.setDelegate(optionsLayerEditBoxDelegate);
 
-        this.addChild(columnsEditBox);
+        this.addChild(this._columns_edit_box);
 
         var rowsUIText = helper.addUITextToLayer(this, 'Строк:', size.height*0.06, size.height*0.57);
         rowsUIText.setPositionX(size.width*0.45);
 
-        var rowsEditBox = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        rowsEditBox.setAdjustBackgroundImage(false);
-        rowsEditBox.fontName = rowsEditBox.placeHolderFontName = 'Impact';
-        rowsEditBox.fontSize = rowsEditBox.placeHolderFontSize = size.height*0.04;
-        rowsEditBox.placeHolder = rowsEditBox.string = +sessionStorage.last_rows_value;
-        rowsEditBox.setMaxLength(2);
-        rowsEditBox.setAnchorPoint(cc.p(0.5, 0.5));
-        rowsEditBox.setPosition(cc.p(size.width*0.55, size.height*0.575));
-        rowsEditBox.setDelegate(optionsLayerEditBoxDelegate);
+        var this._rows_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        this._rows_edit_box.setAdjustBackgroundImage(false);
+        this._rows_edit_box.fontName = this._rows_edit_box.placeHolderFontName = 'Impact';
+        this._rows_edit_box.fontSize = this._rows_edit_box.placeHolderFontSize = size.height*0.04;
+        this._rows_edit_box.placeHolder = this._rows_edit_box.string = +sessionStorage.last_rows_value;
+        this._rows_edit_box.setMaxLength(2);
+        this._rows_edit_box.setAnchorPoint(cc.p(0.5, 0.5));
+        this._rows_edit_box.setPosition(cc.p(size.width*0.55, size.height*0.575));
+        this._rows_edit_box.setDelegate(optionsLayerEditBoxDelegate);
 
-        this.addChild(rowsEditBox);
+        this.addChild(this._rows_edit_box);
 
         var minesUIText = helper.addUITextToLayer(this, 'Мин:', size.height*0.06, size.height*0.57);
         minesUIText.setPositionX(size.width*0.8);
 
-        var minesEditBox = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        minesEditBox.setAdjustBackgroundImage(false);
-        minesEditBox.fontName = minesEditBox.placeHolderFontName = 'Impact';
-        minesEditBox.fontSize = minesEditBox.placeHolderFontSize = size.height*0.04;
-        minesEditBox.placeHolder = minesEditBox.string = +sessionStorage.last_mines_value;
-        minesEditBox.setMaxLength(3);
-        minesEditBox.setAnchorPoint(cc.p(0.5, 0.5));
-        minesEditBox.setPosition(cc.p(size.width*0.9, size.height*0.575));
-        minesEditBox.setDelegate(optionsLayerEditBoxDelegate);
+        var this._mines_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        this._mines_edit_box.setAdjustBackgroundImage(false);
+        this._mines_edit_box.fontName = this._mines_edit_box.placeHolderFontName = 'Impact';
+        this._mines_edit_box.fontSize = this._mines_edit_box.placeHolderFontSize = size.height*0.04;
+        this._mines_edit_box.placeHolder = this._mines_edit_box.string = +sessionStorage.last_mines_value;
+        this._mines_edit_box.setMaxLength(3);
+        this._mines_edit_box.setAnchorPoint(cc.p(0.5, 0.5));
+        this._mines_edit_box.setPosition(cc.p(size.width*0.9, size.height*0.575));
+        this._mines_edit_box.setDelegate(optionsLayerEditBoxDelegate);
 
-        this.addChild(minesEditBox);
+        this.addChild(this._mines_edit_box);
 
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
-        helper.addMouseUpActionTo(saveButton, function(event) {
-            sessionStorage.last_columns_value = +columnsEditBox.string;
-            helper.sendToServer('update_value', 'last_columns_value', sessionStorage.last_columns_value);
-
-            sessionStorage.last_rows_value = +rowsEditBox.string;
-            helper.sendToServer('update_value', 'last_rows_value', sessionStorage.last_rows_value);
-
-            sessionStorage.last_mines_value = +minesEditBox.string;
-            helper.sendToServer('update_value', 'last_mines_value', sessionStorage.last_mines_value);
-
-            event.getCurrentTarget().parent.changeLayer(MenuLayer);
-        });
+        helper.addMouseUpActionTo(saveButton, this.saveSettingsAndGoBackToMenu.bind(this));
 
         var cancelButton = helper.addButtonToLayer(this, 'Отмена', size.height*0.25);
-        helper.addMouseUpActionTo(cancelButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
+        helper.addMouseUpActionTo(cancelButton, function() { this.changeLayer(MenuLayer); }.bind(this));
 
         return true;
+    },
+    checkIfSettingsAreValid: function() {
+        // This constants are defined in server.js
+        if (!isNaN(this._columns_edit_box.string) && +this._columns_edit_box.string >= helper.COLUMNS_MIN && +this._columns_edit_box.string <= helper.COLUMNS_MAX &&
+            !isNaN(this._rows_edit_box.string) && +this._rows_edit_box.string >= helper.ROWS_MIN && +this._rows_edit_box.string <= helper.ROWS_MAX &&
+            !isNaN(this._mines_edit_box.string) && +this._mines_edit_box.string >= helper.MINES_MIN && +this._mines_edit_box.string <= +this._columns_edit_box.string*+this._rows_edit_box.string - 9) { // 9 start empty tiles.
+            return true;
+        } else {
+            return false;
+        }
+    },
+    saveSettingsAndGoBackToMenu: function() {
+        sessionStorage.last_columns_value = +this._columns_edit_box.string;
+        helper.sendToServer('update_value', 'last_columns_value', sessionStorage.last_columns_value);
+
+        sessionStorage.last_rows_value = +this._rows_edit_box.string;
+        helper.sendToServer('update_value', 'last_rows_value', sessionStorage.last_rows_value);
+
+        sessionStorage.last_mines_value = +this._mines_edit_box.string;
+        helper.sendToServer('update_value', 'last_mines_value', sessionStorage.last_mines_value);
+
+        this.changeLayer(MenuLayer);
     },
     changeLayer: function(aLayer) {
         this.parent.addChild(new aLayer());
@@ -280,12 +282,12 @@ var MenuLayer = cc.Layer.extend({
         helper.setVolume(helper.musicButton, 'music');
 
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
-        helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene); });
+        helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene, true); });
         if (localStorage.getItem('_mineField')) {
             newGameButton.setPositionX(size.width*0.37);
 
             var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55);
-            helper.addMouseUpActionTo(continueGameButton, function(event) { helper.changeSceneTo(GameScene); });
+            helper.addMouseUpActionTo(continueGameButton, function(event) { helper.changeSceneTo(GameScene, false); });
             continueGameButton.setPositionX(size.width*0.63);
         }
 

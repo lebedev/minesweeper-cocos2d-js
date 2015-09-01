@@ -1,6 +1,13 @@
 var helper = {
+    COLUMNS_MIN: 9,
+    COLUMNS_MAX: 50,
+    ROWS_MIN: 9,
+    ROWS_MAX: 50,
+    MINES_MIN: 1,
+
     soundButton: null,
     musicButton: null,
+
     addButtonToLayer: function(aLayer, aString, aY, aDisabled) {
         var size = cc.winSize;
 
@@ -41,15 +48,15 @@ var helper = {
         var l = cc.EventListener.create({
             event: cc.EventListener.MOUSE,
             downHere: false,
-            onMouseDown: function(event) {
-                if (helper.isMouseEventOnItsTarget(event)) {
+            onMouseDown: function(aEvent) {
+                if (helper.isMouseEventOnItsTarget(aEvent)) {
                     this.downHere = true;
                 }
             },
-            onMouseUp: function(event) {
-                var target = event.getCurrentTarget();
-                if (this.downHere && target.enabled && helper.isMouseEventOnItsTarget(event)) {
-                    aCallback(event, target);
+            onMouseUp: function(aEvent) {
+                var target = aEvent.getCurrentTarget();
+                if (this.downHere && target.enabled && helper.isMouseEventOnItsTarget(aEvent)) {
+                    aCallback(aEvent, target);
                 }
                 this.downHere = false;
             }
@@ -64,14 +71,14 @@ var helper = {
         helper.soundButton.setContentSize(cc.size(120, 120));
         helper.soundButton.setPreferredSize(cc.size(120, 120));
         helper.soundButton.setPosition(cc.p(size.width*0.94, size.height*0.9));
-        helper.addMouseUpActionTo(helper.soundButton, function(event) { var target = event.getCurrentTarget(); helper.setVolume(target, 'sound', true); });
+        helper.addMouseUpActionTo(helper.soundButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'sound', true); });
 
         helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
         helper.setVolume(helper.musicButton, 'music');
         helper.musicButton.setContentSize(cc.size(120, 120));
         helper.musicButton.setPreferredSize(cc.size(120, 120));
         helper.musicButton.setPosition(cc.p(size.width*0.94, size.height*0.73));
-        helper.addMouseUpActionTo(helper.musicButton, function(event) { var target = event.getCurrentTarget(); helper.setVolume(target, 'music', true); });
+        helper.addMouseUpActionTo(helper.musicButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'music', true); });
     },
 
     addTileToLayer: function(aLayer) {
@@ -93,10 +100,10 @@ var helper = {
         return t;
     },
 
-    changeSceneTo: function(aScene) {
+    changeSceneTo: function(aScene, aParam) {
         cc.audioEngine.stopAllEffects();
         cc.audioEngine.stopMusic();
-        var scene = new aScene();
+        var scene = aParam !== undefined ? new aScene(aParam) : new aScene();
         cc.director.runScene(new cc.TransitionFade(0.5, scene));
     },
 
@@ -117,9 +124,9 @@ var helper = {
         return t;
     },
 
-    isMouseEventOnItsTarget: function(event) {
-        var target = event.getCurrentTarget(),
-            locationInNode = target.convertToNodeSpace(event.getLocation()),
+    isMouseEventOnItsTarget: function(aEvent) {
+        var target = aEvent.getCurrentTarget(),
+            locationInNode = target.convertToNodeSpace(aEvent.getLocation()),
             s = target.getContentSize(),
             rect = cc.rect(0, 0, s.width, s.height);
 
@@ -158,27 +165,27 @@ var helper = {
         aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? '' : 'disabled_') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
     },
 
-    _ReplaceMethodWithTryCatched: function(method) {
+    _ReplaceMethodWithTryCatched: function(aMethod) {
         return function() {
             try {
-                return method.apply(null, arguments);
+                return aMethod.apply(null, arguments);
             } catch (e) {
                 cc.error(e);
             }
         };
     },
 
-    AddTryCatchersToAllMethodsOf: function(object) {
+    AddTryCatchersToAllMethodsOf: function(aObject) {
         var method_name, method;
-        for (method_name in object) {
-            method = object[method_name];
+        for (method_name in aObject) {
+            method = aObject[method_name];
             if (typeof method === "function") {
-                object[method_name] = helper._ReplaceMethodWithTryCatched(method);
+                aObject[method_name] = helper._ReplaceMethodWithTryCatched(method);
             }
         }
     },
 
-    rect: cc.rect(0, 0, 110, 110),
+    rect: cc.rect(0, 0, 110, 110), // Rect of tile resources.
 };
 
 helper.AddTryCatchersToAllMethodsOf(helper);
