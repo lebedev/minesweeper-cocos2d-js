@@ -275,31 +275,11 @@
             "text-input", "menus", "tilemap", "parallax", "audio"
         ],
 
-        "ccbreader" : [
-            "core", "audio", "gui", "menus", "particle", "actions", "labels",
-
-            "extensions/ccb-reader/CCNodeLoader.js",
-            "extensions/ccb-reader/CCBReaderUtil.js",
-            "extensions/ccb-reader/CCControlLoader.js",
-            "extensions/ccb-reader/CCSpriteLoader.js",
-            "extensions/ccb-reader/CCNodeLoaderLibrary.js",
-            "extensions/ccb-reader/CCBReader.js",
-            "extensions/ccb-reader/CCBValue.js",
-            "extensions/ccb-reader/CCBKeyframe.js",
-            "extensions/ccb-reader/CCBSequence.js",
-            "extensions/ccb-reader/CCBRelativePositioning.js",
-            "extensions/ccb-reader/CCBAnimationManager.js"
-        ],
         "editbox" : [
             "core", "gui",
 
             "extensions/editbox/CCdomNode.js",
             "extensions/editbox/CCEditBox.js"
-        ],
-        "ccpool" : [
-            "core",
-
-            "extensions/ccpool/CCPool.js"
         ],
         "ccui" : [
             "core", "actions", "labels", "text-input","clipping-nodes",
@@ -337,71 +317,6 @@
             "extensions/ccui/uiwidgets/scroll-widget/UIListView.js",
             "extensions/ccui/uiwidgets/scroll-widget/UIPageView.js"
         ],
-        "cocostudio" : [
-            "core",  "tilemap", "particle", "shape-nodes", "ccui",
-
-            "extensions/cocostudio/components/CCComponent.js",
-            "extensions/cocostudio/components/CCComponentContainer.js",
-            "extensions/ccui/layouts/UILayoutComponent.js",
-            "extensions/cocostudio/CocoStudio.js",
-
-            "extensions/cocostudio/armature/utils/CCArmatureDefine.js",
-            "extensions/cocostudio/armature/utils/CCDataReaderHelper.js",
-            "extensions/cocostudio/armature/utils/CCSpriteFrameCacheHelper.js",
-            "extensions/cocostudio/armature/utils/CCTransformHelp.js",
-            "extensions/cocostudio/armature/utils/CCTweenFunction.js",
-            "extensions/cocostudio/armature/utils/CCUtilMath.js",
-            "extensions/cocostudio/armature/utils/CCArmatureDataManager.js",
-            "extensions/cocostudio/armature/datas/CCDatas.js",
-            "extensions/cocostudio/armature/display/CCDecorativeDisplay.js",
-            "extensions/cocostudio/armature/display/CCDisplayFactory.js",
-            "extensions/cocostudio/armature/display/CCDisplayManager.js",
-            "extensions/cocostudio/armature/display/CCSkin.js",
-            "extensions/cocostudio/armature/display/CCSkinCanvasRenderCmd.js",
-            "extensions/cocostudio/armature/display/CCSkinWebGLRenderCmd.js",
-            "extensions/cocostudio/armature/animation/CCProcessBase.js",
-            "extensions/cocostudio/armature/animation/CCArmatureAnimation.js",
-            "extensions/cocostudio/armature/animation/CCTween.js",
-            "extensions/cocostudio/armature/physics/CCColliderDetector.js",
-            "extensions/cocostudio/armature/CCArmature.js",
-            "extensions/cocostudio/armature/CCArmatureCanvasRenderCmd.js",
-            "extensions/cocostudio/armature/CCArmatureWebGLRenderCmd.js",
-            "extensions/cocostudio/armature/CCBone.js",
-
-            "extensions/cocostudio/action/CCActionFrame.js",
-            "extensions/cocostudio/action/CCActionManager.js",
-            "extensions/cocostudio/action/CCActionNode.js",
-            "extensions/cocostudio/action/CCActionObject.js",
-
-            "extensions/cocostudio/components/CCComAttribute.js",
-            "extensions/cocostudio/components/CCComAudio.js",
-            "extensions/cocostudio/components/CCComController.js",
-            "extensions/cocostudio/components/CCComRender.js",
-
-            "extensions/cocostudio/trigger/ObjectFactory.js",
-            "extensions/cocostudio/trigger/TriggerBase.js",
-            "extensions/cocostudio/trigger/TriggerMng.js",
-            "extensions/cocostudio/trigger/TriggerObj.js",
-
-            "extensions/cocostudio/timeline/ActionTimeline.js",
-            "extensions/cocostudio/timeline/Frame.js",
-            "extensions/cocostudio/timeline/Timeline.js",
-
-            "extensions/cocostudio/timeline/CCSkinNode.js",
-            "extensions/cocostudio/timeline/CCBoneNode.js",
-            "extensions/cocostudio/timeline/CCSkeletonNode.js",
-
-            "extensions/cocostudio/loader/load.js",
-            "extensions/cocostudio/loader/parsers/scene-1.x.js",
-            "extensions/cocostudio/loader/parsers/uiParser-1.x.js",
-            "extensions/cocostudio/loader/parsers/action-1.x.js",
-            "extensions/cocostudio/loader/parsers/action-2.x.js",
-            "extensions/cocostudio/loader/parsers/timelineParser-1.x.js",
-            "extensions/cocostudio/loader/parsers/timelineParser-2.x.js",
-            "extensions/cocostudio/loader/parsers/compatible.js"
-
-
-        ],
         "gui" : [
             "core", "clipping-nodes", "render-texture", "actions", "progress-timer",
 
@@ -427,27 +342,7 @@
             "extensions/gui/scrollview/CCTableView.js"
         ],
 
-        "pluginx" : [
-            "core",
-
-            "external/pluginx/Plugin.js"
-        ],
-        "plugin-facebook" : [
-            "external/pluginx/platform/facebook_sdk.js",
-            "external/pluginx/platform/facebook.js"
-        ],
-
-        "spine":[
-            "core",
-
-            "extensions/spine/Spine.js",
-            "extensions/spine/CCSkeleton.js",
-            "extensions/spine/CCSkeletonAnimation.js",
-            "extensions/spine/CCSkeletonCanvasRenderCmd.js",
-            "extensions/spine/CCSkeletonWebGLRenderCmd.js"
-        ],
-
-        "extensions" : ["gui", "ccbreader", "editbox", "cocostudio", "spine", "ccpool"]
+        "extensions" : ["gui", "ccui", "editbox"]
     },
     "bootFile" : "CCBoot.js"
 }
