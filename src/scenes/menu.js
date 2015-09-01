@@ -151,7 +151,7 @@ var OptionsLayer = cc.Layer.extend({
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
 
-        var this._columns_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        this._columns_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         this._columns_edit_box.setAdjustBackgroundImage(false);
         this._columns_edit_box.fontName = this._columns_edit_box.placeHolderFontName = 'Impact';
         this._columns_edit_box.fontSize = this._columns_edit_box.placeHolderFontSize = size.height*0.04;
@@ -166,7 +166,7 @@ var OptionsLayer = cc.Layer.extend({
         var rowsUIText = helper.addUITextToLayer(this, 'Строк:', size.height*0.06, size.height*0.57);
         rowsUIText.setPositionX(size.width*0.45);
 
-        var this._rows_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        this._rows_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         this._rows_edit_box.setAdjustBackgroundImage(false);
         this._rows_edit_box.fontName = this._rows_edit_box.placeHolderFontName = 'Impact';
         this._rows_edit_box.fontSize = this._rows_edit_box.placeHolderFontSize = size.height*0.04;
@@ -181,7 +181,7 @@ var OptionsLayer = cc.Layer.extend({
         var minesUIText = helper.addUITextToLayer(this, 'Мин:', size.height*0.06, size.height*0.57);
         minesUIText.setPositionX(size.width*0.8);
 
-        var this._mines_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        this._mines_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         this._mines_edit_box.setAdjustBackgroundImage(false);
         this._mines_edit_box.fontName = this._mines_edit_box.placeHolderFontName = 'Impact';
         this._mines_edit_box.fontSize = this._mines_edit_box.placeHolderFontSize = size.height*0.04;
