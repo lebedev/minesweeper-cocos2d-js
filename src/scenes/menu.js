@@ -220,14 +220,12 @@ var OptionsLayer = cc.Layer.extend({
     },
 
     _saveSettingsAndGoBackToMenu: function() {
-        sessionStorage.last_columns_value = +this._columns_edit_box.string;
-        helper.sendToServer('update_value', 'last_columns_value', sessionStorage.last_columns_value);
-
-        sessionStorage.last_rows_value = +this._rows_edit_box.string;
-        helper.sendToServer('update_value', 'last_rows_value', sessionStorage.last_rows_value);
-
-        sessionStorage.last_mines_value = +this._mines_edit_box.string;
-        helper.sendToServer('update_value', 'last_mines_value', sessionStorage.last_mines_value);
+        var storedName, names = ['columns', 'rows', 'mines'];
+        for (var i = 0; i < names.length; i++) {
+            storedName = 'last_' + names[i] + '_value';
+            sessionStorage[storedName] = +this['_' + names[i] + '_edit_box'].string;
+            helper.sendToServer('update_value', storedName, sessionStorage[storedName]);
+        }
 
         this._changeLayer(MenuLayer);
     },
