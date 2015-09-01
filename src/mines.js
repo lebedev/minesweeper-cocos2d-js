@@ -27,7 +27,6 @@ var mines = {
             if (value === '*' || --mines._safe_tiles_left === 0) {
                 mines._game_over = true;
             }
-            cc.log(mines._safe_tiles_left);
             localStorage.setItem('_safe_tiles_left', mines._safe_tiles_left);
             if (mines._game_over) {
                 localStorage.removeItem('_safe_tiles_left');
