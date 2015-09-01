@@ -57,7 +57,7 @@ var helper = {
                     action: 'update_value',
                     login: sessionStorage.login,
                     password: sessionStorage.password,
-                    name: [aName + '_enabled'],
+                    name: aName + '_enabled',
                     value: sessionStorage[aName + '_enabled']
                 });
             }
