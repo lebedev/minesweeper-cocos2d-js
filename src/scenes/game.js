@@ -30,6 +30,7 @@ var GameLayer = cc.Layer.extend({
     _right_button_pressed: false,
     _easy_state: false,
     _timer_label: null,
+    _mines_left_label: null,
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -38,14 +39,12 @@ var GameLayer = cc.Layer.extend({
         // ask the window size
         var size = cc.winSize;
 
-        isLoggedIn = true;
-
         var returnButton = helper.addButtonToLayer(this, "В меню", size.height*0.05);
         returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
         returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
         helper.addMouseUpActionTo(returnButton, function() { helper.changeSceneTo(MenuScene); })
 
-        timerSprite = new cc.Sprite();
+        var timerSprite = new cc.Sprite();
         timerSprite.initWithFile(res.timer_png, cc.rect(0, 0, 137, 60));
         timerSprite.setAnchorPoint(cc.p(0.5, 0.5));
         timerSprite.setPosition(cc.p(size.width*0.25, size.height*0.05));
@@ -59,22 +58,28 @@ var GameLayer = cc.Layer.extend({
         this._timer_label.string = 0;
         this.addChild(this._timer_label);
 
-        minesLeftSprite = new cc.Sprite();
+        var minesLeftSprite = new cc.Sprite();
         minesLeftSprite.initWithFile(res.mines_left_png, cc.rect(0, 0, 137, 60));
         minesLeftSprite.setAnchorPoint(cc.p(0.5, 0.5));
         minesLeftSprite.setPosition(cc.p(size.width*0.75, size.height*0.05));
         this.addChild(minesLeftSprite);
 
-        minesLeftLabel = new cc.LabelTTF();
-        minesLeftLabel.setAnchorPoint(cc.p(0.5, 0.5));
-        minesLeftLabel.setPosition(cc.p(size.width*0.77, size.height*0.05));
-        minesLeftLabel.fontName = "Impact";
-        minesLeftLabel.fontSize = size.height*0.045;
-        minesLeftLabel.string = +sessionStorage.last_mines_value;
-        this.addChild(minesLeftLabel);
+        this._mines_left_label = new cc.LabelTTF();
+        this._mines_left_label.setAnchorPoint(cc.p(0.5, 0.5));
+        this._mines_left_label.setPosition(cc.p(size.width*0.77, size.height*0.05));
+        this._mines_left_label.fontName = "Impact";
+        this._mines_left_label.fontSize = size.height*0.045;
+        this._mines_left_label.string = +sessionStorage.last_mines_value;
+        this.addChild(this._mines_left_label);
+
+        var newGameButton = helper.addButtonToLayer(this, "Новая игра", size.height*0.95);
+        newGameButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
+        newGameButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
+        helper.addMouseUpActionTo(newGameButton, function() { this.parent.addChild(new GameLayer()); this.removeFromParent(); }.bind(this))
 
         this.createBlankMineField();
 
+        cc.audioEngine.stopAllEffects();
         cc.audioEngine.playMusic(res.ingame_music, true);
 
         helper.addSoundAndMusicButtons(this);
@@ -89,7 +94,7 @@ var GameLayer = cc.Layer.extend({
             || null;
     },
     addFlagTo: function(aPoint) {
-        minesLeftLabel.string--;
+        this._mines_left_label.string--;
         var tile = this.getTile(aPoint);
         tile.state = this.TILE_STATE_CLOSED_FLAG;
         tile.initWithFile(res.closed_flag_png, helper['rect_' + sprite_size]);
@@ -368,7 +373,7 @@ var GameLayer = cc.Layer.extend({
         return null;
     },
     removeFlagFrom: function(aPoint) {
-        minesLeftLabel.string++;
+        this._mines_left_label.string++;
         var tile = this.getTile(aPoint);
         tile.state = this.TILE_STATE_CLOSED;
         tile.initWithFile(res.closed_png, helper['rect_' + sprite_size]);
