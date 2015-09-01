@@ -520,7 +520,7 @@ var GameScene = cc.Scene.extend({
     _is_new_game: null,
     ctor: function(isNewGame) {
         this._super();
-        this._is_new_game = isNewGame || false;
+        this._is_new_game = isNewGame;
     },
     onEnter: function() {
         this._super();

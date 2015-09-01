@@ -202,7 +202,6 @@ var OptionsLayer = cc.Layer.extend({
         return true;
     },
     checkIfSettingsAreValid: function() {
-        // This constants are defined in server.js
         if (!isNaN(this._columns_edit_box.string) && +this._columns_edit_box.string >= helper.COLUMNS_MIN && +this._columns_edit_box.string <= helper.COLUMNS_MAX &&
             !isNaN(this._rows_edit_box.string) && +this._rows_edit_box.string >= helper.ROWS_MIN && +this._rows_edit_box.string <= helper.ROWS_MAX &&
             !isNaN(this._mines_edit_box.string) && +this._mines_edit_box.string >= helper.MINES_MIN && +this._mines_edit_box.string <= +this._columns_edit_box.string*+this._rows_edit_box.string - 9) { // 9 start empty tiles.
@@ -282,12 +281,12 @@ var MenuLayer = cc.Layer.extend({
         helper.setVolume(helper.musicButton, 'music');
 
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
-        helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene, true); });
+        helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene, helper.START_NEW_GAME); });
         if (localStorage.getItem('_mineField')) {
             newGameButton.setPositionX(size.width*0.37);
 
             var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55);
-            helper.addMouseUpActionTo(continueGameButton, function(event) { helper.changeSceneTo(GameScene, false); });
+            helper.addMouseUpActionTo(continueGameButton, function(event) { helper.changeSceneTo(GameScene, helper.CONTINUE_PREVIOUS_GAME); });
             continueGameButton.setPositionX(size.width*0.63);
         }
 

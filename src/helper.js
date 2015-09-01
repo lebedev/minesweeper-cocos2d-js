@@ -5,6 +5,9 @@ var helper = {
     ROWS_MAX: 50,
     MINES_MIN: 1,
 
+    CONTINUE_PREVIOUS_GAME: false,
+    START_NEW_GAME: true,
+
     soundButton: null,
     musicButton: null,
 
