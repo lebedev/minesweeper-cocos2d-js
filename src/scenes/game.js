@@ -28,6 +28,9 @@ var GameLayer = cc.Layer.extend({
 
     _flags: null,
     _opened: null,
+
+    _tile_open_sound_tag: null,
+
     ctor: function(aIsNewGame) {
         //////////////////////////////
         // 1. super init first
@@ -287,22 +290,22 @@ var GameLayer = cc.Layer.extend({
     _changeStateOf: function(aPoint, aValueFromPreviousGame) {
         var sprite, state,
             responseRaw, response, value;
-            if (aValueFromPreviousGame !== undefined) {
-                value = aValueFromPreviousGame;
-            } else {
-                responseRaw = server.processAction({
-                    action: 'ask_value_of_tile',
-                    login: sessionStorage.login,
-                    password: sessionStorage.password,
-                    x: aPoint.x,
-                    y: aPoint.y
-                });
-                response = JSON.parse(responseRaw);
-                value = response.status === 'OK' && response.value;
-            }
+        if (aValueFromPreviousGame !== undefined) {
+            value = aValueFromPreviousGame;
+        } else {
+            responseRaw = server.processAction({
+                action: 'ask_value_of_tile',
+                login: sessionStorage.login,
+                password: sessionStorage.password,
+                x: aPoint.x,
+                y: aPoint.y
+            });
+            response = JSON.parse(responseRaw);
+            value = response.status === 'OK' && response.value;
+        }
 
-            this._opened.push({point:aPoint, value:value});
-            localStorage.setItem('_opened', JSON.stringify(this._opened));
+        this._opened.push({point:aPoint, value:value});
+        localStorage.setItem('_opened', JSON.stringify(this._opened));
 
         switch(value) {
         case '*': {
@@ -334,13 +337,17 @@ var GameLayer = cc.Layer.extend({
 
         if (state === this.TILE_STATE_EMPTY) {
             this.scheduleOnce(function() {
-                cc.audioEngine.playEffect(res.open_many_tiles_sound);
+                if (this._tile_open_sound_tag) {
+                    cc.audioEngine.stopEffect(this._tile_open_sound_tag);
+                    this._tile_open_sound_tag = null;
+                }
+                this._tile_open_sound_tag = cc.audioEngine.playEffect(res.open_many_tiles_sound);
                 this._changeStateOfSurroundingsOf(aPoint);
             }, 0.1);
-        } else if (aValueFromPreviousGame === undefined && state === this.TILE_STATE_MINE_EXPLODED) {
-            this._runFailActions();
+        } else if (state === this.TILE_STATE_MINE_EXPLODED) {
+            this._runFailActions(); return;
         }
-        if (aValueFromPreviousGame === undefined && this._opened_tiles === this._tiles_total - this._mines_count) {
+        if (this._opened_tiles === this._tiles_total - this._mines_count) {
             this._runWinActions();
         }
     },
@@ -450,6 +457,7 @@ var GameLayer = cc.Layer.extend({
                     }
                 }
             } else {
+                cc.audioEngine.stopAllEffects();
                 cc.audioEngine.playEffect(res.both_buttons_pressed_mode_fail_sound);
 
                 for (var i = 0; i < 4; i++) {

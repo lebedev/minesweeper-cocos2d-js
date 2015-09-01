@@ -1,7 +1,7 @@
 {
     "project_type": "javascript",
 
-    "debugMode" : 0,
+    "debugMode" : 1,
     "showFPS" : true,
     "frameRate" : 60,
     "id" : "gameCanvas",
