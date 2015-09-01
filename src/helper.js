@@ -76,6 +76,9 @@ var helper = {
         eb.setPosition(aPosition);
         eb.setAnchorPoint(cc.p(0.5, 0.5));
         eb.setDelegate(aDelegateEl);
+        if (aMaxLength) {
+            eb.setMaxLength(aMaxLength);
+        }
 
         aLayer.addChild(eb);
 
