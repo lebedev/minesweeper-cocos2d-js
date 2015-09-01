@@ -44,7 +44,7 @@ var res = {
     sound_png: "res/sound.png",
     sound_disabled_png: "res/sound_disabled.png",
     music_png: "res/music.png",
-    music_disabled_png: "res/music_disabled.png",
+    music_disabled_png: "res/music_disabled.png"
 };
 
 var g_resources = [];

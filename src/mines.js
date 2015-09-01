@@ -111,7 +111,7 @@ var mines = {
             log += '\n[' + mines._mineField[i].join('] [') + ']';
         }
         cc.log(log);
-    },
+    }
 };
 
 helper.AddTryCatchersToAllMethodsOf(mines);
