@@ -79,7 +79,7 @@ var LoginLayer = cc.Layer.extend({
         helper.addMouseUpActionTo(enterButton, function() { this._doLogin.call(this); }.bind(this));
 
         this._errorUIText = helper.addUITextToLayer(this, '',  size.height*0.06, size.height*0.1);
-        this._errorUIText.setColor(cc.color(225,0,0));
+        this._errorUIText.setColor(cc.color(225, 0, 0));
         this._errorUIText.setOpacity(0);
 
         cc.audioEngine.playEffect(res.login_page_sound);

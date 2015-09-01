@@ -24,6 +24,23 @@ var helper = {
     soundButton: null,
     musicButton: null,
 
+    createS9TileFromRes: function(aRes) {
+        return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
+    },
+
+    createUIText: function(aString, aFontSize) {
+        var t = new ccui.Text();
+        t.attr({
+            textAlign: cc.TEXT_ALIGNMENT_CENTER,
+            string: aString,
+            fontName: 'Impact',
+            fontSize: aFontSize
+        });
+        t.enableOutline(cc.color(0, 0, 0), aFontSize*0.15);
+
+        return t;
+    },
+
     addButtonToLayer: function(aLayer, aString, aY, aDisabled, aX) {
         var size = cc.winSize;
 
@@ -58,11 +75,29 @@ var helper = {
         eb.fontSize = eb.placeHolderFontSize = size.height*0.04;
         eb.setPosition(aPosition);
         eb.setAnchorPoint(cc.p(0.5, 0.5));
-        passwordEditBox.setDelegate(aDelegateEl);
+        eb.setDelegate(aDelegateEl);
 
         aLayer.addChild(eb);
 
         return eb;
+    },
+
+    addTileToLayer: function(aLayer) {
+        var b = new cc.Sprite();
+        b.initWithFile(res.closed_png, helper.rect);
+        b.setAnchorPoint(cc.p(0.5, 0.5));
+        aLayer.addChild(b);
+
+        return b;
+    },
+
+    addUITextToLayer: function(aLayer, aString, aFontSize, aY, aX) {
+        var t = helper.createUIText(aString, aFontSize);
+        t.setPosition(cc.p(aX || cc.winSize.width*0.5, aY));
+
+        aLayer.addChild(t);
+
+        return t;
     },
 
     addMouseActionsTo: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
@@ -96,39 +131,47 @@ var helper = {
         cc.eventManager.addListener(l, aNode);
     },
 
+    isMouseEventOnItsTarget: function(aEvent) {
+        var target = aEvent.getCurrentTarget(),
+            locationInNode = target.convertToNodeSpace(aEvent.getLocation()),
+            s = target.getContentSize(),
+            rect = cc.rect(0, 0, s.width, s.height);
+
+        return cc.rectContainsPoint(rect, locationInNode);
+    },
+
     setSoundsStateAndAddButtonsToLayer: function(aLayer) {
         var size = cc.winSize,
             buttonSize = cc.size(120, 120);
-        helper.soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.05, size.height*0.9, false, size.width*0.94);
+
+        helper.soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.9, false, size.width*0.94);
         helper.setVolume(helper.soundButton, 'sound');
         helper.soundButton.setContentSize(buttonSize);
         helper.soundButton.setPreferredSize(buttonSize);
         helper.addMouseUpActionTo(helper.soundButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'sound', true); });
 
-        helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05, size.height*0.73, false, size.width*0.94);
+        helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.73, false, size.width*0.94);
         helper.setVolume(helper.musicButton, 'music');
         helper.musicButton.setContentSize(buttonSize);
         helper.musicButton.setPreferredSize(buttonSize);
         helper.addMouseUpActionTo(helper.musicButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'music', true); });
     },
 
-    addTileToLayer: function(aLayer) {
-        var size = cc.winSize;
-        var b = new cc.Sprite();
-        b.initWithFile(res.closed_png, helper.rect);
-        b.setAnchorPoint(cc.p(0.5, 0.5));
-        aLayer.addChild(b);
-
-        return b;
-    },
-
-    addUITextToLayer: function(aLayer, aString, aFontSize, aY, aX) {
-        var t = helper.createUIText(aString, aFontSize);
-        t.setPosition(cc.p(aX || cc.winSize.width*0.5, aY));
-
-        aLayer.addChild(t);
-
-        return t;
+    setVolume: function(aTarget, aName, aSwitch) {
+        if (aSwitch) {
+            sessionStorage[aName + '_enabled'] = (sessionStorage[aName + '_enabled'] === 'false') ? 'true' : 'false';
+            if (sessionStorage.login && sessionStorage.password) {
+                helper.sendActionWithDataToServer('update_value', aName + '_enabled', sessionStorage[aName + '_enabled']);
+            }
+        }
+        var isDisabled = sessionStorage[aName + '_enabled'] === 'false';
+        if (aName === 'sound') {
+            cc.audioEngine.setEffectsVolume(isDisabled ? 0 : 0.5);
+        } else {
+            cc.audioEngine.setMusicVolume(isDisabled ? 0 : 0.25);
+        }
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? 'disabled_' : '') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? '' : 'disabled_') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
     },
 
     changeSceneTo: function(aScene, aParam) {
@@ -137,32 +180,6 @@ var helper = {
 
         var scene = aParam !== undefined ? new aScene(aParam) : new aScene();
         cc.director.runScene(new cc.TransitionFade(0.5, scene));
-    },
-
-    createS9TileFromRes: function(aRes) {
-        return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
-    },
-
-    createUIText: function(aString, aFontSize) {
-        var t = new ccui.Text();
-        t.attr({
-            textAlign: cc.TEXT_ALIGNMENT_CENTER,
-            string: aString,
-            fontName: 'Impact',
-            fontSize: aFontSize
-        });
-        t.enableOutline(cc.color(0, 0, 0), aFontSize*0.15);
-
-        return t;
-    },
-
-    isMouseEventOnItsTarget: function(aEvent) {
-        var target = aEvent.getCurrentTarget(),
-            locationInNode = target.convertToNodeSpace(aEvent.getLocation()),
-            s = target.getContentSize(),
-            rect = cc.rect(0, 0, s.width, s.height);
-
-        return cc.rectContainsPoint(rect, locationInNode);
     },
 
     sendActionToServer: function(aAction) {
@@ -182,23 +199,6 @@ var helper = {
             data.value = aValue;
         }
         return JSON.parse(server.processAction(data));
-    },
-
-    setVolume: function(aTarget, aName, aSwitch) {
-        if (aSwitch) {
-            sessionStorage[aName + '_enabled'] = sessionStorage[aName + '_enabled'] === 'false' ? 'true' : 'false';
-            if (sessionStorage.login && sessionStorage.password) {
-                helper.sendActionWithDataToServer('update_value', aName + '_enabled', sessionStorage[aName + '_enabled']);
-            }
-        }
-        var isDisabled = sessionStorage[aName + '_enabled'] === 'false';
-        if (aName === 'sound') {
-            cc.audioEngine.setEffectsVolume(isDisabled ? 0 : 0.5);
-        } else {
-            cc.audioEngine.setMusicVolume(isDisabled ? 0 : 0.25);
-        }
-        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? 'disabled_' : '') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
-        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? '' : 'disabled_') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
     },
 
     _ReplaceMethodWithTryCatched: function(aMethod) {
