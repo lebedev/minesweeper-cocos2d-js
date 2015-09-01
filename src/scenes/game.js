@@ -445,11 +445,15 @@ var GameLayer = cc.Layer.extend({
             localStorage.setItem('timer', this.string);
         }, 1);
     },
-    updateStatistics: function(aMines, aWin) {
+    updateStatistics: function(aMinesDefused, aWin) {
         sessionStorage.games             = helper.sendToServer('increase_value', 'games', 1).value;
         sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
-        sessionStorage.mines_defused     = helper.sendToServer('increase_value', 'mines_defused', +aMines).value;
-        sessionStorage.wins              = helper.sendToServer('increase_value', 'wins', aWin ? 1 : 0).value;
+        if (aMinesDefused) {
+            sessionStorage.mines_defused     = helper.sendToServer('increase_value', 'mines_defused', +aMinesDefused).value;
+        }
+        if (aWin) {
+            sessionStorage.wins          = helper.sendToServer('increase_value', 'wins', 1).value;
+        }
     },
     set9TilesToEmpty: function() {
         for (var i = 0; i < 9; i++) {
