@@ -149,7 +149,11 @@ var OptionsLayer = cc.Layer.extend({
                 saveButton.enabled = false;
             }
         }.bind(this);
-        optionsLayerEditBoxDelegate.editBoxReturn = this._saveSettingsAndGoBackToMenu.bind(this);
+        optionsLayerEditBoxDelegate.editBoxReturn = function() {
+            if (this._checkIfSettingsAreValid()) {
+                this._saveSettingsAndGoBackToMenu();
+            }
+        }.bind(this);
 
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
