@@ -21,7 +21,7 @@ var BackgroundLayer = cc.LayerColor.extend({
 
         helper.addUITextToLayer(this, '2015 © zeird', size.height*0.03, size.height*0.02);
 
-        helper.addSoundAndMusicButtons(this);
+        helper.setSoundsStateAndAddButtonsToLayer(this);
 
         return true;
     }
@@ -51,8 +51,10 @@ var LoginLayer = cc.Layer.extend({
                 if (!enterButton.enabled) {
                     enterButton.setEnabled(true);
                 }
-            } else if (enterButton.enabled) {
-                enterButton.setEnabled(false);
+            } else {
+                if (enterButton.enabled) {
+                    enterButton.setEnabled(false);
+                }
             }
         }.bind(this);
         loginLayerEditBoxDelegate.editBoxReturn = function() {
@@ -63,30 +65,14 @@ var LoginLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
 
-        var loginEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        loginEditBox.setAdjustBackgroundImage(false);
-        loginEditBox.fontName = loginEditBox.placeHolderFontName = 'Impact';
-        loginEditBox.fontSize = loginEditBox.placeHolderFontSize = size.height*0.04;
+        var loginEditBox = helper.addEditBoxFixedToLayer(this, size.width*0.3, cc.p(size.width*0.5, size.height*0.57), loginLayerEditBoxDelegate);
         loginEditBox.placeHolder = 'логин';
-        loginEditBox.setAnchorPoint(cc.p(0.5, 0.5));
-        loginEditBox.setPosition(cc.p(size.width*0.5, size.height*0.57));
-        loginEditBox.setDelegate(loginLayerEditBoxDelegate);
-
-        this.addChild(loginEditBox);
 
         helper.addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
 
-        var passwordEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        passwordEditBox.setAdjustBackgroundImage(false);
+        var passwordEditBox = helper.addEditBoxFixedToLayer(this, size.width*0.3, cc.p(size.width*0.5, size.height*0.37), loginLayerEditBoxDelegate);
         passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
-        passwordEditBox.fontName = passwordEditBox.placeHolderFontName = 'Impact';
-        passwordEditBox.fontSize = passwordEditBox.placeHolderFontSize = size.height*0.04;
         passwordEditBox.placeHolder = 'пароль';
-        passwordEditBox.setAnchorPoint(cc.p(0.5, 0.5));
-        passwordEditBox.setPosition(cc.p(size.width*0.5, size.height*0.37));
-        passwordEditBox.setDelegate(loginLayerEditBoxDelegate);
-
-        this.addChild(passwordEditBox);
 
         var enterButton = helper.addButtonToLayer(this, 'Войти/создать', size.height*0.25, true);
         enterButton.setPreferredSize(cc.size(size.width*0.3, size.height*0.13));
@@ -158,47 +144,20 @@ var OptionsLayer = cc.Layer.extend({
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
 
-        this._columns_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        this._columns_edit_box.setAdjustBackgroundImage(false);
-        this._columns_edit_box.fontName = this._columns_edit_box.placeHolderFontName = 'Impact';
-        this._columns_edit_box.fontSize = this._columns_edit_box.placeHolderFontSize = size.height*0.04;
+        this._columns_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.06, cc.p(size.width*0.24, size.height*0.575), optionsLayerEditBoxDelegate, 2);
         this._columns_edit_box.placeHolder = this._columns_edit_box.string = +sessionStorage.last_columns_value;
-        this._columns_edit_box.setMaxLength(2);
-        this._columns_edit_box.setAnchorPoint(cc.p(0.5, 0.5));
-        this._columns_edit_box.setPosition(cc.p(size.width*0.24, size.height*0.575));
-        this._columns_edit_box.setDelegate(optionsLayerEditBoxDelegate);
-
-        this.addChild(this._columns_edit_box);
 
         var rowsUIText = helper.addUITextToLayer(this, 'Строк:', size.height*0.06, size.height*0.57);
         rowsUIText.setPositionX(size.width*0.45);
 
-        this._rows_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        this._rows_edit_box.setAdjustBackgroundImage(false);
-        this._rows_edit_box.fontName = this._rows_edit_box.placeHolderFontName = 'Impact';
-        this._rows_edit_box.fontSize = this._rows_edit_box.placeHolderFontSize = size.height*0.04;
+        this._rows_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.06, cc.p(size.width*0.55, size.height*0.575), optionsLayerEditBoxDelegate, 2);
         this._rows_edit_box.placeHolder = this._rows_edit_box.string = +sessionStorage.last_rows_value;
-        this._rows_edit_box.setMaxLength(2);
-        this._rows_edit_box.setAnchorPoint(cc.p(0.5, 0.5));
-        this._rows_edit_box.setPosition(cc.p(size.width*0.55, size.height*0.575));
-        this._rows_edit_box.setDelegate(optionsLayerEditBoxDelegate);
-
-        this.addChild(this._rows_edit_box);
 
         var minesUIText = helper.addUITextToLayer(this, 'Мин:', size.height*0.06, size.height*0.57);
         minesUIText.setPositionX(size.width*0.8);
 
-        this._mines_edit_box = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
-        this._mines_edit_box.setAdjustBackgroundImage(false);
-        this._mines_edit_box.fontName = this._mines_edit_box.placeHolderFontName = 'Impact';
-        this._mines_edit_box.fontSize = this._mines_edit_box.placeHolderFontSize = size.height*0.04;
+        this._mines_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.072, cc.p(size.width*0.9, size.height*0.575), optionsLayerEditBoxDelegate, 3);
         this._mines_edit_box.placeHolder = this._mines_edit_box.string = +sessionStorage.last_mines_value;
-        this._mines_edit_box.setMaxLength(3);
-        this._mines_edit_box.setAnchorPoint(cc.p(0.5, 0.5));
-        this._mines_edit_box.setPosition(cc.p(size.width*0.9, size.height*0.575));
-        this._mines_edit_box.setDelegate(optionsLayerEditBoxDelegate);
-
-        this.addChild(this._mines_edit_box);
 
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
         helper.addMouseUpActionTo(saveButton, this._saveSettingsAndGoBackToMenu.bind(this));
@@ -210,9 +169,12 @@ var OptionsLayer = cc.Layer.extend({
     },
 
     _checkIfSettingsAreValid: function() {
-        if (!isNaN(this._columns_edit_box.string) && +this._columns_edit_box.string >= helper.COLUMNS_MIN && +this._columns_edit_box.string <= helper.COLUMNS_MAX &&
-            !isNaN(this._rows_edit_box.string) && +this._rows_edit_box.string >= helper.ROWS_MIN && +this._rows_edit_box.string <= helper.ROWS_MAX &&
-            !isNaN(this._mines_edit_box.string) && +this._mines_edit_box.string >= helper.MINES_MIN && +this._mines_edit_box.string <= +this._columns_edit_box.string*+this._rows_edit_box.string - 9) { // 9 start empty tiles.
+        var columns = this._columns_edit_box.string,
+            rows    = this._rows_edit_box.string,
+            mines   = this._mines_edit_box.string;
+        if (!isNaN(columns) && +columns >= helper.COLUMNS_MIN && +columns <= helper.COLUMNS_MAX &&
+            !isNaN(rows)    && +rows    >= helper.ROWS_MIN    && +rows    <= helper.ROWS_MAX &&
+            !isNaN(mines)   && +mines   >= helper.MINES_MIN   && +mines   <= +this._columns_edit_box.string*+this._rows_edit_box.string - 9) { // 9 start empty tiles.
             return true;
         } else {
             return false;
@@ -224,7 +186,7 @@ var OptionsLayer = cc.Layer.extend({
         for (var i = 0; i < names.length; i++) {
             storedName = 'last_' + names[i] + '_value';
             sessionStorage[storedName] = +this['_' + names[i] + '_edit_box'].string;
-            helper.sendToServer('update_value', storedName, sessionStorage[storedName]);
+            helper.sendActionWithDataToServer('update_value', storedName, sessionStorage[storedName]);
         }
 
         this._changeLayer(MenuLayer);
@@ -245,26 +207,20 @@ var StatisticsLayer = cc.Layer.extend({
         // ask the window size
         var size = cc.winSize;
 
-        var gamesTotalUIText = helper.addUITextToLayer(this, 'Игр сыграно: ' + sessionStorage.games, size.height*0.06, size.height*0.57);
-        gamesTotalUIText.setPositionX(size.width*0.25);
+        helper.addUITextToLayer(this, 'Игр сыграно: ' + sessionStorage.games, size.height*0.06, size.height*0.57, size.width*0.25);
 
-        var gamesWonUIText = helper.addUITextToLayer(this, 'Игр выиграно: ' + sessionStorage.wins, size.height*0.06, size.height*0.47);
-        gamesWonUIText.setPositionX(size.width*0.25);
+        helper.addUITextToLayer(this, 'Игр выиграно: ' + sessionStorage.wins, size.height*0.06, size.height*0.47, size.width*0.25);
 
-        var gamesWonToTotalUIText = helper.addUITextToLayer(this, 'Процент побед: ' + Math.floor(+sessionStorage.wins/(+sessionStorage.games || 1)*100) + '%' , size.height*0.06, size.height*0.37);
-        gamesWonToTotalUIText.setPositionX(size.width*0.25);
+        helper.addUITextToLayer(this, 'Процент побед: ' + Math.floor(+sessionStorage.wins/(+sessionStorage.games || 1)*100) + '%' , size.height*0.06, size.height*0.37, size.width*0.25);
 
-        var minesDefusedUIText = helper.addUITextToLayer(this, 'Мин отмечено: ' + sessionStorage.mines_defused, size.height*0.06, size.height*0.57);
-        minesDefusedUIText.setPositionX(size.width*0.75);
+        helper.addUITextToLayer(this, 'Мин отмечено: ' + sessionStorage.mines_defused, size.height*0.06, size.height*0.57, size.width*0.75);
 
-        var totalTimeUIText = helper.addUITextToLayer(this, 'Времени прошло: ' + sessionStorage.total_time_played, size.height*0.06, size.height*0.47);
-        totalTimeUIText.setPositionX(size.width*0.75);
+        helper.addUITextToLayer(this, 'Времени прошло: ' + sessionStorage.total_time_played, size.height*0.06, size.height*0.47, size.width*0.75);
 
-        var minesPerMinuteUIText = helper.addUITextToLayer(this, 'Мин в минуту: ' + Math.floor(+sessionStorage.mines_defused/(+sessionStorage.total_time_played || 1)*60), size.height*0.06, size.height*0.37);
-        minesPerMinuteUIText.setPositionX(size.width*0.75);
+        helper.addUITextToLayer(this, 'Мин в минуту: ' + Math.floor(+sessionStorage.mines_defused/(+sessionStorage.total_time_played || 1)*60), size.height*0.06, size.height*0.37, size.width*0.75);
 
         var backButton = helper.addButtonToLayer(this, 'Назад', size.height*0.25);
-        helper.addMouseUpActionTo(backButton, function(event) { event.getCurrentTarget().parent._changeLayer(MenuLayer); });
+        helper.addMouseUpActionTo(backButton, function() { this._changeLayer.call(this, MenuLayer); }.bind(this));
 
         return true;
     },
@@ -293,21 +249,18 @@ var MenuLayer = cc.Layer.extend({
         if (localStorage.getItem('_mineField')) {
             newGameButton.setPositionX(size.width*0.37);
 
-            var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55);
-            helper.addMouseUpActionTo(continueGameButton, function(event) { helper.changeSceneTo(GameScene, helper.CONTINUE_PREVIOUS_GAME); });
-            continueGameButton.setPositionX(size.width*0.63);
+            var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55, false, size.width*0.63);
+            helper.addMouseUpActionTo(continueGameButton, function() { helper.changeSceneTo(GameScene, helper.CONTINUE_PREVIOUS_GAME); });
         }
 
-        var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4);
-        optionsButton.setPositionX(size.width*0.37);
-        helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent._changeLayer(OptionsLayer); });
+        var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4, false, size.width*0.37);
+        helper.addMouseUpActionTo(optionsButton, function() { this._changeLayer.call(this, OptionsLayer); }.bind(this));
 
-        var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4);
-        statisticsButton.setPositionX(size.width*0.63);
-        helper.addMouseUpActionTo(statisticsButton, function(event) { event.getCurrentTarget().parent._changeLayer(StatisticsLayer); });
+        var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4, false, size.width*0.63);
+        helper.addMouseUpActionTo(statisticsButton, function() { this._changeLayer.call(this, StatisticsLayer); }.bind(this));
 
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addMouseUpActionTo(exitButton, function(event) { sessionStorage.clear(); event.getCurrentTarget().parent._changeLayer(LoginLayer); });
+        helper.addMouseUpActionTo(exitButton, function() { sessionStorage.clear(); this._changeLayer.call(this, LoginLayer); }.bind(this));
 
         if (!cc.audioEngine.isMusicPlaying()) {
             cc.audioEngine.playMusic(res.menu_music, true);

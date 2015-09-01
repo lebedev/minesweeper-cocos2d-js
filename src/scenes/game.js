@@ -40,7 +40,7 @@ var GameLayer = cc.Layer.extend({
         this._flags = [];
 
         if (!aIsNewGame) {
-            aIsNewGame = (helper.sendToServer('continue_previous_game').status !== 'OK');
+            aIsNewGame = (helper.sendActionToServer('continue_previous_game').status !== 'OK');
         }
 
         if (aIsNewGame) {
@@ -97,7 +97,7 @@ var GameLayer = cc.Layer.extend({
         cc.audioEngine.stopAllEffects();
         cc.audioEngine.playMusic(res.ingame_music, true);
 
-        helper.addSoundAndMusicButtons(this);
+        helper.setSoundsStateAndAddButtonsToLayer(this);
 
         if (!aIsNewGame) {
             var opened = JSON.parse(localStorage.getItem('_opened')) || [];
@@ -121,7 +121,7 @@ var GameLayer = cc.Layer.extend({
         localStorage.removeItem('_mineField');
         localStorage.removeItem('_safe_tiles_left');
 
-        helper.sendToServer('clear_mine_field');
+        helper.sendActionToServer('clear_mine_field');
 
         localStorage.removeItem('_flags');
         localStorage.removeItem('_opened');
@@ -466,13 +466,13 @@ var GameLayer = cc.Layer.extend({
     },
 
     _updateStatistics: function(aMinesDefused, aWin) {
-        sessionStorage.games             = helper.sendToServer('increase_value', 'games', 1).value;
-        sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
+        sessionStorage.games             = helper.sendActionWithDataToServer('increase_value', 'games', 1).value;
+        sessionStorage.total_time_played = helper.sendActionWithDataToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
         if (aMinesDefused) {
-            sessionStorage.mines_defused = helper.sendToServer('increase_value', 'mines_defused', +aMinesDefused).value;
+            sessionStorage.mines_defused = helper.sendActionWithDataToServer('increase_value', 'mines_defused', +aMinesDefused).value;
         }
         if (aWin) {
-            sessionStorage.wins          = helper.sendToServer('increase_value', 'wins', 1).value;
+            sessionStorage.wins          = helper.sendActionWithDataToServer('increase_value', 'wins', 1).value;
         }
     },
 
@@ -497,7 +497,7 @@ var GameLayer = cc.Layer.extend({
 
     _runFailActions: function() {
         var tile, defused = 0,
-            mines_coords = helper.sendToServer('get_all_mines').value;
+            mines_coords = helper.sendActionToServer('get_all_mines').value;
         for (var i = 0; i < mines_coords.length; i++) {
             tile = this._getTileAt(mines_coords[i]);
             if (tile.state === this.TILE_STATE_CLOSED_FLAG) {

@@ -24,16 +24,16 @@ var helper = {
     soundButton: null,
     musicButton: null,
 
-    addButtonToLayer: function(aLayer, aString, aY, aDisabled) {
+    addButtonToLayer: function(aLayer, aString, aY, aDisabled, aX) {
         var size = cc.winSize;
 
         var b = new cc.ControlButton();
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_normal_png), cc.CONTROL_STATE_NORMAL);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_normal_png),      cc.CONTROL_STATE_NORMAL);
         b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_disabled_png), cc.CONTROL_STATE_DISABLED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_disabled_png),    cc.CONTROL_STATE_DISABLED);
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
-        b.setPosition(cc.p(size.width*0.5, aY));
+        b.setPosition(cc.p(aX || size.width*0.5, aY));
         if (aString) {
             b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
             b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
@@ -49,12 +49,28 @@ var helper = {
         return b;
     },
 
+    addEditBoxFixedToLayer: function(aLayer, aWidth, aPosition, aDelegateEl, aMaxLength) {
+        var size = cc.winSize;
+
+        var eb = new cc.EditBoxFixed(cc.size(aWidth, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        eb.setAdjustBackgroundImage(false);
+        eb.fontName = eb.placeHolderFontName = 'Impact';
+        eb.fontSize = eb.placeHolderFontSize = size.height*0.04;
+        eb.setPosition(aPosition);
+        eb.setAnchorPoint(cc.p(0.5, 0.5));
+        passwordEditBox.setDelegate(aDelegateEl);
+
+        aLayer.addChild(eb);
+
+        return eb;
+    },
+
     addMouseActionsTo: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
             event: cc.EventListener.MOUSE,
             onMouseDown: aMouseDownCallback,
             onMouseMove: aMouseMoveCallback,
-            onMouseUp: aMouseUpCallback
+            onMouseUp:   aMouseUpCallback
         });
 
         cc.eventManager.addListener(l, aNode);
@@ -80,20 +96,19 @@ var helper = {
         cc.eventManager.addListener(l, aNode);
     },
 
-    addSoundAndMusicButtons: function(aLayer) {
-        var size = cc.winSize;
-        helper.soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
+    setSoundsStateAndAddButtonsToLayer: function(aLayer) {
+        var size = cc.winSize,
+            buttonSize = cc.size(120, 120);
+        helper.soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.05, size.height*0.9, false, size.width*0.94);
         helper.setVolume(helper.soundButton, 'sound');
-        helper.soundButton.setContentSize(cc.size(120, 120));
-        helper.soundButton.setPreferredSize(cc.size(120, 120));
-        helper.soundButton.setPosition(cc.p(size.width*0.94, size.height*0.9));
+        helper.soundButton.setContentSize(buttonSize);
+        helper.soundButton.setPreferredSize(buttonSize);
         helper.addMouseUpActionTo(helper.soundButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'sound', true); });
 
-        helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05);
+        helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.05, size.height*0.73, false, size.width*0.94);
         helper.setVolume(helper.musicButton, 'music');
-        helper.musicButton.setContentSize(cc.size(120, 120));
-        helper.musicButton.setPreferredSize(cc.size(120, 120));
-        helper.musicButton.setPosition(cc.p(size.width*0.94, size.height*0.73));
+        helper.musicButton.setContentSize(buttonSize);
+        helper.musicButton.setPreferredSize(buttonSize);
         helper.addMouseUpActionTo(helper.musicButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'music', true); });
     },
 
@@ -107,9 +122,9 @@ var helper = {
         return b;
     },
 
-    addUITextToLayer: function(aLayer, aString, aFontSize, aY) {
+    addUITextToLayer: function(aLayer, aString, aFontSize, aY, aX) {
         var t = helper.createUIText(aString, aFontSize);
-        t.setPosition(cc.p(cc.winSize.width*0.5, aY));
+        t.setPosition(cc.p(aX || cc.winSize.width*0.5, aY));
 
         aLayer.addChild(t);
 
@@ -119,6 +134,7 @@ var helper = {
     changeSceneTo: function(aScene, aParam) {
         cc.audioEngine.stopAllEffects();
         cc.audioEngine.stopMusic();
+
         var scene = aParam !== undefined ? new aScene(aParam) : new aScene();
         cc.director.runScene(new cc.TransitionFade(0.5, scene));
     },
@@ -149,7 +165,11 @@ var helper = {
         return cc.rectContainsPoint(rect, locationInNode);
     },
 
-    sendToServer: function(aAction, aName, aValue) {
+    sendActionToServer: function(aAction) {
+        return helper.sendActionWithDataToServer(aAction);
+    },
+
+    sendActionWithDataToServer: function(aAction, aName, aValue) {
         var data = {
             action: aAction,
             login: sessionStorage.login,
@@ -168,7 +188,7 @@ var helper = {
         if (aSwitch) {
             sessionStorage[aName + '_enabled'] = sessionStorage[aName + '_enabled'] === 'false' ? 'true' : 'false';
             if (sessionStorage.login && sessionStorage.password) {
-                helper.sendToServer('update_value', aName + '_enabled', sessionStorage[aName + '_enabled']);
+                helper.sendActionWithDataToServer('update_value', aName + '_enabled', sessionStorage[aName + '_enabled']);
             }
         }
         var isDisabled = sessionStorage[aName + '_enabled'] === 'false';
