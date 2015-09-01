@@ -101,7 +101,7 @@ var LoginLayer = cc.Layer.extend({
         return true;
     },
     _doLogin: function() {
-        var responseRaw = server.sendAction({
+        var responseRaw = server.processAction({
             action: 'login',
             login: this._login,
             password: this._password

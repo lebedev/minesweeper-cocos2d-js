@@ -56,7 +56,7 @@ var GameLayer = cc.Layer.extend({
             localStorage.setItem('_rows', sessionStorage.last_rows_value);
             localStorage.setItem('_columns', sessionStorage.last_columns_value);
             localStorage.setItem('_mines', sessionStorage.last_mines_value);
-            this.removeExpiredData();
+            this._removeExpiredData();
         } else {
             sessionStorage.last_rows_value = localStorage.getItem('_rows');
             sessionStorage.last_columns_value = localStorage.getItem('_columns');
@@ -101,7 +101,7 @@ var GameLayer = cc.Layer.extend({
         returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
         helper.addMouseUpActionTo(returnButton, function() { helper.changeSceneTo(MenuScene); });
 
-        this.createBlankMineField();
+        this._createBlankMineField();
 
         cc.audioEngine.stopAllEffects();
         cc.audioEngine.playMusic(res.ingame_music, true);
@@ -111,159 +111,31 @@ var GameLayer = cc.Layer.extend({
         if (!aIsNewGame) {
             var opened = JSON.parse(localStorage.getItem('_opened')) || [];
             for (var i = 0; i < opened.length; i++) {
-                this.changeStateOf(opened[i].point, opened[i].value);
+                this._changeStateOf(opened[i].point, opened[i].value);
             }
 
             var flags = JSON.parse(localStorage.getItem('_flags')) || [];
             for (var i = 0; i < flags.length; i++) {
-                this.addFlagTo(flags[i]);
+                this._addFlagTo(flags[i]);
             }
             this._game_started = true;
 
-            this.startTimer(localStorage.getItem('timer'));
+            this._startTimer(localStorage.getItem('timer'));
         }
 
         return true;
     },
-    removeExpiredData: function() {
+    _removeExpiredData: function() {
         localStorage.removeItem('_mineField');
         localStorage.removeItem('_safe_tiles_left');
+
         helper.sendToServer('clear_mine_field');
 
         localStorage.removeItem('_flags');
         localStorage.removeItem('_opened');
         localStorage.removeItem('timer');
-
     },
-    getTileAt: function(aPoint) {
-        return aPoint
-            && this._minefield_tiles[aPoint.y] !== undefined
-            && this._minefield_tiles[aPoint.y][aPoint.x] !== undefined
-            && this._minefield_tiles[aPoint.y][aPoint.x]
-            || null;
-    },
-    addFlagTo: function(aPoint) {
-        this._mines_left_label.string--;
-        var tile = this.getTileAt(aPoint);
-        tile.state = this.TILE_STATE_CLOSED_FLAG;
-        tile.initWithFile(res.closed_flag_png, helper.rect);
-
-        this._flags.push(aPoint);
-        localStorage.setItem('_flags', JSON.stringify(this._flags));
-    },
-    changeStateOf: function(aPoint, aValueFromPreviousGame) {
-        var sprite, state,
-            responseRaw, response, value;
-            if (aValueFromPreviousGame !== undefined) {
-                value = aValueFromPreviousGame;
-            } else {
-                responseRaw = server.sendAction({
-                    action: 'ask_value_of_tile',
-                    login: sessionStorage.login,
-                    password: sessionStorage.password,
-                    x: aPoint.x,
-                    y: aPoint.y
-                });
-                response = JSON.parse(responseRaw);
-                value = response.status === 'OK' && response.value;
-            }
-
-            this._opened.push({point:aPoint, value:value});
-            localStorage.setItem('_opened', JSON.stringify(this._opened));
-
-        switch(value) {
-        case '*': {
-            sprite = res.mine_exploded_png;
-            state = this.TILE_STATE_MINE_EXPLODED;
-            break;
-        }
-        case   0: {
-            sprite = res.empty_png;
-            state = this.TILE_STATE_EMPTY;
-            this._opened_tiles++;
-            break;
-        }
-        default : {
-            sprite = res['number_' + value + '_png'];
-            state = this.TILE_STATE_NUMBER;
-            this._opened_tiles++;
-            break;
-        }};
-
-        var tile = this.getTileAt(aPoint);
-        tile.state = state;
-        tile.value = value;
-        tile.initWithFile(sprite, helper.rect);
-
-        if (aValueFromPreviousGame !== undefined) {
-            return;
-        }
-
-        if (state === this.TILE_STATE_EMPTY) {
-            this.scheduleOnce(function() {
-                cc.audioEngine.playEffect(res.open_many_tiles_sound);
-                this.changeStateOfSurroundingsOf(aPoint);
-            }, 0.1);
-        } else if (aValueFromPreviousGame === undefined && state === this.TILE_STATE_MINE_EXPLODED) {
-            this.runFailActions();
-        }
-        if (aValueFromPreviousGame === undefined && this._opened_tiles === this._tiles_total - this._mines_count) {
-            this.runWinActions();
-        }
-    },
-    runWinActions: function() {
-        for (var i = 0; i < this._rows; i++) {
-            for (var j = 0; j < this._columns; j++) {
-                if (this.getTileAt(cc.p(j, i)).state === this.TILE_STATE_CLOSED) {
-                    this.addFlagTo(cc.p(j, i));
-                }
-            }
-        }
-        cc.eventManager.removeListeners(this, false);
-        this._timer_label.unscheduleAllCallbacks()
-        cc.audioEngine.stopMusic();
-        cc.audioEngine.stopAllEffects();
-        cc.audioEngine.playEffect(res.victory_sound);
-
-        this.updateStatistics(this._mines_count, true);
-
-        this.removeExpiredData();
-    },
-    runFailActions: function() {
-        var tile, defused = 0,
-            mines_coords = helper.sendToServer('get_all_mines').value;
-        for (var i = 0; i < mines_coords.length; i++) {
-            tile = this.getTileAt(mines_coords[i]);
-            if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                defused++;
-                tile.state = this.TILE_STATE_MINE_DEFUSED;
-                tile.initWithFile(res.mine_defused_png, helper.rect);
-            } else if (tile.state === this.TILE_STATE_CLOSED) {
-                tile.state = this.TILE_STATE_MINE;
-                tile.initWithFile(res.mine_png, helper.rect);
-            }
-        }
-        var rows = this._minefield_tiles.length,
-            columns = this._minefield_tiles[0].length;
-        for (var i = 0; i < rows; i++) {
-            for (var j = 0; j < columns; j++) {
-                tile = this.getTileAt(cc.p(j, i));
-                if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                    tile.state = this.TILE_STATE_FLAG_WRONG;
-                    tile.initWithFile(res.closed_flag_wrong_png, helper.rect);
-                }
-            }
-        }
-        cc.eventManager.removeListeners(this, false);
-        this._timer_label.unscheduleAllCallbacks()
-        cc.audioEngine.stopMusic();
-        cc.audioEngine.playEffect(res.game_over_sound);
-
-        this.updateStatistics(defused);
-
-        this.removeExpiredData();
-    },
-    createBlankMineField: function() {
+    _createBlankMineField: function() {
         if (this._minefield_tiles) {
             var old_rows = this._rows,
                 old_columns = this._columns;
@@ -307,12 +179,12 @@ var GameLayer = cc.Layer.extend({
 
         helper.addMouseActionsTo(
             this,
-            this.mineFieldOnMouseDownCallback.bind(this),
-            this.mineFieldOnMouseMoveCallback.bind(this),
-            this.mineFieldOnMouseUpCallback.bind(this)
+            this._mineFieldOnMouseDownCallback.bind(this),
+            this._mineFieldOnMouseMoveCallback.bind(this),
+            this._mineFieldOnMouseUpCallback.bind(this)
         );
     },
-    mineFieldOnMouseDownCallback: function(aEvent) {
+    _mineFieldOnMouseDownCallback: function(aEvent) {
         if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
             this._left_button_pressed = true;
         } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
@@ -322,48 +194,48 @@ var GameLayer = cc.Layer.extend({
             this._both_buttons_pressed = true;
         }
 
-        var coords = this.getTileXYUnderMouse(aEvent),
-            tile = this.getTileAt(coords);
+        var coords = this._getTileXYUnderMouse(aEvent),
+            tile = this._getTileAt(coords);
         if (tile && !this._both_buttons_pressed && aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
             if (tile.state === this.TILE_STATE_CLOSED) {
-                this.addFlagTo(coords);
+                this._addFlagTo(coords);
             } else if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                this.removeFlagFrom(coords);
+                this._removeFlagFrom(coords);
             }
         } else if (this._both_buttons_pressed) {
-            this.set9TilesToEmpty();
+            this._set9TilesToEmpty();
         }
     },
-    mineFieldOnMouseMoveCallback: function(aEvent) {
-        var tile, coords = this.getTileXYUnderMouse(aEvent);
-        this.setLast9TilesToNormal();
+    _mineFieldOnMouseMoveCallback: function(aEvent) {
+        var tile, coords = this._getTileXYUnderMouse(aEvent);
+        this._setLast9TilesToNormal();
         this._last_tile_coords = coords;
         if (this._last_tile_coords) {
             if (!this._both_buttons_pressed) {
-                if (this.getTileAt(this._last_tile_coords).state === this.TILE_STATE_CLOSED) {
+                if (this._getTileAt(this._last_tile_coords).state === this.TILE_STATE_CLOSED) {
                     if (aEvent.getButton() !== cc.EventMouse.BUTTON_LEFT) {
-                        this.getTileAt(this._last_tile_coords).initWithFile(res.closed_highlighted_png, helper.rect);
+                        this._getTileAt(this._last_tile_coords).initWithFile(res.closed_highlighted_png, helper.rect);
                     } else {
-                        this.getTileAt(this._last_tile_coords).initWithFile(res.empty_png, helper.rect);
+                        this._getTileAt(this._last_tile_coords).initWithFile(res.empty_png, helper.rect);
                     }
-                } else if (this.getTileAt(this._last_tile_coords).state === this.TILE_STATE_CLOSED_FLAG) {
-                    this.getTileAt(this._last_tile_coords).initWithFile(res.closed_flag_highlighted_png, helper.rect);
+                } else if (this._getTileAt(this._last_tile_coords).state === this.TILE_STATE_CLOSED_FLAG) {
+                    this._getTileAt(this._last_tile_coords).initWithFile(res.closed_flag_highlighted_png, helper.rect);
                 }
             } else {
-                this.set9TilesToEmpty();
+                this._set9TilesToEmpty();
             }
         }
     },
-    mineFieldOnMouseUpCallback: function(aEvent) {
-        var coords = this.getTileXYUnderMouse(aEvent),
-            tile = this.getTileAt(coords);
+    _mineFieldOnMouseUpCallback: function(aEvent) {
+        var coords = this._getTileXYUnderMouse(aEvent),
+            tile = this._getTileAt(coords);
         if (!this._both_buttons_pressed && aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
                 if (!this._game_started) {
                     this._game_started = true;
-                    this.setMineFieldStateWithStartPoint(coords);
+                    this._setMineFieldStateWithStartPoint(coords);
                 } else {
-                    this.changeStateOf(coords);
+                    this._changeStateOf(coords);
                 }
             }
         }
@@ -371,56 +243,15 @@ var GameLayer = cc.Layer.extend({
             this._left_button_pressed = false;
             if (this._both_buttons_pressed) {
                 this._both_buttons_pressed = false;
-                this.setLast9TilesToNormal();
-                this.callBothButtonsSpecialActionAt(coords);
+                this._setLast9TilesToNormal();
+                this._callBothButtonsSpecialActionAt(coords);
             }
         } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
             this._right_button_pressed = false;
         }
     },
-    getTileXYUnderMouse: function(aEvent) {
-        var size = cc.winSize,
-            margin_x = (size.width  - this._tile_size*this._columns)/2,
-            margin_y = (size.height - this._tile_size*this._rows)/2,
-            loc = aEvent.getLocation();
-            if (margin_x < loc.x && loc.x < size.width  - margin_x &&
-                margin_y < loc.y && loc.y < size.height - margin_y) {
-                var x = Math.floor((loc.x - margin_x)/(size.width - 2*margin_x)*this._columns),
-                    y = this._rows - 1 - Math.floor((loc.y - margin_y)/(size.height - 2*margin_y)*this._rows);
-                return cc.p(x, y);
-            }
-        return null;
-    },
-    removeFlagFrom: function(aPoint) {
-        this._mines_left_label.string++;
-        var tile = this.getTileAt(aPoint);
-        tile.state = this.TILE_STATE_CLOSED;
-        tile.initWithFile(res.closed_png, helper.rect);
-
-        var index = 0;
-        while (this._flags[index].x !== aPoint.x && this._flags[index].y !== aPoint.y) {
-            index++;
-        }
-
-        var tmp = this._flags;
-        this._flags = tmp.slice(0, index).concat(tmp.slice(index + 1));
-        localStorage.setItem('_flags', JSON.stringify(this._flags));
-    },
-    changeStateOfSurroundingsOf: function(aPoint) {
-        var point, tile;
-        for (var i = 0; i < 8; i++) {
-            point = cc.p(
-                aPoint.x + this._deltas8[i][0],
-                aPoint.y + this._deltas8[i][1]
-            );
-            tile = this.getTileAt(point);
-            if (tile && tile.state === this.TILE_STATE_CLOSED) {
-                this.changeStateOf(point);
-            }
-        }
-    },
-    setMineFieldStateWithStartPoint: function(aPoint) {
-        server.sendAction({
+    _setMineFieldStateWithStartPoint: function(aPoint) {
+        server.processAction({
             action: 'create_mine_field',
             login: sessionStorage.login,
             password: sessionStorage.password,
@@ -434,10 +265,127 @@ var GameLayer = cc.Layer.extend({
 
         this._opened_tiles = 0;
 
-        this.startTimer();
-        this.changeStateOf(aPoint);
+        this._startTimer();
+        this._changeStateOf(aPoint);
     },
-    startTimer: function(aFrom) {
+    _getTileXYUnderMouse: function(aEvent) {
+        var size = cc.winSize,
+            margin_x = (size.width  - this._tile_size*this._columns)/2,
+            margin_y = (size.height - this._tile_size*this._rows)/2,
+            loc = aEvent.getLocation();
+            if (margin_x < loc.x && loc.x < size.width  - margin_x &&
+                margin_y < loc.y && loc.y < size.height - margin_y) {
+                var x = Math.floor((loc.x - margin_x)/(size.width - 2*margin_x)*this._columns),
+                    y = this._rows - 1 - Math.floor((loc.y - margin_y)/(size.height - 2*margin_y)*this._rows);
+                return cc.p(x, y);
+            }
+        return null;
+    },
+    _getTileAt: function(aPoint) {
+        return aPoint
+            && this._minefield_tiles[aPoint.y] !== undefined
+            && this._minefield_tiles[aPoint.y][aPoint.x] !== undefined
+            && this._minefield_tiles[aPoint.y][aPoint.x]
+            || null;
+    },
+    _changeStateOf: function(aPoint, aValueFromPreviousGame) {
+        var sprite, state,
+            responseRaw, response, value;
+            if (aValueFromPreviousGame !== undefined) {
+                value = aValueFromPreviousGame;
+            } else {
+                responseRaw = server.processAction({
+                    action: 'ask_value_of_tile',
+                    login: sessionStorage.login,
+                    password: sessionStorage.password,
+                    x: aPoint.x,
+                    y: aPoint.y
+                });
+                response = JSON.parse(responseRaw);
+                value = response.status === 'OK' && response.value;
+            }
+
+            this._opened.push({point:aPoint, value:value});
+            localStorage.setItem('_opened', JSON.stringify(this._opened));
+
+        switch(value) {
+        case '*': {
+            sprite = res.mine_exploded_png;
+            state = this.TILE_STATE_MINE_EXPLODED;
+            break;
+        }
+        case   0: {
+            sprite = res.empty_png;
+            state = this.TILE_STATE_EMPTY;
+            this._opened_tiles++;
+            break;
+        }
+        default : {
+            sprite = res['number_' + value + '_png'];
+            state = this.TILE_STATE_NUMBER;
+            this._opened_tiles++;
+            break;
+        }};
+
+        var tile = this._getTileAt(aPoint);
+        tile.state = state;
+        tile.value = value;
+        tile.initWithFile(sprite, helper.rect);
+
+        if (aValueFromPreviousGame !== undefined) {
+            return;
+        }
+
+        if (state === this.TILE_STATE_EMPTY) {
+            this.scheduleOnce(function() {
+                cc.audioEngine.playEffect(res.open_many_tiles_sound);
+                this._changeStateOfSurroundingsOf(aPoint);
+            }, 0.1);
+        } else if (aValueFromPreviousGame === undefined && state === this.TILE_STATE_MINE_EXPLODED) {
+            this._runFailActions();
+        }
+        if (aValueFromPreviousGame === undefined && this._opened_tiles === this._tiles_total - this._mines_count) {
+            this._runWinActions();
+        }
+    },
+    _changeStateOfSurroundingsOf: function(aPoint) {
+        var point, tile;
+        for (var i = 0; i < 8; i++) {
+            point = cc.p(
+                aPoint.x + this._deltas8[i][0],
+                aPoint.y + this._deltas8[i][1]
+            );
+            tile = this._getTileAt(point);
+            if (tile && tile.state === this.TILE_STATE_CLOSED) {
+                this._changeStateOf(point);
+            }
+        }
+    },
+    _addFlagTo: function(aPoint) {
+        this._mines_left_label.string--;
+        var tile = this._getTileAt(aPoint);
+        tile.state = this.TILE_STATE_CLOSED_FLAG;
+        tile.initWithFile(res.closed_flag_png, helper.rect);
+
+        this._flags.push(aPoint);
+        localStorage.setItem('_flags', JSON.stringify(this._flags));
+    },
+    _removeFlagFrom: function(aPoint) {
+        this._mines_left_label.string++;
+        var tile = this._getTileAt(aPoint);
+        tile.state = this.TILE_STATE_CLOSED;
+        tile.initWithFile(res.closed_png, helper.rect);
+
+        var index = 0;
+        while (this._flags[index].x !== aPoint.x && this._flags[index].y !== aPoint.y) {
+            index++;
+        }
+
+        var tmp = this._flags;
+        this._flags = tmp.slice(0, index).concat(tmp.slice(index + 1));
+        localStorage.setItem('_flags', JSON.stringify(this._flags));
+    },
+    _startTimer: function(aFrom) {
         if (aFrom) {
             this._timer_label.string = aFrom;
         }
@@ -446,28 +394,18 @@ var GameLayer = cc.Layer.extend({
             localStorage.setItem('timer', this.string);
         }, 1);
     },
-    updateStatistics: function(aMinesDefused, aWin) {
-        sessionStorage.games             = helper.sendToServer('increase_value', 'games', 1).value;
-        sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
-        if (aMinesDefused) {
-            sessionStorage.mines_defused = helper.sendToServer('increase_value', 'mines_defused', +aMinesDefused).value;
-        }
-        if (aWin) {
-            sessionStorage.wins          = helper.sendToServer('increase_value', 'wins', 1).value;
-        }
-    },
-    set9TilesToEmpty: function() {
+    _set9TilesToEmpty: function() {
         for (var i = 0; i < 9; i++) {
-            var tile = this.getTileAt(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
+            var tile = this._getTileAt(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
                 tile.initWithFile(res.empty_png, helper.rect);
             }
         }
     },
-    setLast9TilesToNormal: function() {
+    _setLast9TilesToNormal: function() {
         if (this._last_tile_coords) {
             for (var i = 0; i < 9; i++) {
-                tile = this.getTileAt(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
+                tile = this._getTileAt(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
                 if (tile && tile.state === this.TILE_STATE_CLOSED) {
                     tile.initWithFile(res.closed_png, helper.rect);
                 } else if (tile && tile.state === this.TILE_STATE_CLOSED_FLAG) {
@@ -476,8 +414,8 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
-    callBothButtonsSpecialActionAt: function(aCoords) {
-        var tile = this.getTileAt(aCoords);
+    _callBothButtonsSpecialActionAt: function(aCoords) {
+        var tile = this._getTileAt(aCoords);
         if (tile.state === this.TILE_STATE_NUMBER) {
             var mines_expected = tile.value,
                 closed_count = 0,
@@ -489,7 +427,7 @@ var GameLayer = cc.Layer.extend({
             for (var i = 0; i < 8; i++) {
                 p = cc.p(aCoords.x + this._deltas8[i][0], aCoords.y + this._deltas8[i][1]);
                 ps.push(p);
-                tile_delta = this.getTileAt(p);
+                tile_delta = this._getTileAt(p);
                 states.push(tile_delta && tile_delta.state);
                 switch(states[i]) {
                 case this.TILE_STATE_CLOSED_FLAG: flags_count++;  break;
@@ -499,13 +437,13 @@ var GameLayer = cc.Layer.extend({
             if (mines_expected === flags_count) {
                 for (var i = 0; i < 8; i++) {
                     if (states[i] === this.TILE_STATE_CLOSED) {
-                        this.changeStateOf(ps[i]);
+                        this._changeStateOf(ps[i]);
                     }
                 }
             } else if (mines_expected === flags_count + closed_count) {
                 for (var i = 0; i < 8; i++) {
                     if (states[i] === this.TILE_STATE_CLOSED) {
-                        this.addFlagTo(ps[i]);
+                        this._addFlagTo(ps[i]);
                     }
                 }
             } else {
@@ -518,6 +456,68 @@ var GameLayer = cc.Layer.extend({
                 }
             }
         }
+    },
+    _updateStatistics: function(aMinesDefused, aWin) {
+        sessionStorage.games             = helper.sendToServer('increase_value', 'games', 1).value;
+        sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
+        if (aMinesDefused) {
+            sessionStorage.mines_defused = helper.sendToServer('increase_value', 'mines_defused', +aMinesDefused).value;
+        }
+        if (aWin) {
+            sessionStorage.wins          = helper.sendToServer('increase_value', 'wins', 1).value;
+        }
+    },
+    _runWinActions: function() {
+        for (var i = 0; i < this._rows; i++) {
+            for (var j = 0; j < this._columns; j++) {
+                if (this._getTileAt(cc.p(j, i)).state === this.TILE_STATE_CLOSED) {
+                    this._addFlagTo(cc.p(j, i));
+                }
+            }
+        }
+        cc.eventManager.removeListeners(this, false);
+        this._timer_label.unscheduleAllCallbacks()
+        cc.audioEngine.stopMusic();
+        cc.audioEngine.stopAllEffects();
+        cc.audioEngine.playEffect(res.victory_sound);
+
+        this._updateStatistics(this._mines_count, true);
+
+        this._removeExpiredData();
+    },
+    _runFailActions: function() {
+        var tile, defused = 0,
+            mines_coords = helper.sendToServer('get_all_mines').value;
+        for (var i = 0; i < mines_coords.length; i++) {
+            tile = this._getTileAt(mines_coords[i]);
+            if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
+                defused++;
+                tile.state = this.TILE_STATE_MINE_DEFUSED;
+                tile.initWithFile(res.mine_defused_png, helper.rect);
+            } else if (tile.state === this.TILE_STATE_CLOSED) {
+                tile.state = this.TILE_STATE_MINE;
+                tile.initWithFile(res.mine_png, helper.rect);
+            }
+        }
+        var rows = this._minefield_tiles.length,
+            columns = this._minefield_tiles[0].length;
+        for (var i = 0; i < rows; i++) {
+            for (var j = 0; j < columns; j++) {
+                tile = this._getTileAt(cc.p(j, i));
+                if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
+                    tile.state = this.TILE_STATE_FLAG_WRONG;
+                    tile.initWithFile(res.closed_flag_wrong_png, helper.rect);
+                }
+            }
+        }
+        cc.eventManager.removeListeners(this, false);
+        this._timer_label.unscheduleAllCallbacks()
+        cc.audioEngine.stopMusic();
+        cc.audioEngine.playEffect(res.game_over_sound);
+
+        this._updateStatistics(defused);
+
+        this._removeExpiredData();
     },
 });
 

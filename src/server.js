@@ -33,7 +33,7 @@ var server = {
         aObj.status = 'OK';
         return JSON.stringify(aObj);
     },
-    sendAction: function(aParams) {
+    processAction: function(aParams) {
         if (!aParams || !aParams.action || !aParams.login || !aParams.password) {
             return server._returnError('Неверные параметры');
         }

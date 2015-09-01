@@ -148,7 +148,7 @@ var helper = {
         if (aValue) {
             data.value = aValue;
         }
-        return JSON.parse(server.sendAction(data));
+        return JSON.parse(server.processAction(data));
     },
 
     setVolume: function(aTarget, aName, aSwitch) {
