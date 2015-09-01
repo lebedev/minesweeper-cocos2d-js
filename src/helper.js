@@ -171,7 +171,7 @@ var helper = {
     _ReplaceMethodWithTryCatched: function(aMethod) {
         return function() {
             try {
-                return aMethod.apply(null, arguments);
+                return aMethod.apply(this, arguments);
             } catch (e) {
                 cc.error(e);
             }
@@ -183,7 +183,7 @@ var helper = {
         for (method_name in aObject) {
             method = aObject[method_name];
             if (typeof method === "function") {
-                aObject[method_name] = helper._ReplaceMethodWithTryCatched(method);
+                aObject[method_name] = helper._ReplaceMethodWithTryCatched(method).bind(aObject);
             }
         }
     },
