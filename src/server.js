@@ -24,22 +24,28 @@ var server = {
         var Players = JSON.parse(localStorage.Players);
         Players.push(player);
         localStorage.Players = JSON.stringify(Players);
-        return JSON.stringify({status: "OK", player: player});
+        return server._returnOK({player:player});
+    },
+    _returnError: function(aText) {
+        return JSON.stringify({status:'error',error:aText});
+    },
+    _returnOK: function(aObj) {
+        aObj.status = 'OK';
+        return JSON.stringify(aObj);
     },
     sendAction: function(aParams) {
-        cc.log(aParams);
-        cc.log(aParams.name);
         if (!aParams || !aParams.action || !aParams.login || !aParams.password) {
-            return JSON.stringify({status:"error",error:"Неверные параметры"});
+            return server._returnError('Неверные параметры');
         }
+
         if (aParams.action === 'login') {
             var players = JSON.parse(localStorage.Players);
             for (var i = 0; i < players.length; i++) {
                 if (players[i].login === aParams.login) {
                     if (players[i].password === aParams.password) {
-                        return JSON.stringify({status:"OK", player: players[i]});
+                        return server._returnOK({player:players[i]});
                     } else {
-                        return JSON.stringify({status:"error",error:"Неверный пароль"});
+                        return server._returnError('Неверный пароль');
                     }
                 }
             }
@@ -54,17 +60,28 @@ var server = {
                     if (players[i].password === aParams.password) {
                         players[i][aParams.name] = (aParams.action === 'increase_value' ? +players[i][aParams.name] : '' ) + aParams.value;
                         localStorage.Players = JSON.stringify(players);
-                        return JSON.stringify({status:"OK", name: aParams.name, value: players[i][aParams.name]});
+                        return server._returnOK({name: aParams.name, value: players[i][aParams.name]});
                     } else {
-                        return JSON.stringify({status:"error",error:"Неверный пароль"});
+                        return server._returnError('Неверный пароль');
                     }
                 }
             }
+        } else if (aParams.action === 'ask_value_of_tile') {
+            return server._returnOK({value:mines.askValueOf(aParams.x, aParams.y)});
+        } else if (aParams.action === 'get_all_mines') {
+            return server._returnOK({value:mines.getAllMines()});
+        } else if (aParams.action === 'clear_mine_field') {
+            mines.clearMineField();
+            return server._returnOK({});
+        } else if (aParams.action === 'create_mine_field') {
+            mines.createMineField(aParams.columns, aParams.rows, aParams.maxMines, aParams.x, aParams.y);
+            return server._returnOK({});
         }
-        return JSON.stringify({status:"error",error:"Неверные параметры"});
+
+        return server._returnError('Нет действия');
     }
 };
 
-helper.ProcessTryCatcher(server);
+helper.AddTryCatchersToAllMethodsOf(server);
 
 server.init();

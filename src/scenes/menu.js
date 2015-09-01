@@ -63,7 +63,7 @@ var LoginLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
 
-        var loginEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var loginEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         loginEditBox.setAdjustBackgroundImage(false);
         loginEditBox.fontName = loginEditBox.placeHolderFontName = 'Impact';
         loginEditBox.fontSize = loginEditBox.placeHolderFontSize = size.height*0.04;
@@ -76,7 +76,7 @@ var LoginLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
 
-        var passwordEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var passwordEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         passwordEditBox.setAdjustBackgroundImage(false);
         passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
         passwordEditBox.fontName = passwordEditBox.placeHolderFontName = 'Impact';
@@ -160,7 +160,7 @@ var OptionsLayer = cc.Layer.extend({
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
 
-        var columnsEditBox = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var columnsEditBox = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         columnsEditBox.setAdjustBackgroundImage(false);
         columnsEditBox.fontName = columnsEditBox.placeHolderFontName = 'Impact';
         columnsEditBox.fontSize = columnsEditBox.placeHolderFontSize = size.height*0.04;
@@ -175,7 +175,7 @@ var OptionsLayer = cc.Layer.extend({
         var rowsUIText = helper.addUITextToLayer(this, 'Строк:', size.height*0.06, size.height*0.57);
         rowsUIText.setPositionX(size.width*0.45);
 
-        var rowsEditBox = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var rowsEditBox = new cc.EditBoxFixed(cc.size(size.width*0.06, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         rowsEditBox.setAdjustBackgroundImage(false);
         rowsEditBox.fontName = rowsEditBox.placeHolderFontName = 'Impact';
         rowsEditBox.fontSize = rowsEditBox.placeHolderFontSize = size.height*0.04;
@@ -190,7 +190,7 @@ var OptionsLayer = cc.Layer.extend({
         var minesUIText = helper.addUITextToLayer(this, 'Мин:', size.height*0.06, size.height*0.57);
         minesUIText.setPositionX(size.width*0.8);
 
-        var minesEditBox = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var minesEditBox = new cc.EditBoxFixed(cc.size(size.width*0.072, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
         minesEditBox.setAdjustBackgroundImage(false);
         minesEditBox.fontName = minesEditBox.placeHolderFontName = 'Impact';
         minesEditBox.fontSize = minesEditBox.placeHolderFontSize = size.height*0.04;
@@ -281,12 +281,22 @@ var MenuLayer = cc.Layer.extend({
 
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
         helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene); });
+        if (localStorage.getItem('_mineField')) {
+            newGameButton.setPositionX(size.width*0.37);
+
+            var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55);
+            helper.addMouseUpActionTo(continueGameButton, function(event) { helper.changeSceneTo(GameScene); });
+            continueGameButton.setPositionX(size.width*0.63);
+        }
+
         var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4);
         optionsButton.setPositionX(size.width*0.37);
         helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent.changeLayer(OptionsLayer); });
+
         var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4);
         statisticsButton.setPositionX(size.width*0.63);
         helper.addMouseUpActionTo(statisticsButton, function(event) { event.getCurrentTarget().parent.changeLayer(StatisticsLayer); });
+
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
         helper.addMouseUpActionTo(exitButton, function(event) { sessionStorage.clear(); event.getCurrentTarget().parent.changeLayer(LoginLayer); });
 
@@ -303,16 +313,17 @@ var MenuLayer = cc.Layer.extend({
 });
 
 var MenuScene = cc.Scene.extend({
-    onEnter:function () {
+    onEnter: function() {
         this._super();
 
-        var isLoggedIn = sessionStorage.login && sessionStorage.password;
+        var layer, isLoggedIn = sessionStorage.login && sessionStorage.password;
 
-        this.addChild(new BackgroundLayer(cc.color(32, 32, 32)));
-        if (!isLoggedIn) {
-            this.addChild(new LoginLayer());
-        } else {
-            this.addChild(new MenuLayer());
-        }
+        layer = new BackgroundLayer(cc.color(32, 32, 32));
+        helper.AddTryCatchersToAllMethodsOf(layer);
+        this.addChild(layer);
+
+        layer = !isLoggedIn ? new LoginLayer() : new MenuLayer();
+        helper.AddTryCatchersToAllMethodsOf(layer);
+        this.addChild(layer);
     }
 });
