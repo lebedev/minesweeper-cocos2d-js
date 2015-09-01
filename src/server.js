@@ -7,6 +7,7 @@ var server = {
             localStorage.CanBeIncreasedOnly = "^(?:games|wins|mines_defused|total_time_played)$";
         }
     },
+
     _createNewPlayer: function(aLogin, aPassword) {
         var player = {
             login: aLogin,
@@ -26,13 +27,16 @@ var server = {
         localStorage.Players = JSON.stringify(Players);
         return server._returnOK({player:player});
     },
+
     _returnError: function(aText) {
         return JSON.stringify({status:'error',error:aText});
     },
+
     _returnOK: function(aObj) {
         aObj.status = 'OK';
         return JSON.stringify(aObj);
     },
+
     processAction: function(aParams) {
         if (!aParams || !aParams.action || !aParams.login || !aParams.password) {
             return server._returnError('Неверные параметры');

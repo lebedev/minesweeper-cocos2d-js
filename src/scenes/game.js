@@ -7,16 +7,7 @@ var GameLayer = cc.Layer.extend({
     TILE_STATE_MINE:                        5,
     TILE_STATE_MINE_DEFUSED:                6,
     TILE_STATE_FLAG_WRONG:                  7,
-    _deltas8: [
-        [-1, -1],  [0, -1], [+1, -1],
-        [-1,  0],/*[x,  y]*/[+1,  0],
-        [-1, +1],  [0, +1], [+1, +1],
-    ],
-    _deltas9: [
-        [-1, -1],  [0, -1], [+1, -1],
-        [-1,  0],  [0,  0], [+1,  0],
-        [-1, +1],  [0, +1], [+1, +1],
-    ],
+
     _game_started: false,
     _minefield_tiles: null,
     _tiles_total: null,
@@ -125,6 +116,7 @@ var GameLayer = cc.Layer.extend({
 
         return true;
     },
+
     _removeExpiredData: function() {
         localStorage.removeItem('_mineField');
         localStorage.removeItem('_safe_tiles_left');
@@ -135,6 +127,7 @@ var GameLayer = cc.Layer.extend({
         localStorage.removeItem('_opened');
         localStorage.removeItem('timer');
     },
+
     _createBlankMineField: function() {
         if (this._minefield_tiles) {
             var old_rows = this._rows,
@@ -184,6 +177,7 @@ var GameLayer = cc.Layer.extend({
             this._mineFieldOnMouseUpCallback.bind(this)
         );
     },
+
     _mineFieldOnMouseDownCallback: function(aEvent) {
         if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
             this._left_button_pressed = true;
@@ -206,6 +200,7 @@ var GameLayer = cc.Layer.extend({
             this._set9TilesToEmpty();
         }
     },
+
     _mineFieldOnMouseMoveCallback: function(aEvent) {
         var tile, coords = this._getTileXYUnderMouse(aEvent);
         this._setLast9TilesToNormal();
@@ -226,6 +221,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
+
     _mineFieldOnMouseUpCallback: function(aEvent) {
         var coords = this._getTileXYUnderMouse(aEvent),
             tile = this._getTileAt(coords);
@@ -250,6 +246,7 @@ var GameLayer = cc.Layer.extend({
             this._right_button_pressed = false;
         }
     },
+
     _setMineFieldStateWithStartPoint: function(aPoint) {
         server.processAction({
             action: 'create_mine_field',
@@ -268,6 +265,7 @@ var GameLayer = cc.Layer.extend({
         this._startTimer();
         this._changeStateOf(aPoint);
     },
+
     _getTileXYUnderMouse: function(aEvent) {
         var size = cc.winSize,
             margin_x = (size.width  - this._tile_size*this._columns)/2,
@@ -281,6 +279,7 @@ var GameLayer = cc.Layer.extend({
             }
         return null;
     },
+
     _getTileAt: function(aPoint) {
         return aPoint
             && this._minefield_tiles[aPoint.y] !== undefined
@@ -288,6 +287,7 @@ var GameLayer = cc.Layer.extend({
             && this._minefield_tiles[aPoint.y][aPoint.x]
             || null;
     },
+
     _changeStateOf: function(aPoint, aValueFromPreviousGame) {
         var sprite, state,
             responseRaw, response, value;
@@ -348,12 +348,13 @@ var GameLayer = cc.Layer.extend({
             this._runWinActions();
         }
     },
+
     _changeStateOfSurroundingsOf: function(aPoint) {
         var point, tile;
         for (var i = 0; i < 8; i++) {
             point = cc.p(
-                aPoint.x + this._deltas8[i][0],
-                aPoint.y + this._deltas8[i][1]
+                aPoint.x + helper.deltas8[i][0],
+                aPoint.y + helper.deltas8[i][1]
             );
             tile = this._getTileAt(point);
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
@@ -361,6 +362,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
+
     _addFlagTo: function(aPoint) {
         this._mines_left_label.string--;
         var tile = this._getTileAt(aPoint);
@@ -370,6 +372,7 @@ var GameLayer = cc.Layer.extend({
         this._flags.push(aPoint);
         localStorage.setItem('_flags', JSON.stringify(this._flags));
     },
+
     _removeFlagFrom: function(aPoint) {
         this._mines_left_label.string++;
         var tile = this._getTileAt(aPoint);
@@ -385,6 +388,7 @@ var GameLayer = cc.Layer.extend({
         this._flags = tmp.slice(0, index).concat(tmp.slice(index + 1));
         localStorage.setItem('_flags', JSON.stringify(this._flags));
     },
+
     _startTimer: function(aFrom) {
         if (aFrom) {
             this._timer_label.string = aFrom;
@@ -394,18 +398,20 @@ var GameLayer = cc.Layer.extend({
             localStorage.setItem('timer', this.string);
         }, 1);
     },
+
     _set9TilesToEmpty: function() {
         for (var i = 0; i < 9; i++) {
-            var tile = this._getTileAt(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
+            var tile = this._getTileAt(cc.p(this._last_tile_coords.x + helper.deltas9[i][0], this._last_tile_coords.y + helper.deltas9[i][1]));
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
                 tile.initWithFile(res.empty_png, helper.rect);
             }
         }
     },
+
     _setLast9TilesToNormal: function() {
         if (this._last_tile_coords) {
             for (var i = 0; i < 9; i++) {
-                tile = this._getTileAt(cc.p(this._last_tile_coords.x + this._deltas9[i][0], this._last_tile_coords.y + this._deltas9[i][1]));
+                tile = this._getTileAt(cc.p(this._last_tile_coords.x + helper.deltas9[i][0], this._last_tile_coords.y + helper.deltas9[i][1]));
                 if (tile && tile.state === this.TILE_STATE_CLOSED) {
                     tile.initWithFile(res.closed_png, helper.rect);
                 } else if (tile && tile.state === this.TILE_STATE_CLOSED_FLAG) {
@@ -414,6 +420,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
+
     _callBothButtonsSpecialActionAt: function(aCoords) {
         var tile = this._getTileAt(aCoords);
         if (tile.state === this.TILE_STATE_NUMBER) {
@@ -425,7 +432,7 @@ var GameLayer = cc.Layer.extend({
                 tile_delta,
                 p;
             for (var i = 0; i < 8; i++) {
-                p = cc.p(aCoords.x + this._deltas8[i][0], aCoords.y + this._deltas8[i][1]);
+                p = cc.p(aCoords.x + helper.deltas8[i][0], aCoords.y + helper.deltas8[i][1]);
                 ps.push(p);
                 tile_delta = this._getTileAt(p);
                 states.push(tile_delta && tile_delta.state);
@@ -457,6 +464,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
+
     _updateStatistics: function(aMinesDefused, aWin) {
         sessionStorage.games             = helper.sendToServer('increase_value', 'games', 1).value;
         sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
@@ -467,6 +475,7 @@ var GameLayer = cc.Layer.extend({
             sessionStorage.wins          = helper.sendToServer('increase_value', 'wins', 1).value;
         }
     },
+
     _runWinActions: function() {
         for (var i = 0; i < this._rows; i++) {
             for (var j = 0; j < this._columns; j++) {
@@ -485,6 +494,7 @@ var GameLayer = cc.Layer.extend({
 
         this._removeExpiredData();
     },
+
     _runFailActions: function() {
         var tile, defused = 0,
             mines_coords = helper.sendToServer('get_all_mines').value;
@@ -518,7 +528,7 @@ var GameLayer = cc.Layer.extend({
         this._updateStatistics(defused);
 
         this._removeExpiredData();
-    },
+    }
 });
 
 var GameScene = cc.Scene.extend({

@@ -1,11 +1,6 @@
 var mines = {
     _columns: null,
     _game_over: true,
-    _deltas8: [
-        [-1, -1],  [0, -1], [+1, -1],
-        [-1,  0],/*[x,  y]*/[+1,  0],
-        [-1, +1],  [0, +1], [+1, +1],
-    ],
     _mineField: null,
     _rows: null,
     _safe_tiles_left: null,
@@ -13,33 +8,12 @@ var mines = {
     _incrementNumberSurroundingsOf: function(aX, aY) {
         var x, y;
         for (var i = 0; i < 8; i++) {
-            x = aX + mines._deltas8[i][0];
-            y = aY + mines._deltas8[i][1];
+            x = aX + helper.deltas8[i][0];
+            y = aY + helper.deltas8[i][1];
             if (mines._mineField[y] !== undefined && mines._mineField[y][x] !== undefined && mines._mineField[y][x] !== '*') {
                 mines._mineField[y][x]++;
             }
         }
-    },
-
-    askValueOf: function(aX, aY) {
-        if (!mines._game_over) {
-            var value = mines._mineField[aY][aX];
-            if (value === '*' || --mines._safe_tiles_left === 0) {
-                mines._game_over = true;
-            }
-            localStorage.setItem('_safe_tiles_left', mines._safe_tiles_left);
-            if (mines._game_over) {
-                localStorage.removeItem('_safe_tiles_left');
-                localStorage.removeItem('_mineField');
-            }
-            return mines._mineField[aY][aX];
-        } else {
-            return '?';
-        }
-    },
-
-    clearMineField: function() {
-        mines._mineField = null;
     },
 
     createMineField: function(aColumns, aRows, aMaxMines, aX, aY) {
@@ -83,6 +57,27 @@ var mines = {
         mines._game_over = false;
         mines._safe_tiles_left = aRows*aColumns - aMaxMines;
         localStorage.setItem('_mineField', JSON.stringify(mines._mineField));
+    },
+
+    clearMineField: function() {
+        mines._mineField = null;
+    },
+
+    askValueOf: function(aX, aY) {
+        if (!mines._game_over) {
+            var value = mines._mineField[aY][aX];
+            if (value === '*' || --mines._safe_tiles_left === 0) {
+                mines._game_over = true;
+            }
+            localStorage.setItem('_safe_tiles_left', mines._safe_tiles_left);
+            if (mines._game_over) {
+                localStorage.removeItem('_safe_tiles_left');
+                localStorage.removeItem('_mineField');
+            }
+            return mines._mineField[aY][aX];
+        } else {
+            return '?';
+        }
     },
 
     getAllMines: function() {

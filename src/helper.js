@@ -5,6 +5,19 @@ var helper = {
     ROWS_MAX: 50,
     MINES_MIN: 1,
 
+    rect: cc.rect(0, 0, 110, 110), // Rect of tile resources.
+
+    deltas8: [
+        [-1, -1],  [0, -1], [+1, -1],
+        [-1,  0],/*[x,  y]*/[+1,  0],
+        [-1, +1],  [0, +1], [+1, +1]
+    ],
+    deltas9: [
+        [-1, -1],  [0, -1], [+1, -1],
+        [-1,  0],  [0,  0], [+1,  0],
+        [-1, +1],  [0, +1], [+1, +1]
+    ],
+
     CONTINUE_PREVIOUS_GAME: false,
     START_NEW_GAME: true,
 
@@ -186,9 +199,7 @@ var helper = {
                 aObject[method_name] = helper._ReplaceMethodWithTryCatched(method).bind(aObject);
             }
         }
-    },
-
-    rect: cc.rect(0, 0, 110, 110), // Rect of tile resources.
+    }
 };
 
 helper.AddTryCatchersToAllMethodsOf(helper);

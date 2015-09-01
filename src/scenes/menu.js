@@ -100,6 +100,7 @@ var LoginLayer = cc.Layer.extend({
 
         return true;
     },
+
     _doLogin: function() {
         var responseRaw = server.processAction({
             action: 'login',
@@ -117,6 +118,7 @@ var LoginLayer = cc.Layer.extend({
             this.removeFromParent();
         }
     },
+
     _showError: function(aErrorText) {
         this._errorUIText.string = aErrorText;
         this._errorUIText.stopAllActions();
@@ -128,6 +130,7 @@ var OptionsLayer = cc.Layer.extend({
     _columns_edit_box: null,
     _rows_edit_box: null,
     _mines_edit_box: null,
+
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -138,7 +141,7 @@ var OptionsLayer = cc.Layer.extend({
 
         var optionsLayerEditBoxDelegate = new cc.EditBoxDelegate();
         optionsLayerEditBoxDelegate.editBoxTextChanged = function() {
-            if (this.checkIfSettingsAreValid()) {
+            if (this._checkIfSettingsAreValid()) {
                 if (!saveButton.enabled) {
                     saveButton.enabled = true;
                 }
@@ -146,7 +149,7 @@ var OptionsLayer = cc.Layer.extend({
                 saveButton.enabled = false;
             }
         }.bind(this);
-        optionsLayerEditBoxDelegate.editBoxReturn = this.saveSettingsAndGoBackToMenu.bind(this);
+        optionsLayerEditBoxDelegate.editBoxReturn = this._saveSettingsAndGoBackToMenu.bind(this);
 
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
@@ -194,14 +197,15 @@ var OptionsLayer = cc.Layer.extend({
         this.addChild(this._mines_edit_box);
 
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
-        helper.addMouseUpActionTo(saveButton, this.saveSettingsAndGoBackToMenu.bind(this));
+        helper.addMouseUpActionTo(saveButton, this._saveSettingsAndGoBackToMenu.bind(this));
 
         var cancelButton = helper.addButtonToLayer(this, 'Отмена', size.height*0.25);
-        helper.addMouseUpActionTo(cancelButton, function() { this.changeLayer(MenuLayer); }.bind(this));
+        helper.addMouseUpActionTo(cancelButton, function() { this._changeLayer(MenuLayer); }.bind(this));
 
         return true;
     },
-    checkIfSettingsAreValid: function() {
+
+    _checkIfSettingsAreValid: function() {
         if (!isNaN(this._columns_edit_box.string) && +this._columns_edit_box.string >= helper.COLUMNS_MIN && +this._columns_edit_box.string <= helper.COLUMNS_MAX &&
             !isNaN(this._rows_edit_box.string) && +this._rows_edit_box.string >= helper.ROWS_MIN && +this._rows_edit_box.string <= helper.ROWS_MAX &&
             !isNaN(this._mines_edit_box.string) && +this._mines_edit_box.string >= helper.MINES_MIN && +this._mines_edit_box.string <= +this._columns_edit_box.string*+this._rows_edit_box.string - 9) { // 9 start empty tiles.
@@ -210,7 +214,8 @@ var OptionsLayer = cc.Layer.extend({
             return false;
         }
     },
-    saveSettingsAndGoBackToMenu: function() {
+
+    _saveSettingsAndGoBackToMenu: function() {
         sessionStorage.last_columns_value = +this._columns_edit_box.string;
         helper.sendToServer('update_value', 'last_columns_value', sessionStorage.last_columns_value);
 
@@ -220,9 +225,10 @@ var OptionsLayer = cc.Layer.extend({
         sessionStorage.last_mines_value = +this._mines_edit_box.string;
         helper.sendToServer('update_value', 'last_mines_value', sessionStorage.last_mines_value);
 
-        this.changeLayer(MenuLayer);
+        this._changeLayer(MenuLayer);
     },
-    changeLayer: function(aLayer) {
+
+    _changeLayer: function(aLayer) {
         this.parent.addChild(new aLayer());
         this.removeFromParent();
     }
@@ -256,11 +262,11 @@ var StatisticsLayer = cc.Layer.extend({
         minesPerMinuteUIText.setPositionX(size.width*0.75);
 
         var backButton = helper.addButtonToLayer(this, 'Назад', size.height*0.25);
-        helper.addMouseUpActionTo(backButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
+        helper.addMouseUpActionTo(backButton, function(event) { event.getCurrentTarget().parent._changeLayer(MenuLayer); });
 
         return true;
     },
-    changeLayer: function(aLayer) {
+    _changeLayer: function(aLayer) {
         this.parent.addChild(new aLayer());
         this.removeFromParent();
     }
@@ -292,14 +298,14 @@ var MenuLayer = cc.Layer.extend({
 
         var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4);
         optionsButton.setPositionX(size.width*0.37);
-        helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent.changeLayer(OptionsLayer); });
+        helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent._changeLayer(OptionsLayer); });
 
         var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4);
         statisticsButton.setPositionX(size.width*0.63);
-        helper.addMouseUpActionTo(statisticsButton, function(event) { event.getCurrentTarget().parent.changeLayer(StatisticsLayer); });
+        helper.addMouseUpActionTo(statisticsButton, function(event) { event.getCurrentTarget().parent._changeLayer(StatisticsLayer); });
 
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addMouseUpActionTo(exitButton, function(event) { sessionStorage.clear(); event.getCurrentTarget().parent.changeLayer(LoginLayer); });
+        helper.addMouseUpActionTo(exitButton, function(event) { sessionStorage.clear(); event.getCurrentTarget().parent._changeLayer(LoginLayer); });
 
         if (!cc.audioEngine.isMusicPlaying()) {
             cc.audioEngine.playMusic(res.menu_music, true);
@@ -307,7 +313,8 @@ var MenuLayer = cc.Layer.extend({
 
         return true;
     },
-    changeLayer: function(aLayer) {
+
+    _changeLayer: function(aLayer) {
         this.parent.addChild(new aLayer());
         this.removeFromParent();
     }
