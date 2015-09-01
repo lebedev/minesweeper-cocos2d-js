@@ -239,8 +239,6 @@ var MenuLayer = cc.Layer.extend({
         // ask the window size
         var size = cc.winSize;
 
-        isLoggedIn = true;
-
         helper.setVolume(helper.soundButton, 'sound');
         helper.setVolume(helper.musicButton, 'music');
 

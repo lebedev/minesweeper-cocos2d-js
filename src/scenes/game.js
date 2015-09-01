@@ -1,12 +1,12 @@
 var GameLayer = cc.Layer.extend({
-    TILE_STATE_CLOSED:                      0,
-    TILE_STATE_CLOSED_FLAG:                 1,
-    TILE_STATE_EMPTY:                       2,
-    TILE_STATE_NUMBER:                      3,
-    TILE_STATE_MINE_EXPLODED:               4,
-    TILE_STATE_MINE:                        5,
-    TILE_STATE_MINE_DEFUSED:                6,
-    TILE_STATE_FLAG_WRONG:                  7,
+    TILE_STATE_CLOSED:        0,
+    TILE_STATE_CLOSED_FLAG:   1,
+    TILE_STATE_EMPTY:         2,
+    TILE_STATE_NUMBER:        3,
+    TILE_STATE_MINE_EXPLODED: 4,
+    TILE_STATE_MINE:          5,
+    TILE_STATE_MINE_DEFUSED:  6,
+    TILE_STATE_FLAG_WRONG:    7,
 
     _game_started: false,
     _minefield_tiles: null,
@@ -204,19 +204,18 @@ var GameLayer = cc.Layer.extend({
     },
 
     _mineFieldOnMouseMoveCallback: function(aEvent) {
-        var tile, coords = this._getTileXYUnderMouse(aEvent);
+        var new_res, coords = this._getTileXYUnderMouse(aEvent),
+            tile = this._getTileAt(coords);
         this._setLast9TilesToNormal();
         this._last_tile_coords = coords;
         if (this._last_tile_coords) {
             if (!this._both_buttons_pressed) {
-                if (this._getTileAt(this._last_tile_coords).state === this.TILE_STATE_CLOSED) {
-                    if (aEvent.getButton() !== cc.EventMouse.BUTTON_LEFT) {
-                        this._getTileAt(this._last_tile_coords).initWithFile(res.closed_highlighted_png, helper.rect);
-                    } else {
-                        this._getTileAt(this._last_tile_coords).initWithFile(res.empty_png, helper.rect);
-                    }
-                } else if (this._getTileAt(this._last_tile_coords).state === this.TILE_STATE_CLOSED_FLAG) {
-                    this._getTileAt(this._last_tile_coords).initWithFile(res.closed_flag_highlighted_png, helper.rect);
+                switch (tile.state) {
+                case this.TILE_STATE_CLOSED: new_res = this._left_button_pressed ? res.empty_png : res.closed_highlighted_png; break;
+                case this.TILE_STATE_CLOSED_FLAG: new_res = res.closed_flag_highlighted_png; break;
+                }
+                if (new_res) {
+                    tile.initWithFile(new_res, helper.rect);
                 }
             } else {
                 this._set9TilesToEmpty();
@@ -227,22 +226,18 @@ var GameLayer = cc.Layer.extend({
     _mineFieldOnMouseUpCallback: function(aEvent) {
         var coords = this._getTileXYUnderMouse(aEvent),
             tile = this._getTileAt(coords);
-        if (!this._both_buttons_pressed && aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
-            if (tile && tile.state === this.TILE_STATE_CLOSED) {
-                if (!this._game_started) {
-                    this._game_started = true;
-                    this._setMineFieldStateWithStartPoint(coords);
-                } else {
-                    this._changeStateOf(coords);
-                }
-            }
-        }
         if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
             this._left_button_pressed = false;
             if (this._both_buttons_pressed) {
                 this._both_buttons_pressed = false;
                 this._setLast9TilesToNormal();
                 this._callBothButtonsSpecialActionAt(coords);
+            } else if (tile && tile.state === this.TILE_STATE_CLOSED) {
+                if (!this._game_started) {
+                    this._game_started = true;
+                    this._setMineFieldStateWithStartPoint(coords);
+                }
+                this._changeStateOf(coords);
             }
         } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
             this._right_button_pressed = false;
@@ -265,7 +260,6 @@ var GameLayer = cc.Layer.extend({
         this._opened_tiles = 0;
 
         this._startTimer();
-        this._changeStateOf(aPoint);
     },
 
     _getTileXYUnderMouse: function(aEvent) {
