@@ -52,9 +52,9 @@ var server = {
             for (var i = 0; i < players.length; i++) {
                 if (players[i].login === aParams.login) {
                     if (players[i].password === aParams.password) {
-                        players[i][aParams.name] = (aParams.action === 'increase_value' ? players[i][aParams.name] : '' ) + aParams.value;
+                        players[i][aParams.name] = (aParams.action === 'increase_value' ? +players[i][aParams.name] : '' ) + aParams.value;
                         localStorage.Players = JSON.stringify(players);
-                        return JSON.stringify({status:"OK", name: aParams.name, value: aParams.value});
+                        return JSON.stringify({status:"OK", name: aParams.name, value: players[i][aParams.name]});
                     } else {
                         return JSON.stringify({status:"error",error:"Неверный пароль"});
                     }

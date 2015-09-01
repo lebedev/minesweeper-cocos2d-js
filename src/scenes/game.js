@@ -52,7 +52,7 @@ var GameLayer = cc.Layer.extend({
 
         this._timer_label = new cc.LabelTTF();
         this._timer_label.setAnchorPoint(cc.p(0.5, 0.5));
-        this._timer_label.setPosition(cc.p(size.width*0.27, size.height*0.05));
+        this._timer_label.setPosition(cc.p(size.width*0.27, size.height*0.045));
         this._timer_label.fontName = "Impact";
         this._timer_label.fontSize = size.height*0.045;
         this._timer_label.string = 0;
@@ -66,7 +66,7 @@ var GameLayer = cc.Layer.extend({
 
         this._mines_left_label = new cc.LabelTTF();
         this._mines_left_label.setAnchorPoint(cc.p(0.5, 0.5));
-        this._mines_left_label.setPosition(cc.p(size.width*0.77, size.height*0.05));
+        this._mines_left_label.setPosition(cc.p(size.width*0.77, size.height*0.045));
         this._mines_left_label.fontName = "Impact";
         this._mines_left_label.fontSize = size.height*0.045;
         this._mines_left_label.string = +sessionStorage.last_mines_value;
@@ -132,10 +132,12 @@ var GameLayer = cc.Layer.extend({
                 this.runActionOnSurroundingsOf(aPoint);
             }, 0.1);
         } else if (state === this.TILE_STATE_MINE_EXPLODED) {
-            var tile, mines_coords = mines.getAllMines();
+            var tile, defused = 0,
+                mines_coords = mines.getAllMines();
             for (var i = 0; i < mines_coords.length; i++) {
                 tile = this.getTile(mines_coords[i]);
                 if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
+                    defused++;
                     tile.state = this.TILE_STATE_MINE_DEFUSED;
                     tile.initWithFile(res.mine_defused_png, helper['rect_' + sprite_size]);
                 } else if (tile.state === this.TILE_STATE_CLOSED) {
@@ -158,6 +160,8 @@ var GameLayer = cc.Layer.extend({
             this._timer_label.unscheduleAllCallbacks()
             cc.audioEngine.stopMusic();
             cc.audioEngine.playEffect(res.game_over_sound);
+
+            this.updateStatistics(defused);
         }
         if (this._opened_tiles === this._tiles_total - this._mines_count) {
             for (var i = 0; i < this._rows; i++) {
@@ -172,6 +176,8 @@ var GameLayer = cc.Layer.extend({
             cc.audioEngine.stopMusic();
             cc.audioEngine.stopAllEffects();
             cc.audioEngine.playEffect(res.victory_sound);
+
+            this.updateStatistics(this._mines_count, true);
         }
     },
     createBlankMineField: function() {
@@ -401,6 +407,12 @@ var GameLayer = cc.Layer.extend({
             this.string++;
         }, 1);
         this.changeStateOf(aPoint);
+    },
+    updateStatistics: function(aMines, aWin) {
+        sessionStorage.games = helper.sendToServer('increase_value', 'games', 1).value;
+        sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
+        sessionStorage.mines_defused = helper.sendToServer('increase_value', 'mines_defused', +aMines).value;
+        sessionStorage.wins = helper.sendToServer('increase_value', 'wins', aWin ? 1 : 0).value;
     }
 });
 

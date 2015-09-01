@@ -205,16 +205,57 @@ var OptionsLayer = cc.Layer.extend({
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
         helper.addMouseUpActionTo(saveButton, function(event) {
             sessionStorage.last_columns_value = +columnsEditBox.string;
+            helper.sendToServer('update_value', 'last_columns_value', sessionStorage.last_columns_value);
+
             sessionStorage.last_rows_value = +rowsEditBox.string;
+            helper.sendToServer('update_value', 'last_rows_value', sessionStorage.last_rows_value);
+
             sessionStorage.last_mines_value = +minesEditBox.string;
-            server.sendAction({ action: 'update_value', login: sessionStorage.login, password: sessionStorage.password, name: 'last_columns_value', value: sessionStorage.last_columns_value });
-            server.sendAction({ action: 'update_value', login: sessionStorage.login, password: sessionStorage.password, name: 'last_rows_value', value: sessionStorage.last_rows_value });
-            server.sendAction({ action: 'update_value', login: sessionStorage.login, password: sessionStorage.password, name: 'last_mines_value', value: sessionStorage.last_mines_value });
+            helper.sendToServer('update_value', 'last_mines_value', sessionStorage.last_mines_value);
+
             event.getCurrentTarget().parent.changeLayer(MenuLayer);
         });
 
         var cancelButton = helper.addButtonToLayer(this, 'Отмена', size.height*0.25);
         helper.addMouseUpActionTo(cancelButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
+
+        return true;
+    },
+    changeLayer: function(aLayer) {
+        this.parent.addChild(new aLayer());
+        this.removeFromParent();
+    }
+});
+
+var StatisticsLayer = cc.Layer.extend({
+    ctor: function() {
+        //////////////////////////////
+        // 1. super init first
+        this._super();
+
+        // ask the window size
+        var size = cc.winSize;
+
+        var gamesTotalUIText = helper.addUITextToLayer(this, 'Игр сыграно: ' + sessionStorage.games, size.height*0.06, size.height*0.57);
+        gamesTotalUIText.setPositionX(size.width*0.25);
+
+        var gamesWonUIText = helper.addUITextToLayer(this, 'Игр выиграно: ' + sessionStorage.wins, size.height*0.06, size.height*0.47);
+        gamesWonUIText.setPositionX(size.width*0.25);
+
+        var gamesWonToTotalUIText = helper.addUITextToLayer(this, 'Процент побед: ' + Math.floor(+sessionStorage.wins/(+sessionStorage.games || 1)*100) + '%' , size.height*0.06, size.height*0.37);
+        gamesWonToTotalUIText.setPositionX(size.width*0.25);
+
+        var minesDefusedUIText = helper.addUITextToLayer(this, 'Мин отмечено: ' + sessionStorage.mines_defused, size.height*0.06, size.height*0.57);
+        minesDefusedUIText.setPositionX(size.width*0.75);
+
+        var totalTimeUIText = helper.addUITextToLayer(this, 'Времени прошло: ' + sessionStorage.total_time_played, size.height*0.06, size.height*0.47);
+        totalTimeUIText.setPositionX(size.width*0.75);
+
+        var minesPerMinuteUIText = helper.addUITextToLayer(this, 'Мин в минуту: ' + Math.floor(+sessionStorage.mines_defused/(+sessionStorage.total_time_played || 1)*60), size.height*0.06, size.height*0.37);
+        minesPerMinuteUIText.setPositionX(size.width*0.75);
+
+        var backButton = helper.addButtonToLayer(this, 'Назад', size.height*0.25);
+        helper.addMouseUpActionTo(backButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
 
         return true;
     },
@@ -241,7 +282,11 @@ var MenuLayer = cc.Layer.extend({
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
         helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene); });
         var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4);
+        optionsButton.setPositionX(size.width*0.37);
         helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent.changeLayer(OptionsLayer); });
+        var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4);
+        statisticsButton.setPositionX(size.width*0.63);
+        helper.addMouseUpActionTo(statisticsButton, function(event) { event.getCurrentTarget().parent.changeLayer(StatisticsLayer); });
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
         helper.addMouseUpActionTo(exitButton, function(event) { sessionStorage.clear(); event.getCurrentTarget().parent.changeLayer(LoginLayer); });
 

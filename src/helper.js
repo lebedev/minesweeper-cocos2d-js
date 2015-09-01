@@ -22,11 +22,18 @@ var helper = {
     addMouseUpActionTo: function(aNode, aCallback) {
         var l = cc.EventListener.create({
             event: cc.EventListener.MOUSE,
+            downHere: false,
+            onMouseDown: function(event) {
+                if (helper.isMouseEventOnItsTarget(event)) {
+                    this.downHere = true;
+                }
+            },
             onMouseUp: function(event) {
                 var target = event.getCurrentTarget();
-                if (target.enabled && helper.isMouseEventOnItsTarget(event)) {
+                if (this.downHere && target.enabled && helper.isMouseEventOnItsTarget(event)) {
                     aCallback(event, target);
                 }
+                this.downHere = false;
             }
         });
         cc.eventManager.addListener(l, aNode);
@@ -53,13 +60,7 @@ var helper = {
         if (aSwitch) {
             sessionStorage[aName + '_enabled'] = sessionStorage[aName + '_enabled'] === 'false' ? 'true' : 'false';
             if (sessionStorage.login && sessionStorage.password) {
-                server.sendAction({
-                    action: 'update_value',
-                    login: sessionStorage.login,
-                    password: sessionStorage.password,
-                    name: aName + '_enabled',
-                    value: sessionStorage[aName + '_enabled']
-                });
+                helper.sendToServer('update_value', aName + '_enabled', sessionStorage[aName + '_enabled']);
             }
         }
         var isDisabled = sessionStorage[aName + '_enabled'] === 'false';
@@ -154,6 +155,21 @@ var helper = {
             rect = cc.rect(0, 0, s.width, s.height);
 
         return cc.rectContainsPoint(rect, locationInNode);
+    },
+
+    sendToServer: function(aAction, aName, aValue) {
+        var data = {
+            action: aAction,
+            login: sessionStorage.login,
+            password: sessionStorage.password
+        };
+        if (aName) {
+            data.name = aName;
+        }
+        if (aValue) {
+            data.value = aValue;
+        }
+        return JSON.parse(server.sendAction(data));
     },
 
     ReplaceWithTryCatch: function(method) {
