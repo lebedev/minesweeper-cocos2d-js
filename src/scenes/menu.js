@@ -1,5 +1,3 @@
-var isLoggedIn = false;
-
 var BackgroundLayer = cc.LayerColor.extend({
     ctor: function(aColor) {
         //////////////////////////////
@@ -30,6 +28,10 @@ var BackgroundLayer = cc.LayerColor.extend({
 });
 
 var LoginLayer = cc.Layer.extend({
+    _login: '',
+    _password: '',
+    _errorUIText: null,
+    SHOW_HIDE_ACTION: new cc.Sequence(new cc.FadeIn(1), new cc.FadeOut(1)),
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -43,23 +45,25 @@ var LoginLayer = cc.Layer.extend({
 
         var loginLayerEditBoxDelegate = new cc.EditBoxDelegate();
         loginLayerEditBoxDelegate.editBoxTextChanged = function(sender, text) {
-            if (loginEditBox.string && passwordEditBox.string) {
+            this._login = loginEditBox.string;
+            this._password = passwordEditBox.string;
+            if (this._login && this._password) {
                 if (!enterButton.enabled) {
                     enterButton.setEnabled(true);
                 }
             } else if (enterButton.enabled) {
                 enterButton.setEnabled(false);
             }
-        };
+        }.bind(this);
         loginLayerEditBoxDelegate.editBoxReturn = function(sender) {
-            if (loginEditBox.string && passwordEditBox.string) {
-                sender.parent.changeLayer(MenuLayer);
+            if (this._login && this._password) {
+                this._doLogin();
             }
-        };
+        }.bind(this);
 
         helper.addUITextToLayer(this, 'Логин:',  size.height*0.06, size.height*0.65);
 
-        var loginEditBox = new cc.EditBoxFixed(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var loginEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
         loginEditBox.setAdjustBackgroundImage(false);
         loginEditBox.fontName = loginEditBox.placeHolderFontName = 'Impact';
         loginEditBox.fontSize = loginEditBox.placeHolderFontSize = size.height*0.04;
@@ -72,7 +76,7 @@ var LoginLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Пароль:', size.height*0.06, size.height*0.45);
 
-        var passwordEditBox = new cc.EditBoxFixed(cc.size(size.width*0.25, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
+        var passwordEditBox = new cc.EditBoxFixed(cc.size(size.width*0.3, size.height*0.1), helper.createS9TileFromRes(res.editbox_png, true));
         passwordEditBox.setAdjustBackgroundImage(false);
         passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
         passwordEditBox.fontName = passwordEditBox.placeHolderFontName = 'Impact';
@@ -84,16 +88,39 @@ var LoginLayer = cc.Layer.extend({
 
         this.addChild(passwordEditBox);
 
-        var enterButton = helper.addButtonToLayer(this, 'Войти', size.height*0.25, true);
-        helper.addMouseUpActionTo(enterButton, function(event) { event.getCurrentTarget().parent.changeLayer(MenuLayer); });
+        var enterButton = helper.addButtonToLayer(this, 'Войти/создать', size.height*0.25, true);
+        enterButton.setPreferredSize(cc.size(size.width*0.3, size.height*0.13));
+        helper.addMouseUpActionTo(enterButton, function() { this._doLogin.call(this); }.bind(this));
+
+        this._errorUIText = helper.addUITextToLayer(this, '',  size.height*0.06, size.height*0.1);
+        this._errorUIText.setColor(cc.color(225,0,0));
+        this._errorUIText.setOpacity(0);
 
         cc.audioEngine.playEffect(res.login_page_sound);
 
         return true;
     },
-    changeLayer: function(aLayer) {
-        this.parent.addChild(new aLayer());
-        this.removeFromParent();
+    _doLogin: function() {
+        var responseRaw = server.sendAction({
+            action: 'login',
+            login: this._login,
+            password: this._password
+        });
+        var response = JSON.parse(responseRaw);
+        if (response.status === 'error') {
+            this._showError(response.error);
+        } else if (response.status === 'OK') {
+            for (key in response.player) {
+                sessionStorage[key] = response.player[key];
+            }
+            this.parent.addChild(new MenuLayer());
+            this.removeFromParent();
+        }
+    },
+    _showError: function(aErrorText) {
+        this._errorUIText.string = aErrorText;
+        this._errorUIText.stopAllActions();
+        this._errorUIText.runAction(this.SHOW_HIDE_ACTION);
     }
 });
 
@@ -137,7 +164,7 @@ var OptionsLayer = cc.Layer.extend({
         columnsEditBox.setAdjustBackgroundImage(false);
         columnsEditBox.fontName = columnsEditBox.placeHolderFontName = 'Impact';
         columnsEditBox.fontSize = columnsEditBox.placeHolderFontSize = size.height*0.04;
-        columnsEditBox.placeHolder = columnsEditBox.string = icolumns;
+        columnsEditBox.placeHolder = columnsEditBox.string = +sessionStorage.last_columns_value;
         columnsEditBox.setMaxLength(2);
         columnsEditBox.setAnchorPoint(cc.p(0.5, 0.5));
         columnsEditBox.setPosition(cc.p(size.width*0.24, size.height*0.575));
@@ -152,7 +179,7 @@ var OptionsLayer = cc.Layer.extend({
         rowsEditBox.setAdjustBackgroundImage(false);
         rowsEditBox.fontName = rowsEditBox.placeHolderFontName = 'Impact';
         rowsEditBox.fontSize = rowsEditBox.placeHolderFontSize = size.height*0.04;
-        rowsEditBox.placeHolder = rowsEditBox.string = irows;
+        rowsEditBox.placeHolder = rowsEditBox.string = +sessionStorage.last_rows_value;
         rowsEditBox.setMaxLength(2);
         rowsEditBox.setAnchorPoint(cc.p(0.5, 0.5));
         rowsEditBox.setPosition(cc.p(size.width*0.55, size.height*0.575));
@@ -167,7 +194,7 @@ var OptionsLayer = cc.Layer.extend({
         minesEditBox.setAdjustBackgroundImage(false);
         minesEditBox.fontName = minesEditBox.placeHolderFontName = 'Impact';
         minesEditBox.fontSize = minesEditBox.placeHolderFontSize = size.height*0.04;
-        minesEditBox.placeHolder = minesEditBox.string = imines;
+        minesEditBox.placeHolder = minesEditBox.string = +sessionStorage.last_mines_value;
         minesEditBox.setMaxLength(3);
         minesEditBox.setAnchorPoint(cc.p(0.5, 0.5));
         minesEditBox.setPosition(cc.p(size.width*0.9, size.height*0.575));
@@ -177,9 +204,12 @@ var OptionsLayer = cc.Layer.extend({
 
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
         helper.addMouseUpActionTo(saveButton, function(event) {
-            icolumns = +columnsEditBox.string;
-            irows = +rowsEditBox.string;
-            imines = +minesEditBox.string;
+            sessionStorage.last_columns_value = +columnsEditBox.string;
+            sessionStorage.last_rows_value = +rowsEditBox.string;
+            sessionStorage.last_mines_value = +minesEditBox.string;
+            server.sendAction({ action: 'update_value', login: sessionStorage.login, password: sessionStorage.password, name: 'last_columns_value', value: sessionStorage.last_columns_value });
+            server.sendAction({ action: 'update_value', login: sessionStorage.login, password: sessionStorage.password, name: 'last_rows_value', value: sessionStorage.last_rows_value });
+            server.sendAction({ action: 'update_value', login: sessionStorage.login, password: sessionStorage.password, name: 'last_mines_value', value: sessionStorage.last_mines_value });
             event.getCurrentTarget().parent.changeLayer(MenuLayer);
         });
 
@@ -205,12 +235,15 @@ var MenuLayer = cc.Layer.extend({
 
         isLoggedIn = true;
 
+        helper.setVolume(helper.soundButton, 'sound');
+        helper.setVolume(helper.musicButton, 'music');
+
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
         helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene); });
         var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4);
         helper.addMouseUpActionTo(optionsButton, function(event) { event.getCurrentTarget().parent.changeLayer(OptionsLayer); });
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addMouseUpActionTo(exitButton, function(event) { event.getCurrentTarget().parent.changeLayer(LoginLayer); });
+        helper.addMouseUpActionTo(exitButton, function(event) { sessionStorage.clear(); event.getCurrentTarget().parent.changeLayer(LoginLayer); });
 
         if (!cc.audioEngine.isMusicPlaying()) {
             cc.audioEngine.playMusic(res.menu_music, true);
@@ -227,6 +260,8 @@ var MenuLayer = cc.Layer.extend({
 var MenuScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
+
+        var isLoggedIn = sessionStorage.login && sessionStorage.password;
 
         this.addChild(new BackgroundLayer(cc.color(32, 32, 32)));
         if (!isLoggedIn) {

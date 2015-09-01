@@ -1,5 +1,3 @@
-var irows = 16, icolumns = 16, imines = 40, gamelayer;
-
 var GameLayer = cc.Layer.extend({
     TILE_STATE_CLOSED:                      0,
     TILE_STATE_CLOSED_FLAG:                 1,
@@ -31,6 +29,7 @@ var GameLayer = cc.Layer.extend({
     _left_button_pressed: false,
     _right_button_pressed: false,
     _easy_state: false,
+    _timer_label: null,
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -52,17 +51,13 @@ var GameLayer = cc.Layer.extend({
         timerSprite.setPosition(cc.p(size.width*0.25, size.height*0.05));
         this.addChild(timerSprite);
 
-        timerLabel = new cc.LabelTTF();
-        timerLabel.setAnchorPoint(cc.p(0.5, 0.5));
-        timerLabel.setPosition(cc.p(size.width*0.27, size.height*0.042));
-        timerLabel.fontName = "Impact";
-        timerLabel.fontSize = size.height*0.045;
-        timerLabel.string = 0;
-        this.addChild(timerLabel);
-
-        timerLabel.schedule(function() {
-            timerLabel.string++;
-        }, 1);
+        this._timer_label = new cc.LabelTTF();
+        this._timer_label.setAnchorPoint(cc.p(0.5, 0.5));
+        this._timer_label.setPosition(cc.p(size.width*0.27, size.height*0.05));
+        this._timer_label.fontName = "Impact";
+        this._timer_label.fontSize = size.height*0.045;
+        this._timer_label.string = 0;
+        this.addChild(this._timer_label);
 
         minesLeftSprite = new cc.Sprite();
         minesLeftSprite.initWithFile(res.mines_left_png, cc.rect(0, 0, 137, 60));
@@ -72,10 +67,10 @@ var GameLayer = cc.Layer.extend({
 
         minesLeftLabel = new cc.LabelTTF();
         minesLeftLabel.setAnchorPoint(cc.p(0.5, 0.5));
-        minesLeftLabel.setPosition(cc.p(size.width*0.77, size.height*0.042));
+        minesLeftLabel.setPosition(cc.p(size.width*0.77, size.height*0.05));
         minesLeftLabel.fontName = "Impact";
         minesLeftLabel.fontSize = size.height*0.045;
-        minesLeftLabel.string = imines;
+        minesLeftLabel.string = +sessionStorage.last_mines_value;
         this.addChild(minesLeftLabel);
 
         this.createBlankMineField();
@@ -155,7 +150,7 @@ var GameLayer = cc.Layer.extend({
                 }
             }
             cc.eventManager.removeListeners(this, false);
-            timerLabel.unscheduleAllCallbacks()
+            this._timer_label.unscheduleAllCallbacks()
             cc.audioEngine.stopMusic();
             cc.audioEngine.playEffect(res.game_over_sound);
         }
@@ -168,7 +163,7 @@ var GameLayer = cc.Layer.extend({
                 }
             }
             cc.eventManager.removeListeners(this, false);
-            timerLabel.unscheduleAllCallbacks()
+            this._timer_label.unscheduleAllCallbacks()
             cc.audioEngine.stopMusic();
             cc.audioEngine.stopAllEffects();
             cc.audioEngine.playEffect(res.victory_sound);
@@ -190,8 +185,8 @@ var GameLayer = cc.Layer.extend({
         }
 
         var tile, row,
-            rows = irows,
-            columns = icolumns,
+            rows = sessionStorage.last_rows_value,
+            columns = sessionStorage.last_columns_value,
             size = cc.winSize,
             tile_size = Math.min(size.width*0.8/columns, size.height*0.8/rows),
             x_offset = (size.width  - tile_size*columns)/2,
@@ -392,11 +387,14 @@ var GameLayer = cc.Layer.extend({
         }
     },
     setMineFieldState: function(aPoint) {
-        var mines_count = imines;
+        var mines_count = sessionStorage.last_mines_value;
         mines.createMineField(this._columns, this._rows, mines_count, aPoint.x, aPoint.y);
         this._mines_count = mines_count;
         this._opened_tiles = 0;
         mines.showMineField();
+        this._timer_label.schedule(function() {
+            this.string++;
+        }, 1);
         this.changeStateOf(aPoint);
     }
 });

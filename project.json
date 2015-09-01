@@ -15,6 +15,7 @@
         "src/resource.js",
         "src/helper.js",
         "src/mines.js",
+        "src/server.js",
         "src/scenes/blank.js",
         "src/scenes/menu.js",
         "src/scenes/game.js"
