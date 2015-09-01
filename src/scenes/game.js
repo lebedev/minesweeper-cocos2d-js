@@ -35,8 +35,8 @@ var GameLayer = cc.Layer.extend({
     _timer_label: null,
     _mines_left_label: null,
 
-    _flags: [],
-    _opened: [],
+    _flags: null,
+    _opened: null,
     ctor: function(aIsNewGame) {
         //////////////////////////////
         // 1. super init first
@@ -44,6 +44,9 @@ var GameLayer = cc.Layer.extend({
 
         // ask the window size
         var size = cc.winSize;
+
+        this._opened = [];
+        this._flags = [];
 
         if (!aIsNewGame) {
             aIsNewGame = (helper.sendToServer('continue_previous_game').status !== 'OK');
@@ -63,7 +66,7 @@ var GameLayer = cc.Layer.extend({
         var newGameButton = helper.addButtonToLayer(this, "Новая игра", size.height*0.95);
         newGameButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
         newGameButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
-        helper.addMouseUpActionTo(newGameButton, function() { this.parent.addChild(new GameLayer(true)); this.removeFromParent(); }.bind(this));
+        helper.addMouseUpActionTo(newGameButton, function() { this.parent.addChild(new GameLayer(helper.START_NEW_GAME)); this.removeFromParent(); }.bind(this));
 
         var timerSprite = new cc.Sprite();
         timerSprite.initWithFile(res.timer_png, cc.rect(0, 0, 137, 60));
@@ -106,13 +109,11 @@ var GameLayer = cc.Layer.extend({
         helper.addSoundAndMusicButtons(this);
 
         if (!aIsNewGame) {
-            this._opened = [];
             var opened = JSON.parse(localStorage.getItem('_opened')) || [];
             for (var i = 0; i < opened.length; i++) {
                 this.changeStateOf(opened[i].point, opened[i].value);
             }
 
-            this._flags = [];
             var flags = JSON.parse(localStorage.getItem('_flags')) || [];
             for (var i = 0; i < flags.length; i++) {
                 this.addFlagTo(flags[i]);
@@ -449,7 +450,7 @@ var GameLayer = cc.Layer.extend({
         sessionStorage.games             = helper.sendToServer('increase_value', 'games', 1).value;
         sessionStorage.total_time_played = helper.sendToServer('increase_value', 'total_time_played', +this._timer_label.string).value;
         if (aMinesDefused) {
-            sessionStorage.mines_defused     = helper.sendToServer('increase_value', 'mines_defused', +aMinesDefused).value;
+            sessionStorage.mines_defused = helper.sendToServer('increase_value', 'mines_defused', +aMinesDefused).value;
         }
         if (aWin) {
             sessionStorage.wins          = helper.sendToServer('increase_value', 'wins', 1).value;
