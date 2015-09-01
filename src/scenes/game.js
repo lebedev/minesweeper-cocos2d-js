@@ -193,8 +193,10 @@ var GameLayer = cc.Layer.extend({
         if (tile && !this._both_buttons_pressed && aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
             if (tile.state === this.TILE_STATE_CLOSED) {
                 this._addFlagTo(coords);
+                tile.initWithFile(res.closed_flag_highlighted_png, helper.rect);
             } else if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
                 this._removeFlagFrom(coords);
+                tile.initWithFile(res.closed_highlighted_png, helper.rect);
             }
         } else if (this._both_buttons_pressed) {
             this._set9TilesToEmpty();
