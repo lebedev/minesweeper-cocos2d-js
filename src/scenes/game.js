@@ -307,12 +307,12 @@ var GameLayer = cc.Layer.extend({
 
         helper.addMouseActionsTo(
             this,
-            this.onMouseDown.bind(this),
-            this.onMouseMove.bind(this),
-            this.onMouseUp.bind(this)
+            this.mineFieldOnMouseDownCallback.bind(this),
+            this.mineFieldOnMouseMoveCallback.bind(this),
+            this.mineFieldOnMouseUpCallback.bind(this)
         );
     },
-    onMouseDown: function(aEvent) {
+    mineFieldOnMouseDownCallback: function(aEvent) {
         if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
             this._left_button_pressed = true;
         } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
@@ -334,7 +334,7 @@ var GameLayer = cc.Layer.extend({
             this.set9TilesToEmpty();
         }
     },
-    onMouseMove: function(aEvent) {
+    mineFieldOnMouseMoveCallback: function(aEvent) {
         var tile, coords = this.getTileXYUnderMouse(aEvent);
         this.setLast9TilesToNormal();
         this._last_tile_coords = coords;
@@ -354,7 +354,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
-    onMouseUp: function(aEvent) {
+    mineFieldOnMouseUpCallback: function(aEvent) {
         var coords = this.getTileXYUnderMouse(aEvent),
             tile = this.getTileAt(coords);
         if (!this._both_buttons_pressed && aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
