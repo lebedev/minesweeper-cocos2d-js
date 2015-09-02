@@ -524,10 +524,8 @@ var GameLayer = cc.Layer.extend({
                 tile.initWithFile(images.tile_mine, helper.rect);
             }
         }
-        var rows = this._minefield_tiles.length,
-            columns = this._minefield_tiles[0].length;
-        for (i = 0; i < rows; i++) {
-            for (j = 0; j < columns; j++) {
+        for (i = 0; i < this._rows; i++) {
+            for (j = 0; j < this._columns; j++) {
                 tile = this._getTileAt(cc.p(j, i));
                 if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
                     tile.state = this.TILE_STATE_FLAG_WRONG;
@@ -535,8 +533,10 @@ var GameLayer = cc.Layer.extend({
                 }
             }
         }
+
         cc.eventManager.removeListeners(this, false);
         this._timer_label.unscheduleAllCallbacks();
+
         cc.audioEngine.stopMusic();
         cc.audioEngine.playEffect(sounds.game_over);
 
