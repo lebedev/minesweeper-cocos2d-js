@@ -106,7 +106,7 @@ var mines = {
     },
 
     showMineField: function() {
-        log = "MineField:";
+        var log = "MineField:";
         for (var i = 0; i < mines._mineField.length; i++) {
             log += '\n[' + mines._mineField[i].join('] [') + ']';
         }

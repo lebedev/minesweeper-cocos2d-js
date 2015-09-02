@@ -263,7 +263,6 @@ var GameLayer = cc.Layer.extend({
             password: sessionStorage.password,
             columns: this._columns,
             rows: this._rows,
-            rows: this._rows,
             maxMines: this._mines_count,
             x: aPoint.x,
             y: aPoint.y
@@ -333,7 +332,7 @@ var GameLayer = cc.Layer.extend({
             state = this.TILE_STATE_NUMBER;
             this._opened_tiles++;
             break;
-        }};
+        }}
 
         var tile = this._getTileAt(aPoint);
         tile.state = state;
@@ -498,7 +497,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
         cc.eventManager.removeListeners(this, false);
-        this._timer_label.unscheduleAllCallbacks()
+        this._timer_label.unscheduleAllCallbacks();
         cc.audioEngine.stopMusic();
         cc.audioEngine.stopAllEffects();
         cc.audioEngine.playEffect(sounds.victory);
@@ -534,7 +533,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
         cc.eventManager.removeListeners(this, false);
-        this._timer_label.unscheduleAllCallbacks()
+        this._timer_label.unscheduleAllCallbacks();
         cc.audioEngine.stopMusic();
         cc.audioEngine.playEffect(sounds.game_over);
 
