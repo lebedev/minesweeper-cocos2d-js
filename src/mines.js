@@ -33,16 +33,15 @@ var mines = {
             aY = Math.floor(aRows/2);
         }
 
-        var i, j, x, y;
         mines._mineField = [];
-        for (i = 0; i < aRows; i++) {
+        for (var i = 0; i < aRows; i++) {
             var row = [];
             for (var j = 0; j < aColumns; j++) {
                 row.push(0);
             }
             mines._mineField.push(row);
         }
-        for (var minesCount = 0; minesCount < aMaxMines;) {
+        for (var x, y, minesCount = 0; minesCount < aMaxMines;) {
             x = Math.floor(Math.random()*aColumns);
             y = Math.floor(Math.random()*aRows);
             if ((Math.abs(x - aX) > 1 || Math.abs(y - aY) > 1) && mines._mineField[y][x] !== '*') {

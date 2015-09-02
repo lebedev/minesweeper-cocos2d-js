@@ -97,7 +97,7 @@ var LoginLayer = cc.Layer.extend({
         if (response.status === 'error') {
             this._showError(response.error);
         } else if (response.status === 'OK') {
-            for (key in response.player) {
+            for (var key in response.player) {
                 sessionStorage[key] = response.player[key];
             }
             this.parent.addChild(new MenuLayer());

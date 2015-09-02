@@ -42,9 +42,11 @@ var server = {
             return server._returnError('Неверные параметры');
         }
 
+        var i, players;
+
         if (aParams.action === 'login') {
-            var players = JSON.parse(localStorage.Players);
-            for (var i = 0; i < players.length; i++) {
+            players = JSON.parse(localStorage.Players);
+            for (i = 0; i < players.length; i++) {
                 if (players[i].login === aParams.login) {
                     if (players[i].password === aParams.password) {
                         return server._returnOK({player:players[i]});
@@ -58,8 +60,8 @@ var server = {
                        aParams.action === 'update_value'   && aParams.name.match(localStorage.Updatable) ||
                        aParams.action === 'increase_value' && aParams.name.match(localStorage.CanBeIncreasedOnly)
                    )) {
-            var players = JSON.parse(localStorage.Players);
-            for (var i = 0; i < players.length; i++) {
+            players = JSON.parse(localStorage.Players);
+            for (i = 0; i < players.length; i++) {
                 if (players[i].login === aParams.login) {
                     if (players[i].password === aParams.password) {
                         players[i][aParams.name] = (aParams.action === 'increase_value' ? +players[i][aParams.name] : '' ) + aParams.value;
