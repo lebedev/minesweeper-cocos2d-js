@@ -5,7 +5,7 @@ var res = {
     victory_sound: "res/victory.mp3",
     open_many_tiles_sound: "res/open_many_tiles.wav",
     mine_explode_sound: "res/mine_explode.mp3",
-    both_buttons_pressed_mode_fail_sound: "res/both_buttons_pressed_mode_fail.mp3",
+    both_buttons_pressed_mode_fail_sound: "res/both_buttons_pressed_mode_fail.wav",
     // music tracks
     menu_music: "res/menu_music.ogg",
     ingame_music: "res/ingame_music.mp3",
