@@ -1,54 +1,72 @@
-var res = {
-    // sound effects
-    login_page_sound: "res/login_page.wav",
-    game_over_sound: "res/game_over.ogg",
-    victory_sound: "res/victory.mp3",
-    open_many_tiles_sound: "res/open_many_tiles.wav",
-    mine_explode_sound: "res/mine_explode.mp3",
-    both_buttons_pressed_mode_fail_sound: "res/both_buttons_pressed_mode_fail.wav",
-    // music tracks
-    menu_music: "res/menu_music.ogg",
-    ingame_music: "res/ingame_music.mp3",
-    // sprites
-    background_menu_mine_png: "res/background_menu_mine.png",
-    number_1_png: "res/1.png",
-    number_2_png: "res/2.png",
-    number_3_png: "res/3.png",
-    number_4_png: "res/4.png",
-    number_5_png: "res/5.png",
-    number_6_png: "res/6.png",
-    number_7_png: "res/7.png",
-    number_8_png: "res/8.png",
-    number_1x_png: "res/1x.png",
-    number_2x_png: "res/2x.png",
-    number_3x_png: "res/3x.png",
-    number_4x_png: "res/4x.png",
-    number_5x_png: "res/5x.png",
-    number_6x_png: "res/6x.png",
-    number_7x_png: "res/7x.png",
-    empty_png: "res/empty.png",
-    pressed_png: "res/pressed.png",
-    closed_png: "res/closed.png",
-    closed_highlighted_png: "res/closed_highlighted.png",
-    closed_flag_png: "res/closed_flag.png",
-    closed_flag_highlighted_png: "res/closed_flag_highlighted.png",
-    mine_exploded_png: "res/mine_exploded.png",
-    mine_png: "res/mine.png",
-    mine_defused_png: "res/mine_defused.png",
-    closed_flag_wrong_png: "res/closed_flag_wrong.png",
-    button_normal_png: "res/button_normal.png",
-    button_highlighted_png: "res/button_highlighted.png",
-    button_disabled_png: "res/button_disabled.png",
-    editbox_png: "res/editbox.png",
-    timer_png: "res/timer.png",
-    mines_left_png: "res/mines_left.png",
-    sound_png: "res/sound.png",
-    sound_disabled_png: "res/sound_disabled.png",
-    music_png: "res/music.png",
-    music_disabled_png: "res/music_disabled.png"
+var sounds_prefix = "res/sounds/",
+    musics_prefix = "res/musics/",
+    images_prefix = "res/images/";
+
+var sounds = {
+    login_page:                     sounds_prefix + "login_page.wav",
+    game_over:                      sounds_prefix + "game_over.ogg",
+    victory:                        sounds_prefix + "victory.mp3",
+    empty_tile_opened:              sounds_prefix + "empty_tile_opened.wav",
+    mine_exploded:                  sounds_prefix + "mine_exploded.mp3",
+    both_buttons_pressed_mode_fail: sounds_prefix + "both_buttons_pressed_mode_fail.wav"
+};
+
+var musics = {
+    menu:   musics_prefix + "menu.ogg",
+    ingame: musics_prefix + "ingame.mp3"
+};
+
+var images = {
+    background_menu_mine: images_prefix + "background_menu_mine.png",
+
+    tile_1:                       images_prefix + "tile_1.png",
+    tile_2:                       images_prefix + "tile_2.png",
+    tile_3:                       images_prefix + "tile_3.png",
+    tile_4:                       images_prefix + "tile_4.png",
+    tile_5:                       images_prefix + "tile_5.png",
+    tile_6:                       images_prefix + "tile_6.png",
+    tile_7:                       images_prefix + "tile_7.png",
+    tile_8:                       images_prefix + "tile_8.png",
+    tile_1x:                      images_prefix + "tile_1x.png",
+    tile_2x:                      images_prefix + "tile_2x.png",
+    tile_3x:                      images_prefix + "tile_3x.png",
+    tile_4x:                      images_prefix + "tile_4x.png",
+    tile_5x:                      images_prefix + "tile_5x.png",
+    tile_6x:                      images_prefix + "tile_6x.png",
+    tile_7x:                      images_prefix + "tile_7x.png",
+    tile_empty:                   images_prefix + "tile_empty.png",
+    tile_pressed:                 images_prefix + "tile_pressed.png",
+    tile_closed:                  images_prefix + "tile_closed.png",
+    tile_closed_highlighted:      images_prefix + "tile_closed_highlighted.png",
+    tile_closed_flag:             images_prefix + "tile_closed_flag.png",
+    tile_closed_flag_highlighted: images_prefix + "tile_closed_flag_highlighted.png",
+    tile_closed_flag_wrong:       images_prefix + "tile_closed_flag_wrong.png",
+    tile_mine:                    images_prefix + "tile_mine.png",
+    tile_mine_defused:            images_prefix + "tile_mine_defused.png",
+    tile_mine_exploded:           images_prefix + "tile_mine_exploded.png",
+
+    button_normal:      images_prefix + "button_normal.png",
+    button_highlighted: images_prefix + "button_highlighted.png",
+    button_disabled:    images_prefix + "button_disabled.png",
+
+    editbox: images_prefix + "editbox.png",
+
+    timer:      images_prefix + "timer.png",
+    mines_left: images_prefix + "mines_left.png",
+
+    sound:          images_prefix + "sound.png",
+    sound_disabled: images_prefix + "sound_disabled.png",
+    music:          images_prefix + "music.png",
+    music_disabled: images_prefix + "music_disabled.png"
 };
 
 var g_resources = [];
-for (var i in res) {
-    g_resources.push(res[i]);
+for (var i in sounds) {
+    g_resources.push(sounds[i]);
+}
+for (var i in musics) {
+    g_resources.push(musics[i]);
+}
+for (var i in images) {
+    g_resources.push(images[i]);
 }

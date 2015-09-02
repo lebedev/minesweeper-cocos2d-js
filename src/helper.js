@@ -45,9 +45,9 @@ var helper = {
         var size = cc.winSize;
 
         var b = new cc.ControlButton();
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_normal_png),      cc.CONTROL_STATE_NORMAL);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_highlighted_png), cc.CONTROL_STATE_HIGHLIGHTED);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(res.button_disabled_png),    cc.CONTROL_STATE_DISABLED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_normal),      cc.CONTROL_STATE_NORMAL);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_highlighted), cc.CONTROL_STATE_HIGHLIGHTED);
+        b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_disabled),    cc.CONTROL_STATE_DISABLED);
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setPosition(cc.p(aX || size.width*0.5, aY));
@@ -69,7 +69,7 @@ var helper = {
     addEditBoxFixedToLayer: function(aLayer, aWidth, aPosition, aDelegateEl, aMaxLength) {
         var size = cc.winSize;
 
-        var eb = new cc.EditBoxFixed(cc.size(aWidth, size.height*0.1), helper.createS9TileFromRes(res.editbox_png));
+        var eb = new cc.EditBoxFixed(cc.size(aWidth, size.height*0.1), helper.createS9TileFromRes(images.editbox));
         eb.setAdjustBackgroundImage(false);
         eb.fontName = eb.placeHolderFontName = 'Impact';
         eb.fontSize = eb.placeHolderFontSize = size.height*0.04;
@@ -87,7 +87,7 @@ var helper = {
 
     addTileToLayer: function(aLayer) {
         var b = new cc.Sprite();
-        b.initWithFile(res.closed_png, helper.rect);
+        b.initWithFile(images.tile_closed, helper.rect);
         b.setAnchorPoint(cc.p(0.5, 0.5));
         aLayer.addChild(b);
 
@@ -173,8 +173,8 @@ var helper = {
         } else {
             cc.audioEngine.setMusicVolume(isDisabled ? 0 : 0.25);
         }
-        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? 'disabled_' : '') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
-        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(res[aName + '_' + (isDisabled ? '' : 'disabled_') + 'png'], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(images[aName + (isDisabled ? '_disabled' : '')], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_NORMAL);
+        aTarget.setBackgroundSpriteForState(cc.Scale9Sprite.create(images[aName + (isDisabled ? '' : '_disabled')], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120)), cc.CONTROL_STATE_HIGHLIGHTED);
     },
 
     changeSceneTo: function(aScene, aParam) {

@@ -63,7 +63,7 @@ var GameLayer = cc.Layer.extend({
         helper.addMouseUpActionTo(newGameButton, function() { this.parent.addChild(new GameLayer(helper.START_NEW_GAME)); this.removeFromParent(); }.bind(this));
 
         var timerSprite = new cc.Sprite();
-        timerSprite.initWithFile(res.timer_png, cc.rect(0, 0, 137, 60));
+        timerSprite.initWithFile(images.timer, cc.rect(0, 0, 137, 60));
         timerSprite.setAnchorPoint(cc.p(0.5, 0.5));
         timerSprite.setPosition(cc.p(size.width*0.25, size.height*0.05));
         this.addChild(timerSprite);
@@ -77,7 +77,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this._timer_label);
 
         var minesLeftSprite = new cc.Sprite();
-        minesLeftSprite.initWithFile(res.mines_left_png, cc.rect(0, 0, 137, 60));
+        minesLeftSprite.initWithFile(images.mines_left, cc.rect(0, 0, 137, 60));
         minesLeftSprite.setAnchorPoint(cc.p(0.5, 0.5));
         minesLeftSprite.setPosition(cc.p(size.width*0.75, size.height*0.05));
         this.addChild(minesLeftSprite);
@@ -98,7 +98,7 @@ var GameLayer = cc.Layer.extend({
         this._createBlankMineField();
 
         cc.audioEngine.stopAllEffects();
-        cc.audioEngine.playMusic(res.ingame_music, true);
+        cc.audioEngine.playMusic(musics.ingame, true);
 
         helper.setSoundsStateAndAddButtonsToLayer(this);
 
@@ -199,15 +199,15 @@ var GameLayer = cc.Layer.extend({
         if (!this._both_buttons_pressed) {
             if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
                 if (tile.state === this.TILE_STATE_CLOSED) {
-                    tile.initWithFile(res.pressed_png, helper.rect);
+                    tile.initWithFile(images.tile_pressed, helper.rect);
                 }
             } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
                 if (tile.state === this.TILE_STATE_CLOSED) {
                     this._addFlagTo(coords);
-                    tile.initWithFile(res.closed_flag_highlighted_png, helper.rect);
+                    tile.initWithFile(images.tile_closed_flag_highlighted, helper.rect);
                 } else if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
                     this._removeFlagFrom(coords);
-                    tile.initWithFile(res.closed_highlighted_png, helper.rect);
+                    tile.initWithFile(images.tile_closed_highlighted, helper.rect);
                 }
             }
         } else {
@@ -223,8 +223,8 @@ var GameLayer = cc.Layer.extend({
         if (this._last_tile_coords) {
             if (!this._both_buttons_pressed) {
                 switch (tile.state) {
-                case this.TILE_STATE_CLOSED: new_res = this._left_button_pressed ? res.pressed_png : res.closed_highlighted_png; break;
-                case this.TILE_STATE_CLOSED_FLAG: new_res = res.closed_flag_highlighted_png; break;
+                case this.TILE_STATE_CLOSED: new_res = this._left_button_pressed ? images.tile_pressed : images.tile_closed_highlighted; break;
+                case this.TILE_STATE_CLOSED_FLAG: new_res = images.tile_closed_flag_highlighted; break;
                 }
                 if (new_res) {
                     tile.initWithFile(new_res, helper.rect);
@@ -318,18 +318,18 @@ var GameLayer = cc.Layer.extend({
 
         switch(value) {
         case '*': {
-            sprite = res.mine_exploded_png;
+            sprite = images.tile_mine_exploded;
             state = this.TILE_STATE_MINE_EXPLODED;
             break;
         }
         case   0: {
-            sprite = res.empty_png;
+            sprite = images.tile_empty;
             state = this.TILE_STATE_EMPTY;
             this._opened_tiles++;
             break;
         }
         default : {
-            sprite = res['number_' + value + '_png'];
+            sprite = images['tile_' + value];
             state = this.TILE_STATE_NUMBER;
             this._opened_tiles++;
             break;
@@ -350,7 +350,7 @@ var GameLayer = cc.Layer.extend({
                     cc.audioEngine.stopEffect(this._tile_open_sound_tag);
                     this._tile_open_sound_tag = null;
                 }
-                this._tile_open_sound_tag = cc.audioEngine.playEffect(res.open_many_tiles_sound);
+                this._tile_open_sound_tag = cc.audioEngine.playEffect(sounds.empty_tile_opened);
                 this._changeStateOfSurroundingsOf(aPoint);
             }, 0.1);
         } else if (state === this.TILE_STATE_MINE_EXPLODED) {
@@ -379,7 +379,7 @@ var GameLayer = cc.Layer.extend({
         this._mines_left_label.string--;
         var tile = this._getTileAt(aPoint);
         tile.state = this.TILE_STATE_CLOSED_FLAG;
-        tile.initWithFile(res.closed_flag_png, helper.rect);
+        tile.initWithFile(images.tile_closed_flag, helper.rect);
 
         this._flags.push(aPoint);
         localStorage.setItem('_flags', JSON.stringify(this._flags));
@@ -389,7 +389,7 @@ var GameLayer = cc.Layer.extend({
         this._mines_left_label.string++;
         var tile = this._getTileAt(aPoint);
         tile.state = this.TILE_STATE_CLOSED;
-        tile.initWithFile(res.closed_png, helper.rect);
+        tile.initWithFile(images.tile_closed, helper.rect);
 
         var index = 0;
         while (this._flags[index].x !== aPoint.x && this._flags[index].y !== aPoint.y) {
@@ -415,7 +415,7 @@ var GameLayer = cc.Layer.extend({
         for (var i = 0; i < 9; i++) {
             var tile = this._getTileAt(cc.p(this._last_tile_coords.x + helper.deltas9[i][0], this._last_tile_coords.y + helper.deltas9[i][1]));
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
-                tile.initWithFile(res.pressed_png, helper.rect);
+                tile.initWithFile(images.tile_pressed, helper.rect);
             }
         }
     },
@@ -425,9 +425,9 @@ var GameLayer = cc.Layer.extend({
             for (var i = 0; i < 9; i++) {
                 tile = this._getTileAt(cc.p(this._last_tile_coords.x + helper.deltas9[i][0], this._last_tile_coords.y + helper.deltas9[i][1]));
                 if (tile && tile.state === this.TILE_STATE_CLOSED) {
-                    tile.initWithFile(res.closed_png, helper.rect);
+                    tile.initWithFile(images.tile_closed, helper.rect);
                 } else if (tile && tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                    tile.initWithFile(res.closed_flag_png, helper.rect);
+                    tile.initWithFile(images.tile_closed_flag, helper.rect);
                 }
             }
         }
@@ -467,11 +467,11 @@ var GameLayer = cc.Layer.extend({
                 }
             } else {
                 cc.audioEngine.stopAllEffects();
-                cc.audioEngine.playEffect(res.both_buttons_pressed_mode_fail_sound);
+                cc.audioEngine.playEffect(sounds.both_buttons_pressed_mode_fail);
 
                 for (var i = 0; i < 4; i++) {
                     this.scheduleOnce(function(aTile, aI) {
-                        aTile.initWithFile(res['number_' + aTile.value + (aI%2 ? '' : 'x') + '_png'], helper.rect);
+                        aTile.initWithFile(images['tile_' + aTile.value + (aI%2 ? '' : 'x')], helper.rect);
                     }.bind(this, tile, i), i*0.25);
                 }
             }
@@ -501,7 +501,7 @@ var GameLayer = cc.Layer.extend({
         this._timer_label.unscheduleAllCallbacks()
         cc.audioEngine.stopMusic();
         cc.audioEngine.stopAllEffects();
-        cc.audioEngine.playEffect(res.victory_sound);
+        cc.audioEngine.playEffect(sounds.victory);
 
         this._updateStatistics(this._mines_count, true);
 
@@ -516,10 +516,10 @@ var GameLayer = cc.Layer.extend({
             if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
                 defused++;
                 tile.state = this.TILE_STATE_MINE_DEFUSED;
-                tile.initWithFile(res.mine_defused_png, helper.rect);
+                tile.initWithFile(images.tile_mine_defused, helper.rect);
             } else if (tile.state === this.TILE_STATE_CLOSED) {
                 tile.state = this.TILE_STATE_MINE;
-                tile.initWithFile(res.mine_png, helper.rect);
+                tile.initWithFile(images.tile_mine, helper.rect);
             }
         }
         var rows = this._minefield_tiles.length,
@@ -529,14 +529,14 @@ var GameLayer = cc.Layer.extend({
                 tile = this._getTileAt(cc.p(j, i));
                 if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
                     tile.state = this.TILE_STATE_FLAG_WRONG;
-                    tile.initWithFile(res.closed_flag_wrong_png, helper.rect);
+                    tile.initWithFile(images.tile_closed_flag_wrong, helper.rect);
                 }
             }
         }
         cc.eventManager.removeListeners(this, false);
         this._timer_label.unscheduleAllCallbacks()
         cc.audioEngine.stopMusic();
-        cc.audioEngine.playEffect(res.game_over_sound);
+        cc.audioEngine.playEffect(sounds.game_over);
 
         this._updateStatistics(defused);
 

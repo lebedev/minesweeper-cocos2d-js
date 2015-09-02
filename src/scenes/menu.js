@@ -9,7 +9,7 @@ var BackgroundLayer = cc.LayerColor.extend({
         // ask the window size
         var size = cc.winSize;
 
-        var background_menu_mine = new cc.Sprite(res.background_menu_mine_png);
+        var background_menu_mine = new cc.Sprite(images.background_menu_mine);
         background_menu_mine.setAnchorPoint(cc.p(0.5, 0.5));
         background_menu_mine.setPosition(cc.p(size.width/2, size.height/2));
         this.addChild(background_menu_mine, 0);
@@ -82,7 +82,7 @@ var LoginLayer = cc.Layer.extend({
         this._errorUIText.setColor(cc.color(225, 0, 0));
         this._errorUIText.setOpacity(0);
 
-        cc.audioEngine.playEffect(res.login_page_sound);
+        cc.audioEngine.playEffect(sounds.login_page);
 
         return true;
     },
@@ -261,7 +261,7 @@ var MenuLayer = cc.Layer.extend({
         helper.addMouseUpActionTo(exitButton, function() { sessionStorage.clear(); this._changeLayer.call(this, LoginLayer); }.bind(this));
 
         if (!cc.audioEngine.isMusicPlaying()) {
-            cc.audioEngine.playMusic(res.menu_music, true);
+            cc.audioEngine.playMusic(musics.menu, true);
         }
 
         return true;
