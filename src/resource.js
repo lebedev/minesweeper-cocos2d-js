@@ -27,6 +27,7 @@ var res = {
     number_6x_png: "res/6x.png",
     number_7x_png: "res/7x.png",
     empty_png: "res/empty.png",
+    pressed_png: "res/pressed.png",
     closed_png: "res/closed.png",
     closed_highlighted_png: "res/closed_highlighted.png",
     closed_flag_png: "res/closed_flag.png",

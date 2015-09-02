@@ -193,16 +193,25 @@ var GameLayer = cc.Layer.extend({
 
         var coords = this._getTileXYUnderMouse(aEvent),
             tile = this._getTileAt(coords);
-        if (tile && !this._both_buttons_pressed && aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
-            if (tile.state === this.TILE_STATE_CLOSED) {
-                this._addFlagTo(coords);
-                tile.initWithFile(res.closed_flag_highlighted_png, helper.rect);
-            } else if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
-                this._removeFlagFrom(coords);
-                tile.initWithFile(res.closed_highlighted_png, helper.rect);
+        if (!tile) {
+            return;
+        }
+        if (!this._both_buttons_pressed) {
+            if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
+                if (tile.state === this.TILE_STATE_CLOSED) {
+                    tile.initWithFile(res.pressed_png, helper.rect);
+                }
+            } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+                if (tile.state === this.TILE_STATE_CLOSED) {
+                    this._addFlagTo(coords);
+                    tile.initWithFile(res.closed_flag_highlighted_png, helper.rect);
+                } else if (tile.state === this.TILE_STATE_CLOSED_FLAG) {
+                    this._removeFlagFrom(coords);
+                    tile.initWithFile(res.closed_highlighted_png, helper.rect);
+                }
             }
-        } else if (this._both_buttons_pressed) {
-            this._set9TilesToEmpty();
+        } else {
+            this._set9TilesToPressed();
         }
     },
 
@@ -214,14 +223,14 @@ var GameLayer = cc.Layer.extend({
         if (this._last_tile_coords) {
             if (!this._both_buttons_pressed) {
                 switch (tile.state) {
-                case this.TILE_STATE_CLOSED: new_res = this._left_button_pressed ? res.empty_png : res.closed_highlighted_png; break;
+                case this.TILE_STATE_CLOSED: new_res = this._left_button_pressed ? res.pressed_png : res.closed_highlighted_png; break;
                 case this.TILE_STATE_CLOSED_FLAG: new_res = res.closed_flag_highlighted_png; break;
                 }
                 if (new_res) {
                     tile.initWithFile(new_res, helper.rect);
                 }
             } else {
-                this._set9TilesToEmpty();
+                this._set9TilesToPressed();
             }
         }
     },
@@ -402,11 +411,11 @@ var GameLayer = cc.Layer.extend({
         }, 1);
     },
 
-    _set9TilesToEmpty: function() {
+    _set9TilesToPressed: function() {
         for (var i = 0; i < 9; i++) {
             var tile = this._getTileAt(cc.p(this._last_tile_coords.x + helper.deltas9[i][0], this._last_tile_coords.y + helper.deltas9[i][1]));
             if (tile && tile.state === this.TILE_STATE_CLOSED) {
-                tile.initWithFile(res.empty_png, helper.rect);
+                tile.initWithFile(res.pressed_png, helper.rect);
             }
         }
     },
