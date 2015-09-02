@@ -433,6 +433,10 @@ var GameLayer = cc.Layer.extend({
         }
     },
 
+    _setXOnTile: function(aTile, aX) {
+        aTile.initWithFile(images['tile_' + aTile.value + (aX ? 'x' : '')], helper.rect);
+    },
+
     _callBothButtonsSpecialActionAt: function(aCoords) {
         var i, tile = this._getTileAt(aCoords);
         if (tile.state === this.TILE_STATE_NUMBER) {
@@ -470,9 +474,7 @@ var GameLayer = cc.Layer.extend({
                 cc.audioEngine.playEffect(sounds.both_buttons_pressed_mode_fail);
 
                 for (i = 0; i < 4; i++) {
-                    this.scheduleOnce(function(aTile, aI) {
-                        aTile.initWithFile(images['tile_' + aTile.value + (aI%2 ? '' : 'x')], helper.rect);
-                    }.bind(this, tile, i), i*0.25);
+                    this.scheduleOnce(this._setXOnTile.bind(this, tile, i%2 === 0), i*0.25);
                 }
             }
         }
