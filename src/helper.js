@@ -51,9 +51,9 @@ var helper = {
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setPosition(cc.p(aParams.x || size.width*0.5, aParams.y));
-        b._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: aParams.callback
-        }];
+
+        b.addTargetWithActionForControlEvents(b, aParams.callback, cc.CONTROL_EVENT_TOUCH_UP_INSIDE);
+
         if (aParams.string) {
             b.setTitleForState(aParams.string, cc.CONTROL_STATE_NORMAL);
             b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
