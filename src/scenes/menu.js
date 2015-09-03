@@ -14,8 +14,12 @@ var BackgroundLayer = cc.LayerColor.extend({
         background_menu_mine.setPosition(cc.p(size.width/2, size.height/2));
         this.addChild(background_menu_mine, 0);
 
-        var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
-        background_menu_mine.runAction(infinite_rotate);
+        if (isMobile) {
+            background_menu_mine.setScale(5/8, 5/8);
+        } else {
+            var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
+            background_menu_mine.runAction(infinite_rotate);
+        }
 
         helper.addUITextToLayer(this, 'САПЁР',        size.height*0.25, size.height*0.8);
 
@@ -151,19 +155,19 @@ var OptionsLayer = cc.Layer.extend({
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
 
-        this._columns_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.06, cc.p(size.width*0.24, size.height*0.575), optionsLayerEditBoxDelegate, 2);
+        this._columns_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.08 : 0.06), cc.p(size.width*0.24, size.height*0.575), optionsLayerEditBoxDelegate, 2);
         this._columns_edit_box.placeHolder = this._columns_edit_box.string = +sessionStorage.last_columns_value;
 
         var rowsUIText = helper.addUITextToLayer(this, 'Строк:', size.height*0.06, size.height*0.57);
         rowsUIText.setPositionX(size.width*0.45);
 
-        this._rows_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.06, cc.p(size.width*0.55, size.height*0.575), optionsLayerEditBoxDelegate, 2);
+        this._rows_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.08 : 0.06), cc.p(size.width*0.55, size.height*0.575), optionsLayerEditBoxDelegate, 2);
         this._rows_edit_box.placeHolder = this._rows_edit_box.string = +sessionStorage.last_rows_value;
 
         var minesUIText = helper.addUITextToLayer(this, 'Мин:', size.height*0.06, size.height*0.57);
         minesUIText.setPositionX(size.width*0.8);
 
-        this._mines_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.072, cc.p(size.width*0.9, size.height*0.575), optionsLayerEditBoxDelegate, 3);
+        this._mines_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.095 : 0.072), cc.p(size.width*0.9, size.height*0.575), optionsLayerEditBoxDelegate, 3);
         this._mines_edit_box.placeHolder = this._mines_edit_box.string = +sessionStorage.last_mines_value;
 
         var saveButton = helper.addButton({

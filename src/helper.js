@@ -25,7 +25,7 @@ var helper = {
     musicButton: null,
 
     createS9TileFromRes: function(aRes) {
-        return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), cc.rect(25, 25, 65, 65));
+        return cc.Scale9Sprite.create(aRes, cc.rect(0, 0, 110, 110), isMobile ? cc.rect(15, 15, 80, 80) : cc.rect(25, 25, 65, 65));
     },
 
     createUIText: function(aString, aFontSize) {
@@ -119,7 +119,7 @@ var helper = {
 
     setSoundsStateAndAddButtonsToLayer: function(aLayer) {
         var size = cc.winSize,
-            buttonSize = cc.size(120, 120);
+            buttonSize = isMobile ? cc.size(75, 75) : cc.size(120, 120);
 
         helper.soundButton = helper.addButton({
             layer: aLayer,
@@ -166,7 +166,7 @@ var helper = {
         cc.audioEngine.stopMusic();
 
         var scene = aParam !== undefined ? new aScene(aParam) : new aScene();
-        cc.director.runScene(new cc.TransitionFade(0.5, scene));
+        cc.director.runScene(isMobile ? scene : new cc.TransitionFade(0.5, scene));
     },
 
     sendActionToServer: function(aAction) {

@@ -72,6 +72,9 @@ var GameLayer = cc.Layer.extend({
         timerSprite.initWithFile(images.timer, cc.rect(0, 0, 137, 60));
         timerSprite.setAnchorPoint(cc.p(0.5, 0.5));
         timerSprite.setPosition(cc.p(size.width*0.25, size.height*0.05));
+        if (isMobile) {
+            timerSprite.setScale(5/8, 5/8);
+        }
         this.addChild(timerSprite);
 
         this._timer_label = new cc.LabelTTF();
@@ -86,6 +89,9 @@ var GameLayer = cc.Layer.extend({
         minesLeftSprite.initWithFile(images.mines_left, cc.rect(0, 0, 137, 60));
         minesLeftSprite.setAnchorPoint(cc.p(0.5, 0.5));
         minesLeftSprite.setPosition(cc.p(size.width*0.75, size.height*0.05));
+        if (isMobile) {
+            minesLeftSprite.setScale(5/8, 5/8);
+        }
         this.addChild(minesLeftSprite);
 
         this._mines_left_label = new cc.LabelTTF();
