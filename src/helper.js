@@ -45,9 +45,12 @@ var helper = {
         var size = cc.winSize;
 
         var b = new cc.ControlButton();
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_normal),      cc.CONTROL_STATE_NORMAL);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_highlighted), cc.CONTROL_STATE_HIGHLIGHTED);
-        b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_disabled),    cc.CONTROL_STATE_DISABLED);
+
+        if (!aParams.custom) {
+            b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_normal),      cc.CONTROL_STATE_NORMAL);
+            b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_highlighted), cc.CONTROL_STATE_HIGHLIGHTED);
+            b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_disabled),    cc.CONTROL_STATE_DISABLED);
+        }
         b.setPreferredSize(aParams.preferredSize || cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setPosition(cc.p(aParams.x || size.width*0.5, aParams.y));
@@ -126,6 +129,7 @@ var helper = {
             x: size.width*0.94,
             y: size.height*0.9,
             preferredSize: buttonSize,
+            custom: true,
             callback: function(aTarget) {
                 helper.setVolume(aTarget, 'sound', true);
             }
@@ -137,6 +141,7 @@ var helper = {
             x: size.width*0.94,
             y: size.height*0.73,
             preferredSize: buttonSize,
+            custom: true,
             callback: function(aTarget) {
                 helper.setVolume(aTarget, 'music', true);
             }

@@ -8,6 +8,11 @@ var GameLayer = cc.Layer.extend({
     TILE_STATE_MINE_DEFUSED:  6,
     TILE_STATE_FLAG_WRONG:    7,
 
+    MOUSE:                         0,
+    TOUCHSCREEN_LEFT_BUTTON_MODE:  1,
+    TOUCHSCREEN_RIGHT_BUTTON_MODE: 2,
+    TOUCHSCREEN_BOTH_BUTTONS_MODE: 3,
+
     _game_started: false,
     _minefield_tiles: null,
     _tiles_total: null,
@@ -19,9 +24,12 @@ var GameLayer = cc.Layer.extend({
 
     _last_tile_coords: null,
 
+    _input_mode: null,
+    _selected_mode_button: null,
+
     _left_button_pressed: false,
-    _right_button_pressed: false,
     _both_buttons_pressed: false,
+    _right_button_pressed: false,
 
     _timer_label: null,
     _mines_left_label: null,
@@ -73,7 +81,7 @@ var GameLayer = cc.Layer.extend({
         timerSprite.setAnchorPoint(cc.p(0.5, 0.5));
         timerSprite.setPosition(cc.p(size.width*0.25, size.height*0.05));
         if (isMobile) {
-            timerSprite.setScale(5/8, 5/8);
+            timerSprite.setScale(5/8);
         }
         this.addChild(timerSprite);
 
@@ -90,7 +98,7 @@ var GameLayer = cc.Layer.extend({
         minesLeftSprite.setAnchorPoint(cc.p(0.5, 0.5));
         minesLeftSprite.setPosition(cc.p(size.width*0.75, size.height*0.05));
         if (isMobile) {
-            minesLeftSprite.setScale(5/8, 5/8);
+            minesLeftSprite.setScale(5/8);
         }
         this.addChild(minesLeftSprite);
 
@@ -133,6 +141,12 @@ var GameLayer = cc.Layer.extend({
             this._startTimer(localStorage.getItem('timer'));
         }
 
+        if (!isMobile) {
+            this._input_mode = this.MOUSE;
+        } else {
+            this._initTouchscreenModeButtons();
+        }
+
         return true;
     },
 
@@ -146,6 +160,76 @@ var GameLayer = cc.Layer.extend({
         localStorage.removeItem('_opened');
         localStorage.removeItem('timer');
     },
+
+    _switchTouchscreenMode: function(aTarget) {
+        this._left_button_pressed = this._right_button_pressed = this._both_buttons_pressed = false;
+
+        if (this._selected_mode_button) {
+            this._selected_mode_button.setScale(0.7);
+            this._selected_mode_button.setColor(cc.color(255, 255, 255));
+        }
+
+        aTarget.setScale(1.2);
+        aTarget.setColor(cc.color(255, 255, 80));
+
+        this._selected_mode_button = aTarget;
+        this._input_mode = aTarget.mode;
+
+
+        if (aTarget.mode === this.TOUCHSCREEN_BOTH_BUTTONS_MODE) {
+            this._right_button_pressed = this._both_buttons_pressed = true;
+        }
+    },
+
+    _getButton: function(aEvent) {
+        switch (this._input_mode) {
+        case this.MOUSE: return aEvent.getButton();
+        case this.TOUCHSCREEN_RIGHT_BUTTON_MODE: return cc.EventMouse.BUTTON_RIGHT;
+        default: return cc.EventMouse.BUTTON_LEFT;
+        }
+    },
+
+    _initTouchscreenModeButtons: function() {
+        var sprite, name, size = cc.winSize;
+
+        var buttons = [
+            {
+                name: 'left',
+                mode: this.TOUCHSCREEN_LEFT_BUTTON_MODE,
+                y: 0.73
+            },
+            {
+                name: 'both',
+                mode: this.TOUCHSCREEN_BOTH_BUTTONS_MODE,
+                y: 0.5
+            },
+            {
+                name: 'right',
+                mode: this.TOUCHSCREEN_RIGHT_BUTTON_MODE,
+                y: 0.27
+            }
+        ];
+
+        var params = {
+            layer: this,
+            x: size.width*0.06,
+            preferredSize: cc.size(75, 75),
+            custom: true,
+            callback: this._switchTouchscreenMode.bind(this)
+        };
+
+        for (var i = 0; i < 3; i++) {
+            params.y = size.height*buttons[i].y;
+            name = buttons[i].name + '_mb_mode_button';
+            sprite = cc.Scale9Sprite.create(images[name], cc.rect(0, 0, 120, 120), cc.rect(0, 0, 120, 120));
+            this['_' + name] = helper.addButton(params);
+            this['_' + name].setBackgroundSpriteForState(sprite, cc.CONTROL_STATE_NORMAL);
+            this['_' + name].mode = buttons[i].mode;
+        }
+
+        params.callback(this._left_mb_mode_button);
+    },
+
 
     _createBlankMineField: function() {
         var i,j;
@@ -198,9 +282,10 @@ var GameLayer = cc.Layer.extend({
     },
 
     _mineFieldOnMouseDownCallback: function(aEvent) {
-        if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
+        var button = this._getButton(aEvent);
+        if (button === cc.EventMouse.BUTTON_LEFT) {
             this._left_button_pressed = true;
-        } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+        } else if (button === cc.EventMouse.BUTTON_RIGHT) {
             this._right_button_pressed = true;
         }
         if (this._left_button_pressed && this._right_button_pressed) {
@@ -213,11 +298,11 @@ var GameLayer = cc.Layer.extend({
             return;
         }
         if (!this._both_buttons_pressed) {
-            if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
+            if (button === cc.EventMouse.BUTTON_LEFT) {
                 if (tile.state === this.TILE_STATE_CLOSED) {
                     tile.initWithFile(images.tile_pressed, helper.rect);
                 }
-            } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+            } else if (button === cc.EventMouse.BUTTON_RIGHT) {
                 if (tile.state === this.TILE_STATE_CLOSED) {
                     this._addFlagTo(coords);
                     tile.initWithFile(images.tile_closed_flag_highlighted, helper.rect);
@@ -253,8 +338,9 @@ var GameLayer = cc.Layer.extend({
 
     _mineFieldOnMouseUpCallback: function(aEvent) {
         var coords = this._getTileXYUnderMouse(aEvent),
-            tile = this._getTileAt(coords);
-        if (aEvent.getButton() === cc.EventMouse.BUTTON_LEFT) {
+            tile = this._getTileAt(coords),
+            button = this._getButton(aEvent);
+        if (button === cc.EventMouse.BUTTON_LEFT) {
             this._left_button_pressed = false;
             if (this._both_buttons_pressed) {
                 this._both_buttons_pressed = false;
@@ -267,7 +353,7 @@ var GameLayer = cc.Layer.extend({
                 }
                 this._changeStateOf(coords);
             }
-        } else if (aEvent.getButton() === cc.EventMouse.BUTTON_RIGHT) {
+        } else if (button === cc.EventMouse.BUTTON_RIGHT) {
             this._right_button_pressed = false;
         }
     },
@@ -454,7 +540,7 @@ var GameLayer = cc.Layer.extend({
 
     _callBothButtonsSpecialActionAt: function(aCoords) {
         var i, tile = this._getTileAt(aCoords);
-        if (tile.state === this.TILE_STATE_NUMBER) {
+        if (tile && tile.state === this.TILE_STATE_NUMBER) {
             var mines_expected = tile.value,
                 closed_count = 0,
                 flags_count = 0,
@@ -569,7 +655,7 @@ var GameScene = cc.Scene.extend({
     },
     onEnter: function() {
         this._super();
-        var layer = new GameLayer(this._is_new_game);
+        layer = new GameLayer(this._is_new_game);
         helper.AddTryCatchersToAllMethodsOf(layer);
         this.addChild(layer);
     }

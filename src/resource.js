@@ -57,7 +57,11 @@ var images = {
     sound:          images_prefix + "sound.png",
     sound_disabled: images_prefix + "sound_disabled.png",
     music:          images_prefix + "music.png",
-    music_disabled: images_prefix + "music_disabled.png"
+    music_disabled: images_prefix + "music_disabled.png",
+
+    left_mb_mode_button:  images_prefix +  "left_mb_mode_button.png",
+    both_mb_mode_button:  images_prefix +  "both_mb_mode_button.png",
+    right_mb_mode_button: images_prefix + "right_mb_mode_button.png"
 };
 
 var g_resources = [];
