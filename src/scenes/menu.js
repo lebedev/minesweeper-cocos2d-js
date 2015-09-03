@@ -80,10 +80,10 @@ var LoginLayer = cc.Layer.extend({
             layer: this,
             string: 'Войти/создать',
             y: size.height*0.25,
+            preferredSize: cc.size(size.width*0.3, size.height*0.13),
             disabled: true,
             callback: this._doLogin.bind(this)
         });
-        enterButton.setPreferredSize(cc.size(size.width*0.3, size.height*0.13));
 
         this._errorUIText = helper.addUITextToLayer(this, '',  size.height*0.06, size.height*0.1);
         this._errorUIText.setColor(cc.color(225, 0, 0));

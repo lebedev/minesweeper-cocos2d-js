@@ -48,7 +48,7 @@ var helper = {
         b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_normal),      cc.CONTROL_STATE_NORMAL);
         b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_highlighted), cc.CONTROL_STATE_HIGHLIGHTED);
         b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_disabled),    cc.CONTROL_STATE_DISABLED);
-        b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
+        b.setPreferredSize(aParams.preferredSize || cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setPosition(cc.p(aParams.x || size.width*0.5, aParams.y));
 
@@ -125,25 +125,23 @@ var helper = {
             layer: aLayer,
             x: size.width*0.94,
             y: size.height*0.9,
+            preferredSize: buttonSize,
             callback: function(aTarget) {
                 helper.setVolume(aTarget, 'sound', true);
             }
         });
         helper.setVolume(helper.soundButton, 'sound');
-        helper.soundButton.setContentSize(buttonSize);
-        helper.soundButton.setPreferredSize(buttonSize);
 
         helper.musicButton = helper.addButton({
             layer: aLayer,
             x: size.width*0.94,
             y: size.height*0.73,
+            preferredSize: buttonSize,
             callback: function(aTarget) {
                 helper.setVolume(aTarget, 'music', true);
             }
         });
         helper.setVolume(helper.musicButton, 'music');
-        helper.musicButton.setContentSize(buttonSize);
-        helper.musicButton.setPreferredSize(buttonSize);
     },
 
     setVolume: function(aTarget, aName, aSwitch) {

@@ -61,12 +61,12 @@ var GameLayer = cc.Layer.extend({
             layer: this,
             string: "Новая игра",
             y: size.height*0.95,
+            preferredSize: cc.size(size.width*0.25, size.height*0.08),
             callback: function() {
                 this.parent.addChild(new GameLayer(helper.START_NEW_GAME)); this.removeFromParent();
             }.bind(this)
         });
         newGameButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
-        newGameButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
 
         var timerSprite = new cc.Sprite();
         timerSprite.initWithFile(images.timer, cc.rect(0, 0, 137, 60));
@@ -100,10 +100,10 @@ var GameLayer = cc.Layer.extend({
             layer: this,
             string: "В меню",
             y: size.height*0.05,
+            preferredSize: cc.size(size.width*0.25, size.height*0.08),
             callback: function() { helper.changeSceneTo(MenuScene); }
         });
         returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
-        returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
 
         this._createBlankMineField();
 
