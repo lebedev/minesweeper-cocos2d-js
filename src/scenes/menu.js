@@ -76,13 +76,14 @@ var LoginLayer = cc.Layer.extend({
         passwordEditBox.setInputFlag(cc.EDITBOX_INPUT_FLAG_PASSWORD);
         passwordEditBox.placeHolder = 'пароль';
 
-        var enterButton = helper.addButtonToLayer(this, 'Войти/создать', size.height*0.25, true);
+        var enterButton = helper.addButton({
+            layer: this,
+            string: 'Войти/создать',
+            y: size.height*0.25,
+            disabled: true,
+            callback: this._doLogin.bind(this)
+        });
         enterButton.setPreferredSize(cc.size(size.width*0.3, size.height*0.13));
-        enterButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
-                this._doLogin.call(this);
-            }.bind(this)
-        }];
 
         this._errorUIText = helper.addUITextToLayer(this, '',  size.height*0.06, size.height*0.1);
         this._errorUIText.setColor(cc.color(225, 0, 0));
@@ -165,17 +166,21 @@ var OptionsLayer = cc.Layer.extend({
         this._mines_edit_box = helper.addEditBoxFixedToLayer(this, size.width*0.072, cc.p(size.width*0.9, size.height*0.575), optionsLayerEditBoxDelegate, 3);
         this._mines_edit_box.placeHolder = this._mines_edit_box.string = +sessionStorage.last_mines_value;
 
-        var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
-        saveButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: this._saveSettingsAndGoBackToMenu.bind(this)
-        }];
+        var saveButton = helper.addButton({
+            layer: this,
+            string: 'Сохранить',
+            y: size.height*0.4,
+            callback: this._saveSettingsAndGoBackToMenu.bind(this)
+        });
 
-        var cancelButton = helper.addButtonToLayer(this, 'Отмена', size.height*0.25);
-        cancelButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
+        helper.addButton({
+            layer: this,
+            string: 'Отмена',
+            y: size.height*0.25,
+            callback: function() {
                 this._changeLayer(MenuLayer);
             }.bind(this)
-        }];
+        });
 
         return true;
     },
@@ -231,12 +236,12 @@ var StatisticsLayer = cc.Layer.extend({
 
         helper.addUITextToLayer(this, 'Мин в минуту: ' + Math.floor(+sessionStorage.mines_defused/(+sessionStorage.total_time_played || 1)*60), size.height*0.06, size.height*0.37, size.width*0.75);
 
-        var backButton = helper.addButtonToLayer(this, 'Назад', size.height*0.25);
-        backButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
-                this._changeLayer.call(this, MenuLayer);
-            }.bind(this)
-        }];
+        var backButton = helper.addButton({
+            layer: this,
+            string: 'Назад',
+            y: size.height*0.25,
+            callback: this._changeLayer.bind(this, MenuLayer)
+        });
 
         return true;
     },
@@ -258,44 +263,48 @@ var MenuLayer = cc.Layer.extend({
         helper.setVolume(helper.soundButton, 'sound');
         helper.setVolume(helper.musicButton, 'music');
 
-        var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
-        newGameButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
-                helper.changeSceneTo(GameScene, helper.START_NEW_GAME);
-            }
-        }];
+        newGame = helper.addButton({
+            layer: this,
+            string: 'Новая игра',
+            x: localStorage.getItem('_mineField') ? size.width*0.37 : undefined,
+            y: size.height*0.55,
+            callback: helper.changeSceneTo.bind(null, GameScene, helper.START_NEW_GAME)
+        });
         if (localStorage.getItem('_mineField')) {
-            newGameButton.setPositionX(size.width*0.37);
-
-            var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55, false, size.width*0.63);
-            continueGameButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-                invoke: function() {
-                    helper.changeSceneTo(GameScene, helper.CONTINUE_PREVIOUS_GAME);
-                }
-            }];
+            helper.addButton({
+                layer: this,
+                string: 'Продолжить',
+                x: size.width*0.63,
+                y: size.height*0.55,
+                callback: helper.changeSceneTo.bind(null, GameScene, helper.CONTINUE_PREVIOUS_GAME)
+            });
         }
 
-        var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4, false, size.width*0.37);
-        optionsButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
-                this._changeLayer.call(this, OptionsLayer);
-            }.bind(this)
-        }];
+        helper.addButton({
+            layer: this,
+            string: 'Настройки',
+            x: size.width*0.37,
+            y: size.height*0.4,
+            callback: this._changeLayer.bind(this, OptionsLayer)
+        });
 
-        var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4, false, size.width*0.63);
-        statisticsButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
-                this._changeLayer.call(this, StatisticsLayer);
-            }.bind(this)
-        }];
+        helper.addButton({
+            layer: this,
+            string: 'Cтатистика',
+            x: size.width*0.63,
+            y: size.height*0.4,
+            callback: this._changeLayer.bind(this, StatisticsLayer)
+        });
 
-        var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        exitButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
+        helper.addButton({
+            layer: this,
+            string: 'Выйти',
+            y: size.height*0.25,
+            callback: function() {
                 sessionStorage.clear();
                 this._changeLayer.call(this, LoginLayer);
             }.bind(this)
-        }];
+        });
 
         if (!cc.audioEngine.isMusicPlaying()) {
             cc.audioEngine.playMusic(musics.menu, true);

@@ -57,14 +57,16 @@ var GameLayer = cc.Layer.extend({
             sessionStorage.last_mines_value = localStorage.getItem('_mines');
         }
 
-        var newGameButton = helper.addButtonToLayer(this, "Новая игра", size.height*0.95);
-        newGameButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
-        newGameButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
-        newGameButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() {
+        var newGameButton = helper.addButton({
+            layer: this,
+            string: "Новая игра",
+            y: size.height*0.95,
+            callback: function() {
                 this.parent.addChild(new GameLayer(helper.START_NEW_GAME)); this.removeFromParent();
             }.bind(this)
-        }];
+        });
+        newGameButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
+        newGameButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
 
         var timerSprite = new cc.Sprite();
         timerSprite.initWithFile(images.timer, cc.rect(0, 0, 137, 60));
@@ -94,12 +96,14 @@ var GameLayer = cc.Layer.extend({
         this._mines_left_label.string = +sessionStorage.last_mines_value;
         this.addChild(this._mines_left_label);
 
-        var returnButton = helper.addButtonToLayer(this, "В меню", size.height*0.05);
+        var returnButton = helper.addButton({
+            layer: this,
+            string: "В меню",
+            y: size.height*0.05,
+            callback: function() { helper.changeSceneTo(MenuScene); }
+        });
         returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
         returnButton.setPreferredSize(cc.size(size.width*0.25, size.height*0.08));
-        returnButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function() { helper.changeSceneTo(MenuScene); }
-        }];
 
         this._createBlankMineField();
 

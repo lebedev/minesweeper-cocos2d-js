@@ -41,7 +41,7 @@ var helper = {
         return t;
     },
 
-    addButtonToLayer: function(aLayer, aString, aY, aDisabled, aX) {
+    addButton: function(aParams) {
         var size = cc.winSize;
 
         var b = new cc.ControlButton();
@@ -50,18 +50,21 @@ var helper = {
         b.setBackgroundSpriteForState(helper.createS9TileFromRes(images.button_disabled),    cc.CONTROL_STATE_DISABLED);
         b.setPreferredSize(cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
-        b.setPosition(cc.p(aX || size.width*0.5, aY));
-        if (aString) {
-            b.setTitleForState(aString, cc.CONTROL_STATE_NORMAL);
+        b.setPosition(cc.p(aParams.x || size.width*0.5, aParams.y));
+        b._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: aParams.callback
+        }];
+        if (aParams.string) {
+            b.setTitleForState(aParams.string, cc.CONTROL_STATE_NORMAL);
             b.setTitleTTFForState('Impact', cc.CONTROL_STATE_NORMAL);
             b.setTitleTTFSizeForState(size.height*0.07, cc.CONTROL_STATE_NORMAL);
             b.setTitleColorForState(cc.color(170,170,170), cc.CONTROL_STATE_DISABLED);
         }
-        if (aDisabled) {
+        if (aParams.disabled) {
             b.setEnabled(false);
         }
 
-        aLayer.addChild(b);
+        aParams.layer.addChild(b);
 
         return b;
     },
@@ -118,25 +121,29 @@ var helper = {
         var size = cc.winSize,
             buttonSize = cc.size(120, 120);
 
-        helper.soundButton = helper.addButtonToLayer(aLayer, null, size.height*0.9, false, size.width*0.94);
+        helper.soundButton = helper.addButton({
+            layer: aLayer,
+            x: size.width*0.94,
+            y: size.height*0.9,
+            callback: function(aTarget) {
+                helper.setVolume(aTarget, 'sound', true);
+            }
+        });
         helper.setVolume(helper.soundButton, 'sound');
         helper.soundButton.setContentSize(buttonSize);
         helper.soundButton.setPreferredSize(buttonSize);
-        helper.soundButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function(aTarget) {
-                helper.setVolume(aTarget, 'sound', true);
-            }
-        }];
 
-        helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.73, false, size.width*0.94);
+        helper.musicButton = helper.addButton({
+            layer: aLayer,
+            x: size.width*0.94,
+            y: size.height*0.73,
+            callback: function(aTarget) {
+                helper.setVolume(aTarget, 'music', true);
+            }
+        });
         helper.setVolume(helper.musicButton, 'music');
         helper.musicButton.setContentSize(buttonSize);
         helper.musicButton.setPreferredSize(buttonSize);
-        helper.musicButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
-            invoke: function(aTarget) {
-                helper.setVolume(aTarget, 'music', true);
-            }
-        }];
     },
 
     setVolume: function(aTarget, aName, aSwitch) {
