@@ -15,11 +15,10 @@ var BackgroundLayer = cc.LayerColor.extend({
         this.addChild(background_menu_mine, 0);
 
         if (isMobile) {
-            background_menu_mine.setScale(5/8, 5/8);
-        } else {
-            var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
-            background_menu_mine.runAction(infinite_rotate);
+            background_menu_mine.setScale(5/8);
         }
+        var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
+        background_menu_mine.runAction(infinite_rotate);
 
         helper.addUITextToLayer(this, 'САПЁР',        size.height*0.25, size.height*0.8);
 

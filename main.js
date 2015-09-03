@@ -58,7 +58,7 @@ window.onload = function() {
         // Adjust viewport meta
         cc.view.adjustViewPort(true);
         // Setup the resolution policy and design resolution size
-        isMobile = cc.sys.capabilities.hasOwnProperty('touches') || true;
+        isMobile = cc.sys.capabilities.hasOwnProperty('touches');
         if (isMobile) {
             document.body.classList.add('mobile');
         }

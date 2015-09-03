@@ -69,7 +69,7 @@ var GameLayer = cc.Layer.extend({
             layer: this,
             string: "Новая игра",
             y: size.height*0.95,
-            preferredSize: cc.size(size.width*0.25, size.height*0.08),
+            preferredSize: cc.size(size.width*0.25, size.height*0.1),
             callback: function() {
                 this.parent.addChild(new GameLayer(helper.START_NEW_GAME)); this.removeFromParent();
             }.bind(this)
@@ -114,7 +114,7 @@ var GameLayer = cc.Layer.extend({
             layer: this,
             string: "В меню",
             y: size.height*0.05,
-            preferredSize: cc.size(size.width*0.25, size.height*0.08),
+            preferredSize: cc.size(size.width*0.25, size.height*0.1),
             callback: function() { helper.changeSceneTo(MenuScene); }
         });
         returnButton.setTitleTTFSizeForState(size.height*0.04, cc.CONTROL_STATE_NORMAL);
@@ -215,7 +215,13 @@ var GameLayer = cc.Layer.extend({
             x: size.width*0.06,
             preferredSize: cc.size(75, 75),
             custom: true,
-            callback: this._switchTouchscreenMode.bind(this)
+            scale: 0.7,
+            callback: this._switchTouchscreenMode.bind(this),
+            touch_up_outside_callback: function(aTarget) {
+                if (aTarget !== this._selected_mode_button) {
+                    aTarget.runAction(new cc.ScaleTo(0.3, 0.7));
+                }
+            }.bind(this)
         };
 
         for (var i = 0; i < 3; i++) {
@@ -295,7 +301,7 @@ var GameLayer = cc.Layer.extend({
         var coords = this._getTileXYUnderMouse(aEvent),
             tile = this._getTileAt(coords);
         if (!tile) {
-            return;
+            return true;
         }
         if (!this._both_buttons_pressed) {
             if (button === cc.EventMouse.BUTTON_LEFT) {
@@ -312,8 +318,10 @@ var GameLayer = cc.Layer.extend({
                 }
             }
         } else {
+            this._last_tile_coords = coords;
             this._set9TilesToPressed();
         }
+        return true;
     },
 
     _mineFieldOnMouseMoveCallback: function(aEvent) {
@@ -355,6 +363,12 @@ var GameLayer = cc.Layer.extend({
             }
         } else if (button === cc.EventMouse.BUTTON_RIGHT) {
             this._right_button_pressed = false;
+            if (tile) {
+                switch (tile.state) {
+                case this.TILE_STATE_CLOSED: tile.initWithFile(images.tile_closed, helper.rect); break;
+                case this.TILE_STATE_CLOSED_FLAG: tile.initWithFile(images.tile_closed_flag, helper.rect); break;
+                }
+            }
         }
     },
 
@@ -539,7 +553,7 @@ var GameLayer = cc.Layer.extend({
     },
 
     _callBothButtonsSpecialActionAt: function(aCoords) {
-        var i, tile = this._getTileAt(aCoords);
+        var tile = this._getTileAt(aCoords);
         if (tile && tile.state === this.TILE_STATE_NUMBER) {
             var mines_expected = tile.value,
                 closed_count = 0,
@@ -547,7 +561,7 @@ var GameLayer = cc.Layer.extend({
                 states = [],
                 ps = [],
                 tile_delta,
-                p;
+                p, i;
             for (i = 0; i < 8; i++) {
                 p = cc.p(aCoords.x + helper.deltas8[i][0], aCoords.y + helper.deltas8[i][1]);
                 ps.push(p);

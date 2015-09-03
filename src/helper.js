@@ -54,8 +54,12 @@ var helper = {
         b.setPreferredSize(aParams.preferredSize || cc.size(size.width*0.25, size.height*0.13));
         b.setAnchorPoint(cc.p(0.5, 0.5));
         b.setPosition(cc.p(aParams.x || size.width*0.5, aParams.y));
+        b.setScale(aParams.scale || 1);
 
         b.addTargetWithActionForControlEvents(b, aParams.callback, cc.CONTROL_EVENT_TOUCH_UP_INSIDE);
+        if (aParams.touch_up_outside_callback) {
+            b.addTargetWithActionForControlEvents(b, aParams.touch_up_outside_callback, cc.CONTROL_EVENT_TOUCH_UP_OUTSIDE);
+        }
 
         if (aParams.string) {
             b.setTitleForState(aParams.string, cc.CONTROL_STATE_NORMAL);
@@ -111,10 +115,16 @@ var helper = {
 
     addMouseActionsTo: function(aNode, aMouseDownCallback, aMouseMoveCallback, aMouseUpCallback) {
         var l = cc.EventListener.create({
-            event: cc.EventListener.MOUSE,
-            onMouseDown: aMouseDownCallback,
-            onMouseMove: aMouseMoveCallback,
-            onMouseUp:   aMouseUpCallback
+            event: isMobile ? cc.EventListener.TOUCH_ONE_BY_ONE : cc.EventListener.MOUSE,
+            onMouseDown:  aMouseDownCallback,
+            onTouchBegan: aMouseDownCallback,
+
+            onMouseMove:  aMouseMoveCallback,
+            onTouchMoved: aMouseMoveCallback,
+
+            onMouseUp:        aMouseUpCallback,
+            onTouchEnded:     aMouseUpCallback,
+            onTouchCancelled: aMouseUpCallback
         });
 
         cc.eventManager.addListener(l, aNode);
@@ -171,7 +181,7 @@ var helper = {
         cc.audioEngine.stopMusic();
 
         var scene = aParam !== undefined ? new aScene(aParam) : new aScene();
-        cc.director.runScene(isMobile ? scene : new cc.TransitionFade(0.5, scene));
+        cc.director.runScene(new cc.TransitionFade(0.5, scene));
     },
 
     sendActionToServer: function(aAction) {
