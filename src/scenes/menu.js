@@ -133,7 +133,7 @@ var OptionsLayer = cc.Layer.extend({
         this._super();
 
         // ask the window size
-        var size = cc.winSize;
+        var input, size = cc.winSize;
 
         var optionsLayerEditBoxDelegate = new cc.EditBoxDelegate();
         optionsLayerEditBoxDelegate.editBoxTextChanged = function() {
@@ -154,20 +154,32 @@ var OptionsLayer = cc.Layer.extend({
         var columnsUIText = helper.addUITextToLayer(this, 'Столбцов:',  size.height*0.06, size.height*0.57);
         columnsUIText.setPositionX(size.width*0.12);
 
-        this._columns_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.08 : 0.06), cc.p(size.width*0.24, size.height*0.575), optionsLayerEditBoxDelegate, 2);
+        azaza = this._columns_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.08 : 0.06), cc.p(size.width*0.24, size.height*0.575), optionsLayerEditBoxDelegate);
         this._columns_edit_box.placeHolder = this._columns_edit_box.string = +sessionStorage.last_columns_value;
+        input = this._columns_edit_box._edTxt;
+        input.type = "number";
+        input.min = helper.COLUMNS_MIN;
+        input.max = helper.COLUMNS_MAX;
 
         var rowsUIText = helper.addUITextToLayer(this, 'Строк:', size.height*0.06, size.height*0.57);
         rowsUIText.setPositionX(size.width*0.45);
 
-        this._rows_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.08 : 0.06), cc.p(size.width*0.55, size.height*0.575), optionsLayerEditBoxDelegate, 2);
+        this._rows_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.08 : 0.06), cc.p(size.width*0.55, size.height*0.575), optionsLayerEditBoxDelegate);
         this._rows_edit_box.placeHolder = this._rows_edit_box.string = +sessionStorage.last_rows_value;
+        input = this._rows_edit_box._edTxt;
+        input.type = "number";
+        input.min = helper.ROWS_MIN;
+        input.max = helper.ROWS_MAX;
 
         var minesUIText = helper.addUITextToLayer(this, 'Мин:', size.height*0.06, size.height*0.57);
         minesUIText.setPositionX(size.width*0.8);
 
-        this._mines_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.095 : 0.072), cc.p(size.width*0.9, size.height*0.575), optionsLayerEditBoxDelegate, 3);
+        this._mines_edit_box = helper.addEditBoxFixedToLayer(this, size.width*(false ? 0.095 : 0.072), cc.p(size.width*0.9, size.height*0.575), optionsLayerEditBoxDelegate);
         this._mines_edit_box.placeHolder = this._mines_edit_box.string = +sessionStorage.last_mines_value;
+        input = this._mines_edit_box._edTxt;
+        input.type = "number";
+        input.min = helper.MINES_MIN;
+        input.max = helper.MINES_MAX;
 
         var saveButton = helper.addButton({
             layer: this,

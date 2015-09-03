@@ -4,6 +4,7 @@ var helper = {
     ROWS_MIN: 9,
     ROWS_MAX: 50,
     MINES_MIN: 1,
+    MINES_MAX: 999,
 
     rect: cc.rect(0, 0, 110, 110), // Rect of tile resources.
 
@@ -76,7 +77,7 @@ var helper = {
         return b;
     },
 
-    addEditBoxFixedToLayer: function(aLayer, aWidth, aPosition, aDelegateEl, aMaxLength) {
+    addEditBoxFixedToLayer: function(aLayer, aWidth, aPosition, aDelegateEl) {
         var size = cc.winSize;
 
         var eb = new cc.EditBoxFixed(cc.size(aWidth, size.height*0.1), helper.createS9TileFromRes(images.editbox));
@@ -86,9 +87,6 @@ var helper = {
         eb.setPosition(aPosition);
         eb.setAnchorPoint(cc.p(0.5, 0.5));
         eb.setDelegate(aDelegateEl);
-        if (aMaxLength) {
-            eb.setMaxLength(aMaxLength);
-        }
 
         aLayer.addChild(eb);
 

@@ -14,13 +14,25 @@
         }
         /* dirty hack to add paddings to cc.EditBoxFixed elements */
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="number"] {
             box-sizing: border-box;
             padding: 0 20px !important;
         }
         .mobile input[type="text"],
-        .mobile input[type="password"] {
+        .mobile input[type="password"],
+        .mobile input[type="number"] {
             padding: 0 12px !important;
+        }
+        /* hack to hide arrows in input[type="number"] */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            display: none;
+            -webkit-appearance: none;
+            margin: 0;
         }
     </style>
 </head>
