@@ -114,35 +114,6 @@ var helper = {
         cc.eventManager.addListener(l, aNode);
     },
 
-    addMouseUpActionTo: function(aNode, aCallback) {
-        var l = cc.EventListener.create({
-            event: cc.EventListener.MOUSE,
-            downHere: false,
-            onMouseDown: function(aEvent) {
-                if (helper.isMouseEventOnItsTarget(aEvent)) {
-                    this.downHere = true;
-                }
-            },
-            onMouseUp: function(aEvent) {
-                var target = aEvent.getCurrentTarget();
-                if (this.downHere && target.enabled && helper.isMouseEventOnItsTarget(aEvent)) {
-                    aCallback(aEvent, target);
-                }
-                this.downHere = false;
-            }
-        });
-        cc.eventManager.addListener(l, aNode);
-    },
-
-    isMouseEventOnItsTarget: function(aEvent) {
-        var target = aEvent.getCurrentTarget(),
-            locationInNode = target.convertToNodeSpace(aEvent.getLocation()),
-            s = target.getContentSize(),
-            rect = cc.rect(0, 0, s.width, s.height);
-
-        return cc.rectContainsPoint(rect, locationInNode);
-    },
-
     setSoundsStateAndAddButtonsToLayer: function(aLayer) {
         var size = cc.winSize,
             buttonSize = cc.size(120, 120);
@@ -151,13 +122,21 @@ var helper = {
         helper.setVolume(helper.soundButton, 'sound');
         helper.soundButton.setContentSize(buttonSize);
         helper.soundButton.setPreferredSize(buttonSize);
-        helper.addMouseUpActionTo(helper.soundButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'sound', true); });
+        helper.soundButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function(aTarget) {
+                helper.setVolume(aTarget, 'sound', true);
+            }
+        }];
 
         helper.musicButton = helper.addButtonToLayer(aLayer, null, size.height*0.73, false, size.width*0.94);
         helper.setVolume(helper.musicButton, 'music');
         helper.musicButton.setContentSize(buttonSize);
         helper.musicButton.setPreferredSize(buttonSize);
-        helper.addMouseUpActionTo(helper.musicButton, function(aEvent) { var target = aEvent.getCurrentTarget(); helper.setVolume(target, 'music', true); });
+        helper.musicButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function(aTarget) {
+                helper.setVolume(aTarget, 'music', true);
+            }
+        }];
     },
 
     setVolume: function(aTarget, aName, aSwitch) {

@@ -31,7 +31,9 @@ var LoginLayer = cc.Layer.extend({
     _login: '',
     _password: '',
     _errorUIText: null,
+
     SHOW_HIDE_ACTION: new cc.Sequence(new cc.FadeIn(1), new cc.FadeOut(1)),
+
     ctor: function() {
         //////////////////////////////
         // 1. super init first
@@ -76,7 +78,11 @@ var LoginLayer = cc.Layer.extend({
 
         var enterButton = helper.addButtonToLayer(this, 'Войти/создать', size.height*0.25, true);
         enterButton.setPreferredSize(cc.size(size.width*0.3, size.height*0.13));
-        helper.addMouseUpActionTo(enterButton, function() { this._doLogin.call(this); }.bind(this));
+        enterButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                this._doLogin.call(this);
+            }.bind(this)
+        }];
 
         this._errorUIText = helper.addUITextToLayer(this, '',  size.height*0.06, size.height*0.1);
         this._errorUIText.setColor(cc.color(225, 0, 0));
@@ -160,10 +166,16 @@ var OptionsLayer = cc.Layer.extend({
         this._mines_edit_box.placeHolder = this._mines_edit_box.string = +sessionStorage.last_mines_value;
 
         var saveButton = helper.addButtonToLayer(this, 'Сохранить', size.height*0.4);
-        helper.addMouseUpActionTo(saveButton, this._saveSettingsAndGoBackToMenu.bind(this));
+        saveButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: this._saveSettingsAndGoBackToMenu.bind(this)
+        }];
 
         var cancelButton = helper.addButtonToLayer(this, 'Отмена', size.height*0.25);
-        helper.addMouseUpActionTo(cancelButton, function() { this._changeLayer(MenuLayer); }.bind(this));
+        cancelButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                this._changeLayer(MenuLayer);
+            }.bind(this)
+        }];
 
         return true;
     },
@@ -220,7 +232,11 @@ var StatisticsLayer = cc.Layer.extend({
         helper.addUITextToLayer(this, 'Мин в минуту: ' + Math.floor(+sessionStorage.mines_defused/(+sessionStorage.total_time_played || 1)*60), size.height*0.06, size.height*0.37, size.width*0.75);
 
         var backButton = helper.addButtonToLayer(this, 'Назад', size.height*0.25);
-        helper.addMouseUpActionTo(backButton, function() { this._changeLayer.call(this, MenuLayer); }.bind(this));
+        backButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                this._changeLayer.call(this, MenuLayer);
+            }.bind(this)
+        }];
 
         return true;
     },
@@ -243,22 +259,43 @@ var MenuLayer = cc.Layer.extend({
         helper.setVolume(helper.musicButton, 'music');
 
         var newGameButton = helper.addButtonToLayer(this, 'Новая игра', size.height*0.55);
-        helper.addMouseUpActionTo(newGameButton, function(event) { helper.changeSceneTo(GameScene, helper.START_NEW_GAME); });
+        newGameButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                helper.changeSceneTo(GameScene, helper.START_NEW_GAME);
+            }
+        }];
         if (localStorage.getItem('_mineField')) {
             newGameButton.setPositionX(size.width*0.37);
 
             var continueGameButton = helper.addButtonToLayer(this, 'Продолжить', size.height*0.55, false, size.width*0.63);
-            helper.addMouseUpActionTo(continueGameButton, function() { helper.changeSceneTo(GameScene, helper.CONTINUE_PREVIOUS_GAME); });
+            continueGameButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+                invoke: function() {
+                    helper.changeSceneTo(GameScene, helper.CONTINUE_PREVIOUS_GAME);
+                }
+            }];
         }
 
         var optionsButton = helper.addButtonToLayer(this, 'Настройки', size.height*0.4, false, size.width*0.37);
-        helper.addMouseUpActionTo(optionsButton, function() { this._changeLayer.call(this, OptionsLayer); }.bind(this));
+        optionsButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                this._changeLayer.call(this, OptionsLayer);
+            }.bind(this)
+        }];
 
         var statisticsButton = helper.addButtonToLayer(this, 'Cтатистика', size.height*0.4, false, size.width*0.63);
-        helper.addMouseUpActionTo(statisticsButton, function() { this._changeLayer.call(this, StatisticsLayer); }.bind(this));
+        statisticsButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                this._changeLayer.call(this, StatisticsLayer);
+            }.bind(this)
+        }];
 
         var exitButton = helper.addButtonToLayer(this, 'Выйти', size.height*0.25);
-        helper.addMouseUpActionTo(exitButton, function() { sessionStorage.clear(); this._changeLayer.call(this, LoginLayer); }.bind(this));
+        exitButton._dispatchTable[cc.CONTROL_EVENT_TOUCH_UP_INSIDE] = [{
+            invoke: function() {
+                sessionStorage.clear();
+                this._changeLayer.call(this, LoginLayer);
+            }.bind(this)
+        }];
 
         if (!cc.audioEngine.isMusicPlaying()) {
             cc.audioEngine.playMusic(musics.menu, true);
