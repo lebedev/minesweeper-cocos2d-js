@@ -70,3 +70,8 @@ for (var i in musics) {
 for (var i in images) {
     g_resources.push(images[i]);
 }
+g_resources.push({
+    type: "font",
+    name: "Impact",
+    srcs: ["font/impact.ttf"]
+});
