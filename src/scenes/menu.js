@@ -20,9 +20,9 @@ var BackgroundLayer = cc.LayerColor.extend({
         var infinite_rotate = new cc.RepeatForever(cc.RotateBy.create(60, 360));
         background_menu_mine.runAction(infinite_rotate);
 
-        helper.addUITextToLayer(this, 'САПЁР',        size.height*0.25, size.height*0.8);
+        helper.addUITextToLayer(this, 'САПЁР',            size.height*0.25, size.height*0.8);
 
-        helper.addUITextToLayer(this, '2015 © zeird', size.height*0.03, size.height*0.02);
+        helper.addUITextToLayer(this, '2015 © angly-cat', size.height*0.03, size.height*0.02);
 
         helper.setSoundsStateAndAddButtonsToLayer(this);
 
